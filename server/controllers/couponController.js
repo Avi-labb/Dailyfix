@@ -1,8 +1,8 @@
-import pool from '../config/db.js';
+import Coupon from '../models/Coupon.js';
 
 const getAllCoupons = async (req, res) => {
   try {
-    const [coupons] = await pool.query('SELECT * FROM coupons');
+    const coupons = await Coupon.find();
     res.json(coupons);
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -11,30 +11,31 @@ const getAllCoupons = async (req, res) => {
 
 const validateCoupon = async (req, res) => {
   try {
-    const { code, order_total } = req.body;
-    const [coupons] = await pool.query(
-      'SELECT * FROM coupons WHERE code = ? AND active = true AND valid_from <= NOW() AND (valid_to IS NULL OR valid_to >= NOW())',
-      [code]
-    );
-    if (coupons.length === 0) {
+    const { code, orderTotal } = req.body;
+    const coupon = await Coupon.findOne({ 
+      code, 
+      active: true, 
+      validFrom: { $lte: new Date() },
+      $or: [{ validTo: null }, { validTo: { $gte: new Date() } }]
+    });
+    if (!coupon) {
       return res.status(404).json({ message: 'Coupon not found or expired' });
     }
-    const coupon = coupons[0];
-    if (coupon.usage_limit && coupon.used_count >= coupon.usage_limit) {
+    if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) {
       return res.status(400).json({ message: 'Coupon usage limit reached' });
     }
-    if (coupon.min_order_value && order_total < coupon.min_order_value) {
-      return res.status(400).json({ message: `Minimum order value for coupon is ${coupon.min_order_value}` });
+    if (coupon.minOrderValue && orderTotal < coupon.minOrderValue) {
+      return res.status(400).json({ message: `Minimum order value for coupon is ${coupon.minOrderValue}` });
     }
 
     let discount;
-    if (coupon.discount_type === 'percentage') {
-      discount = (order_total * coupon.discount_value) / 100;
-      if (coupon.max_discount && discount > coupon.max_discount) {
-        discount = coupon.max_discount;
+    if (coupon.discountType === 'percentage') {
+      discount = (orderTotal * coupon.discountValue) / 100;
+      if (coupon.maxDiscount && discount > coupon.maxDiscount) {
+        discount = coupon.maxDiscount;
       }
     } else {
-      discount = coupon.discount_value;
+      discount = coupon.discountValue;
     }
 
     res.json({ coupon, discount });
@@ -45,12 +46,20 @@ const validateCoupon = async (req, res) => {
 
 const createCoupon = async (req, res) => {
   try {
-    const { code, discount_type, discount_value, min_order_value, max_discount, usage_limit, valid_from, valid_to, active } = req.body;
-    const [result] = await pool.query(
-      'INSERT INTO coupons (code, discount_type, discount_value, min_order_value, max_discount, usage_limit, valid_from, valid_to, active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [code, discount_type, discount_value, min_order_value, max_discount, usage_limit, valid_from, valid_to, active || true]
-    );
-    res.status(201).json({ message: 'Coupon created', couponId: result.insertId });
+    const { code, discountType, discountValue, minOrderValue, maxDiscount, usageLimit, validFrom, validTo, active } = req.body;
+    const coupon = new Coupon({
+      code,
+      discountType,
+      discountValue,
+      minOrderValue,
+      maxDiscount,
+      usageLimit,
+      validFrom,
+      validTo,
+      active: active !== undefined ? active : true
+    });
+    await coupon.save();
+    res.status(201).json({ message: 'Coupon created', couponId: coupon._id });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
@@ -58,11 +67,18 @@ const createCoupon = async (req, res) => {
 
 const updateCoupon = async (req, res) => {
   try {
-    const { code, discount_type, discount_value, min_order_value, max_discount, usage_limit, valid_from, valid_to, active } = req.body;
-    await pool.query(
-      'UPDATE coupons SET code=?, discount_type=?, discount_value=?, min_order_value=?, max_discount=?, usage_limit=?, valid_from=?, valid_to=?, active=? WHERE id=?',
-      [code, discount_type, discount_value, min_order_value, max_discount, usage_limit, valid_from, valid_to, active, req.params.id]
-    );
+    const { code, discountType, discountValue, minOrderValue, maxDiscount, usageLimit, validFrom, validTo, active } = req.body;
+    await Coupon.findByIdAndUpdate(req.params.id, {
+      code,
+      discountType,
+      discountValue,
+      minOrderValue,
+      maxDiscount,
+      usageLimit,
+      validFrom,
+      validTo,
+      active
+    });
     res.json({ message: 'Coupon updated' });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -71,7 +87,7 @@ const updateCoupon = async (req, res) => {
 
 const deleteCoupon = async (req, res) => {
   try {
-    await pool.query('DELETE FROM coupons WHERE id = ?', [req.params.id]);
+    await Coupon.findByIdAndDelete(req.params.id);
     res.json({ message: 'Coupon deleted' });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });

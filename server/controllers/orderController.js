@@ -1,88 +1,105 @@
+import crypto from 'crypto';
+import Razorpay from 'razorpay';
 import sendEmail from '../utils/sendEmail.js';
 import customerOrderTemplate from '../templates/customerOrderTemplate.js';
 import adminOrderTemplate from '../templates/adminOrderTemplate.js';
+import Customer from '../models/Customer.js';
+import Order from '../models/Order.js';
+import Product from '../models/Product.js';
+import Coupon from '../models/Coupon.js';
+
+// Initialize Razorpay instance
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
+});
 
 const generateOrderId = () => {
   return 'DFC' + crypto.randomBytes(4).toString('hex').toUpperCase();
 };
 
 const createOrder = async (req, res) => {
-  const connection = await pool.getConnection();
   try {
-    await connection.beginTransaction();
-
-    const { customer, items, shipping_address, billing_address, payment_method, coupon_code } = req.body;
+    const { customer, items, shippingAddress, billingAddress, paymentMethod, couponCode } = req.body;
     
     // Validate email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!customer.email || !emailRegex.test(customer.email)) {
-      await connection.rollback();
       return res.status(400).json({ message: 'Please provide a valid email address' });
     }
     
-    let customerId = null;
+    let customerDoc = null;
     if (customer.email || customer.phone) {
-      const [existingCustomers] = await connection.query(
-        'SELECT id FROM customers WHERE email = ? OR phone = ?',
-        [customer.email, customer.phone]
-      );
-      if (existingCustomers.length > 0) {
-        customerId = existingCustomers[0].id;
-      } else {
-        const [result] = await connection.query(
-          'INSERT INTO customers (first_name, last_name, email, phone) VALUES (?, ?, ?, ?)',
-          [customer.firstName, customer.lastName, customer.email, customer.phone]
-        );
-        customerId = result.insertId;
+      customerDoc = await Customer.findOne({ $or: [{ email: customer.email }, { phone: customer.phone }] });
+      if (!customerDoc) {
+        customerDoc = new Customer({
+          firstName: customer.firstName,
+          lastName: customer.lastName,
+          email: customer.email,
+          phone: customer.phone
+        });
+        await customerDoc.save();
       }
     }
 
     let total = 0;
     const orderItems = []; // Store items for email
+    const orderItemsDb = []; // Items for DB
     
     for (let item of items) {
-      const [products] = await connection.query('SELECT * FROM products WHERE id = ?', [item.product_id]);
-      const product = products[0];
-      const itemPrice = product.discount_price || product.price;
+      const product = await Product.findById(item.productId);
+      if (!product) {
+        return res.status(404).json({ message: `Product with ID ${item.productId} not found` });
+      }
+      
+      const itemPrice = product.discountPrice || product.price;
       const itemTotal = itemPrice * item.quantity;
       total += itemTotal;
       
       // Collect item details for email
       orderItems.push({
-        id: product.id,
+        id: product._id,
         name: product.name,
         image: product.image,
         quantity: item.quantity,
         price: itemPrice,
         total: itemTotal
       });
+      
+      orderItemsDb.push({
+        product: product._id,
+        quantity: item.quantity,
+        price: itemPrice
+      });
     }
 
     let discount = 0;
-    if (coupon_code) {
-      const [coupons] = await connection.query(
-        'SELECT * FROM coupons WHERE code = ? AND active = true AND valid_from <= NOW() AND (valid_to IS NULL OR valid_to >= NOW())',
-        [coupon_code]
-      );
-      if (coupons.length > 0) {
-        const coupon = coupons[0];
-        if (coupon.usage_limit && coupon.used_count >= coupon.usage_limit) {
-          await connection.rollback();
+    let coupon = null;
+    if (couponCode) {
+      coupon = await Coupon.findOne({ 
+        code: couponCode, 
+        active: true, 
+        validFrom: { $lte: new Date() },
+        $or: [{ validTo: null }, { validTo: { $gte: new Date() } }]
+      });
+      
+      if (coupon) {
+        if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) {
           return res.status(400).json({ message: 'Coupon usage limit reached' });
         }
-        if (coupon.min_order_value && total < coupon.min_order_value) {
-          await connection.rollback();
-          return res.status(400).json({ message: `Minimum order value for coupon is ${coupon.min_order_value}` });
+        if (coupon.minOrderValue && total < coupon.minOrderValue) {
+          return res.status(400).json({ message: `Minimum order value for coupon is ${coupon.minOrderValue}` });
         }
-        if (coupon.discount_type === 'percentage') {
-          discount = (total * coupon.discount_value) / 100;
-          if (coupon.max_discount && discount > coupon.max_discount) {
-            discount = coupon.max_discount;
+        if (coupon.discountType === 'percentage') {
+          discount = (total * coupon.discountValue) / 100;
+          if (coupon.maxDiscount && discount > coupon.maxDiscount) {
+            discount = coupon.maxDiscount;
           }
         } else {
-          discount = coupon.discount_value;
+          discount = coupon.discountValue;
         }
-        await connection.query('UPDATE coupons SET used_count = used_count + 1 WHERE id = ?', [coupon.id]);
+        coupon.usedCount += 1;
+        await coupon.save();
       }
     }
 
@@ -91,25 +108,29 @@ const createOrder = async (req, res) => {
     const grandTotal = total - discount + tax + shipping;
 
     const orderId = generateOrderId();
-    const [orderResult] = await connection.query(
-      'INSERT INTO orders (order_id, customer_id, total, tax, shipping, discount, payment_method, shipping_address, billing_address) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [orderId, customerId, grandTotal, tax, shipping, discount, payment_method, JSON.stringify(shipping_address), JSON.stringify(billing_address)]
-    );
+    const order = new Order({
+      orderId,
+      customer: customerDoc?._id,
+      total: grandTotal,
+      tax,
+      shipping,
+      discount,
+      paymentMethod,
+      shippingAddress: JSON.stringify(shippingAddress),
+      billingAddress: JSON.stringify(billingAddress),
+      items: orderItemsDb
+    });
+    await order.save();
 
+    // Update product stock
     for (let item of items) {
-      const [products] = await connection.query('SELECT * FROM products WHERE id = ?', [item.product_id]);
-      const product = products[0];
-      await connection.query(
-        'INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)',
-        [orderResult.insertId, item.product_id, item.quantity, product.discount_price || product.price]
-      );
-      await connection.query('UPDATE products SET stock = stock - ? WHERE id = ?', [item.quantity, item.product_id]);
+      await Product.findByIdAndUpdate(item.productId, {
+        $inc: { stock: -item.quantity }
+      });
     }
-
-    await connection.commit();
     
     // ------------------------------
-    // Send emails asynchronously after order is committed
+    // Send emails asynchronously after order is created
     // ------------------------------
     
     // Format date for email
@@ -129,11 +150,11 @@ const createOrder = async (req, res) => {
     });
     
     // Format payment method for display
-    const paymentMethodDisplay = payment_method === 'cod' 
+    const paymentMethodDisplay = paymentMethod === 'cod' 
       ? 'Cash on Delivery' 
       : 'UPI / Card / Netbanking';
     
-    const paymentStatus = payment_method === 'cod' ? 'Pending (COD)' : 'Paid';
+    const paymentStatus = paymentMethod === 'cod' ? 'Pending (COD)' : 'Paid';
     
     // 1. Send Customer Confirmation Email
     const customerEmailData = {
@@ -141,7 +162,7 @@ const createOrder = async (req, res) => {
       customerName: `${customer.firstName} ${customer.lastName}`,
       orderDate: orderDate,
       items: orderItems,
-      shippingAddress: shipping_address,
+      shippingAddress: shippingAddress,
       paymentMethod: paymentMethodDisplay,
       paymentStatus: paymentStatus,
       subtotal: total,
@@ -159,7 +180,7 @@ const createOrder = async (req, res) => {
       customerEmail: customer.email,
       customerPhone: customer.phone,
       orderDate: orderDate,
-      shippingAddress: shipping_address,
+      shippingAddress: shippingAddress,
       paymentMethod: paymentMethodDisplay,
       paymentStatus: paymentStatus,
       items: orderItems,
@@ -192,22 +213,17 @@ const createOrder = async (req, res) => {
 
     res.status(201).json({ message: 'Order placed successfully', orderId });
   } catch (error) {
-    await connection.rollback();
+    console.error('Order creation error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
-  } finally {
-    connection.release();
   }
 };
 
 const getOrderById = async (req, res) => {
   try {
-    const [orders] = await pool.query('SELECT * FROM orders WHERE order_id = ?', [req.params.id]);
-    if (orders.length === 0) {
+    const order = await Order.findOne({ orderId: req.params.id }).populate('items.product', 'name slug');
+    if (!order) {
       return res.status(404).json({ message: 'Order not found' });
     }
-    const order = orders[0];
-    const [items] = await pool.query('SELECT oi.*, p.name, p.slug FROM order_items oi JOIN products p ON oi.product_id = p.id WHERE oi.order_id = ?', [order.id]);
-    order.items = items;
     res.json(order);
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -217,20 +233,16 @@ const getOrderById = async (req, res) => {
 const getAllOrders = async (req, res) => {
   try {
     const { status, page = 1, limit = 20 } = req.query;
-    const offset = (page - 1) * limit;
+    const skip = (page - 1) * limit;
     
-    let query = 'SELECT * FROM orders';
-    const params = [];
+    const filter = {};
+    if (status) filter.status = status;
 
-    if (status) {
-      query += ' WHERE status = ?';
-      params.push(status);
-    }
-
-    query += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
-    params.push(parseInt(limit), parseInt(offset));
-
-    const [orders] = await pool.query(query, params);
+    const orders = await Order.find(filter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+    
     res.json(orders);
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -240,10 +252,71 @@ const getAllOrders = async (req, res) => {
 const updateOrderStatus = async (req, res) => {
   try {
     const { status } = req.body;
-    await pool.query('UPDATE orders SET status = ? WHERE id = ?', [status, req.params.id]);
+    await Order.findByIdAndUpdate(req.params.id, { status });
     res.json({ message: 'Order status updated' });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// Create Razorpay order
+const createRazorpayOrder = async (req, res) => {
+  try {
+    const { amount } = req.body; // amount in INR (rupees)
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ message: 'Invalid amount' });
+    }
+
+    const options = {
+      amount: Math.round(amount * 100), // Convert to paise
+      currency: 'INR',
+      receipt: crypto.randomBytes(10).toString('hex'),
+    };
+
+    const order = await razorpay.orders.create(options);
+    res.json({
+      success: true,
+      order: {
+        id: order.id,
+        amount: order.amount,
+        currency: order.currency,
+      },
+      keyId: process.env.RAZORPAY_KEY_ID,
+    });
+  } catch (error) {
+    console.error('Razorpay order creation error:', error);
+    res.status(500).json({ message: 'Failed to create Razorpay order', error: error.message });
+  }
+};
+
+// Verify Razorpay payment
+const verifyPayment = async (req, res) => {
+  try {
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderId } = req.body;
+
+    // Generate signature
+    const hmac = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET);
+    hmac.update(razorpay_order_id + '|' + razorpay_payment_id);
+    const generatedSignature = hmac.digest('hex');
+
+    // Verify signature
+    if (generatedSignature !== razorpay_signature) {
+      return res.status(400).json({ message: 'Payment verification failed' });
+    }
+
+    // If orderId is provided, you can update order status here
+    if (orderId) {
+      const order = await Order.findOne({ orderId });
+      if (order) {
+        order.paymentStatus = 'Paid';
+        await order.save();
+      }
+    }
+
+    res.json({ success: true, message: 'Payment verified successfully' });
+  } catch (error) {
+    console.error('Payment verification error:', error);
+    res.status(500).json({ message: 'Failed to verify payment', error: error.message });
   }
 };
 
@@ -251,5 +324,7 @@ export {
   createOrder,
   getOrderById,
   getAllOrders,
-  updateOrderStatus
+  updateOrderStatus,
+  createRazorpayOrder,
+  verifyPayment
 };

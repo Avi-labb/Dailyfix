@@ -4,7 +4,7 @@ import { Sparkles } from 'lucide-react'
 
 const BeardOil = () => {
   return (
-    <div className="min-h-screen py-20 px-8 md:px-16 bg-gradient-to-br from-slate-50 to-white flex items-center justify-center">
+    <div className="min-h-screen -mt-12 px-8 md:px-16 bg-gradient-to-br from-slate-50 to-white flex items-center justify-center">
       <div className="max-w-4xl mx-auto text-center">
         <div className="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-8">
           <Sparkles size={48} className="text-emerald-500" />

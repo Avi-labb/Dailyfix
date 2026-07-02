@@ -69,7 +69,7 @@ function AdminDashboard() {
             {stats.topProducts.map((product, index) => (
               <div key={product.id} className="flex justify-between items-center">
                 <span>{index + 1}. {product.name}</span>
-                <span className="font-semibold">{product.total_sold} sold</span>
+                <span className="font-semibold">{product.totalSold} sold</span>
               </div>
             ))}
           </div>

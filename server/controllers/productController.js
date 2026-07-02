@@ -1,77 +1,47 @@
-import pool from '../config/db.js';
+import Product from '../models/Product.js';
+import ProductImage from '../models/ProductImage.js';
 
 const getAllProducts = async (req, res) => {
   try {
     const { category, subcategory, search, minPrice, maxPrice, brand, rating, sort, page = 1, limit = 20 } = req.query;
-    const offset = (page - 1) * limit;
+    const skip = (page - 1) * limit;
     
-    let query = `
-      SELECT p.*, c.name as category_name, s.name as subcategory_name 
-      FROM products p 
-      LEFT JOIN categories c ON p.category_id = c.id 
-      LEFT JOIN subcategories s ON p.subcategory_id = s.id 
-      WHERE 1=1
-    `;
-    const params = [];
+    const filter = {};
 
-    if (category) {
-      query += ' AND p.category_id = ?';
-      params.push(category);
-    }
-    if (subcategory) {
-      query += ' AND p.subcategory_id = ?';
-      params.push(subcategory);
-    }
-    if (search) {
-      query += ' AND (p.name LIKE ? OR p.description LIKE ?)';
-      params.push(`%${search}%`, `%${search}%`);
-    }
-    if (minPrice) {
-      query += ' AND p.price >= ?';
-      params.push(minPrice);
-    }
-    if (maxPrice) {
-      query += ' AND p.price <= ?';
-      params.push(maxPrice);
-    }
-    if (brand) {
-      query += ' AND p.brand = ?';
-      params.push(brand);
-    }
-    if (rating) {
-      query += ' AND p.rating >= ?';
-      params.push(rating);
-    }
+    if (category) filter.category = category;
+    if (subcategory) filter.subcategory = subcategory;
+    if (search) filter.$or = [{ name: { $regex: search, $options: 'i' } }, { description: { $regex: search, $options: 'i' } }];
+    if (minPrice) filter.price = { ...filter.price, $gte: parseFloat(minPrice) };
+    if (maxPrice) filter.price = { ...filter.price, $lte: parseFloat(maxPrice) };
+    if (brand) filter.brand = brand;
+    if (rating) filter.rating = { $gte: parseFloat(rating) };
 
-    if (sort === 'price-asc') {
-      query += ' ORDER BY p.price ASC';
-    } else if (sort === 'price-desc') {
-      query += ' ORDER BY p.price DESC';
-    } else if (sort === 'rating') {
-      query += ' ORDER BY p.rating DESC';
-    } else if (sort === 'newest') {
-      query += ' ORDER BY p.created_at DESC';
-    } else {
-      query += ' ORDER BY p.id DESC';
-    }
+    let sortOption = { _id: -1 };
+    if (sort === 'price-asc') sortOption = { price: 1 };
+    else if (sort === 'price-desc') sortOption = { price: -1 };
+    else if (sort === 'rating') sortOption = { rating: -1 };
+    else if (sort === 'newest') sortOption = { createdAt: -1 };
 
-    query += ' LIMIT ? OFFSET ?';
-    params.push(parseInt(limit), parseInt(offset));
+    const products = await Product.find(filter)
+      .populate('category', 'name')
+      .populate('subcategory', 'name')
+      .sort(sortOption)
+      .skip(skip)
+      .limit(parseInt(limit));
 
-    const [products] = await pool.query(query, params);
-
+    const productsWithImages = [];
     for (let product of products) {
-      const [images] = await pool.query('SELECT * FROM product_images WHERE product_id = ?', [product.id]);
-      product.images = images;
+      const images = await ProductImage.find({ product: product._id });
+      productsWithImages.push({ ...product.toObject(), images });
     }
 
-    const [countResult] = await pool.query(query.replace(/SELECT.*FROM/, 'SELECT COUNT(*) as total FROM').replace(/ORDER BY.*/, '').replace(/LIMIT.*/, ''), params.slice(0, -2));
+    const total = await Product.countDocuments(filter);
 
     res.json({
-      products,
-      total: countResult[0].total,
+      products: productsWithImages,
+      total,
       page: parseInt(page),
-      totalPages: Math.ceil(countResult[0].total / limit)
+      totalPages: Math.ceil(total / limit)
     });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -80,24 +50,17 @@ const getAllProducts = async (req, res) => {
 
 const getProductById = async (req, res) => {
   try {
-    const [products] = await pool.query('SELECT * FROM products WHERE id = ? OR slug = ?', [req.params.id, req.params.id]);
-    if (products.length === 0) {
+    const product = await Product.findOne({ $or: [{ _id: req.params.id }, { slug: req.params.id }] })
+      .populate('category', 'name')
+      .populate('subcategory', 'name');
+    if (!product) {
       return res.status(404).json({ message: 'Product not found' });
     }
-    const product = products[0];
     
-    const [images] = await pool.query('SELECT * FROM product_images WHERE product_id = ?', [product.id]);
-    product.images = images;
+    const images = await ProductImage.find({ product: product._id });
+    const relatedProducts = await Product.find({ category: product.category._id, _id: { $ne: product._id } }).limit(10);
 
-    const [related] = await pool.query(`
-      SELECT * FROM products 
-      WHERE category_id = ? AND id != ? 
-      LIMIT 10
-    `, [product.category_id, product.id]);
-
-    product.relatedProducts = related;
-
-    res.json(product);
+    res.json({ ...product.toObject(), images, relatedProducts });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
@@ -105,7 +68,7 @@ const getProductById = async (req, res) => {
 
 const getFeaturedProducts = async (req, res) => {
   try {
-    const [products] = await pool.query('SELECT * FROM products WHERE featured = true LIMIT 10');
+    const products = await Product.find({ featured: true }).limit(10);
     res.json(products);
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -114,7 +77,7 @@ const getFeaturedProducts = async (req, res) => {
 
 const getBestSellers = async (req, res) => {
   try {
-    const [products] = await pool.query('SELECT * FROM products WHERE best_seller = true LIMIT 10');
+    const products = await Product.find({ bestSeller: true }).limit(10);
     res.json(products);
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -123,7 +86,7 @@ const getBestSellers = async (req, res) => {
 
 const getNewArrivals = async (req, res) => {
   try {
-    const [products] = await pool.query('SELECT * FROM products WHERE new_arrival = true LIMIT 10');
+    const products = await Product.find({ newArrival: true }).limit(10);
     res.json(products);
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -132,7 +95,7 @@ const getNewArrivals = async (req, res) => {
 
 const getFlashSaleProducts = async (req, res) => {
   try {
-    const [products] = await pool.query('SELECT * FROM products WHERE flash_sale = true LIMIT 10');
+    const products = await Product.find({ flashSale: true }).limit(10);
     res.json(products);
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -141,12 +104,25 @@ const getFlashSaleProducts = async (req, res) => {
 
 const createProduct = async (req, res) => {
   try {
-    const { name, slug, description, price, discount_price, stock, sku, brand, category_id, subcategory_id, featured, best_seller, new_arrival, flash_sale } = req.body;
-    const [result] = await pool.query(
-      'INSERT INTO products (name, slug, description, price, discount_price, stock, sku, brand, category_id, subcategory_id, featured, best_seller, new_arrival, flash_sale) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [name, slug, description, price, discount_price, stock, sku, brand, category_id, subcategory_id, featured || false, best_seller || false, new_arrival || false, flash_sale || false]
-    );
-    res.status(201).json({ message: 'Product created', productId: result.insertId });
+    const { name, slug, description, price, discountPrice, stock, sku, brand, category, subcategory, featured, bestSeller, newArrival, flashSale } = req.body;
+    const product = new Product({
+      name,
+      slug,
+      description,
+      price,
+      discountPrice,
+      stock,
+      sku,
+      brand,
+      category,
+      subcategory,
+      featured: featured || false,
+      bestSeller: bestSeller || false,
+      newArrival: newArrival || false,
+      flashSale: flashSale || false
+    });
+    await product.save();
+    res.status(201).json({ message: 'Product created', productId: product._id });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
@@ -154,11 +130,23 @@ const createProduct = async (req, res) => {
 
 const updateProduct = async (req, res) => {
   try {
-    const { name, slug, description, price, discount_price, stock, sku, brand, category_id, subcategory_id, featured, best_seller, new_arrival, flash_sale } = req.body;
-    await pool.query(
-      'UPDATE products SET name=?, slug=?, description=?, price=?, discount_price=?, stock=?, sku=?, brand=?, category_id=?, subcategory_id=?, featured=?, best_seller=?, new_arrival=?, flash_sale=? WHERE id=?',
-      [name, slug, description, price, discount_price, stock, sku, brand, category_id, subcategory_id, featured, best_seller, new_arrival, flash_sale, req.params.id]
-    );
+    const { name, slug, description, price, discountPrice, stock, sku, brand, category, subcategory, featured, bestSeller, newArrival, flashSale } = req.body;
+    await Product.findByIdAndUpdate(req.params.id, {
+      name,
+      slug,
+      description,
+      price,
+      discountPrice,
+      stock,
+      sku,
+      brand,
+      category,
+      subcategory,
+      featured,
+      bestSeller,
+      newArrival,
+      flashSale
+    });
     res.json({ message: 'Product updated' });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -167,7 +155,8 @@ const updateProduct = async (req, res) => {
 
 const deleteProduct = async (req, res) => {
   try {
-    await pool.query('DELETE FROM products WHERE id = ?', [req.params.id]);
+    await Product.findByIdAndDelete(req.params.id);
+    await ProductImage.deleteMany({ product: req.params.id });
     res.json({ message: 'Product deleted' });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });

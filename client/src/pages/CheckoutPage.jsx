@@ -282,7 +282,7 @@ function FixedOrderSummary({ cart, getTotal }) {
       
       <div className="space-y-4 mb-6">
         {cart.map((item, index) => {
-          const price = item.product.discount_price || item.product.price
+          const price = item.product.discountPrice || item.product.price
           return (
             <div key={index} className="flex justify-between text-slate-700 border-b border-slate-100 pb-3">
               <div>
@@ -393,13 +393,87 @@ function CheckoutPage() {
   const handleOnlinePayment = async () => {
     setPaymentProcessing(true)
     try {
-      // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      toast.success('Payment successful!')
-      await submitOrder()
+      const subtotal = getTotal()
+      const shipping = subtotal > 500 ? 0 : 50
+      const total = subtotal + shipping
+
+      console.log('Creating Razorpay order for amount:', total)
+
+      // Create Razorpay order on server
+      const { data } = await api.post('/orders/create-razorpay-order', { amount: total })
+
+      console.log('Razorpay order data:', data)
+
+      // Function to open Razorpay
+      const openRazorpay = () => {
+        const options = {
+          key: data.keyId,
+          amount: data.order.amount,
+          currency: 'INR',
+          name: 'DailyFixCare',
+          description: 'Order Payment',
+          order_id: data.order.id,
+          handler: async (response) => {
+            console.log('Payment success response:', response)
+            try {
+              // Verify payment
+              await api.post('/orders/verify-payment', {
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              })
+              toast.success('Payment successful!')
+              await submitOrder()
+            } catch (verifyError) {
+              console.error('Payment verification error:', verifyError)
+              toast.error('Payment verification failed')
+              setPaymentProcessing(false)
+            }
+          },
+          prefill: {
+            name: `${formData.firstName} ${formData.lastName}`,
+            email: formData.email,
+            contact: `+91${formData.phone}`,
+          },
+          theme: {
+            color: '#10b981',
+          },
+          modal: {
+            ondismiss: () => {
+              console.log('Razorpay modal closed by user')
+              toast.error('Payment cancelled')
+              setPaymentProcessing(false)
+            }
+          }
+        }
+
+        const rzp = new window.Razorpay(options)
+        rzp.open()
+      }
+
+      // Check if script is already loaded
+      if (window.Razorpay) {
+        console.log('Razorpay already loaded')
+        openRazorpay()
+      } else {
+        console.log('Loading Razorpay script')
+        // Load Razorpay script
+        const script = document.createElement('script')
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js'
+        script.onload = () => {
+          console.log('Razorpay script loaded')
+          openRazorpay()
+        }
+        script.onerror = () => {
+          toast.error('Failed to load payment gateway')
+          setPaymentProcessing(false)
+        }
+        document.body.appendChild(script)
+      }
+
     } catch (error) {
-      toast.error('Payment failed. Please try again.')
-    } finally {
+      console.error('Payment initiation error:', error)
+      toast.error(error.response?.data?.message || 'Payment failed. Please try again.')
       setPaymentProcessing(false)
     }
   }
@@ -415,22 +489,22 @@ function CheckoutPage() {
           phone: formData.phone
         },
         items: cart.map(item => ({
-          product_id: item.product_id,
+          productId: item.productId,
           quantity: item.quantity
         })),
-        shipping_address: {
+        shippingAddress: {
           address: formData.address,
           city: formData.city,
           state: formData.state,
           pincode: formData.pincode
         },
-        billing_address: {
+        billingAddress: {
           address: formData.address,
           city: formData.city,
           state: formData.state,
           pincode: formData.pincode
         },
-        payment_method: formData.paymentMethod
+        paymentMethod: formData.paymentMethod
       })
 
       clearCart()

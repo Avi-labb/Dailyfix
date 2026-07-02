@@ -66,12 +66,12 @@ function OrderSummaryPage() {
           phone: orderData.customer.phone
         },
         items: orderData.items.map(item => ({
-          product_id: item.product_id,
+          productId: item.productId,
           quantity: item.quantity
         })),
-        shipping_address: orderData.shipping_address,
-        billing_address: orderData.billing_address,
-        payment_method: orderData.payment_method
+        shippingAddress: orderData.shippingAddress,
+        billingAddress: orderData.billingAddress,
+        paymentMethod: orderData.paymentMethod
       })
 
       clearCart()

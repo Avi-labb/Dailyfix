@@ -1,6 +1,9 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import pool from '../config/db.js';
+import Admin from '../models/Admin.js';
+import Order from '../models/Order.js';
+import Product from '../models/Product.js';
+import Customer from '../models/Customer.js';
 
 const login = async (req, res) => {
   try {
@@ -10,22 +13,20 @@ const login = async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    const [existingAdmins] = await pool.query('SELECT * FROM admins WHERE email = ?', [email]);
+    let admin = await Admin.findOne({ email });
     
-    let admin;
-    if (existingAdmins.length === 0) {
+    if (!admin) {
       const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
-      const [result] = await pool.query('INSERT INTO admins (email, password) VALUES (?, ?)', [email, hashedPassword]);
-      admin = { id: result.insertId, email };
+      admin = new Admin({ email, password: hashedPassword });
+      await admin.save();
     } else {
-      admin = existingAdmins[0];
       const isPasswordValid = await bcrypt.compare(password, admin.password);
       if (!isPasswordValid) {
         return res.status(401).json({ message: 'Invalid credentials' });
       }
     }
 
-    const token = jwt.sign({ id: admin.id, email: admin.email }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ id: admin._id, email: admin.email }, process.env.JWT_SECRET, { expiresIn: '7d' });
     
     res.cookie('admin_token', token, {
       httpOnly: true,
@@ -34,7 +35,7 @@ const login = async (req, res) => {
       sameSite: 'strict'
     });
 
-    res.json({ message: 'Login successful', admin: { id: admin.id, email: admin.email } });
+    res.json({ message: 'Login successful', token, admin: { id: admin._id, email: admin.email } });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
@@ -47,38 +48,36 @@ const logout = (req, res) => {
 
 const getDashboardStats = async (req, res) => {
   try {
-    const [ordersResult] = await pool.query('SELECT COUNT(*) as total FROM orders');
-    const [revenueResult] = await pool.query('SELECT SUM(total) as total FROM orders WHERE status = "Delivered"');
-    const [productsResult] = await pool.query('SELECT COUNT(*) as total FROM products');
-    const [customersResult] = await pool.query('SELECT COUNT(*) as total FROM customers');
+    const totalOrders = await Order.countDocuments();
+    const revenueResult = await Order.aggregate([
+      { $match: { status: 'Delivered' } },
+      { $group: { _id: null, total: { $sum: '$total' } } }
+    ]);
+    const totalRevenue = revenueResult.length > 0 ? revenueResult[0].total : 0;
+    const totalProducts = await Product.countDocuments();
+    const totalCustomers = await Customer.countDocuments();
     
-    const [monthlySales] = await pool.query(`
-      SELECT 
-        DATE_FORMAT(created_at, '%Y-%m') as month,
-        SUM(total) as sales
-      FROM orders
-      WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
-      GROUP BY DATE_FORMAT(created_at, '%Y-%m')
-      ORDER BY month
-    `);
+    const monthlySales = await Order.aggregate([
+      { $match: { createdAt: { $gte: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000) } } },
+      { $group: { _id: { $dateToString: { format: '%Y-%m', date: '$createdAt' } }, sales: { $sum: '$total' } } },
+      { $sort: { _id: 1 } }
+    ]).then(results => results.map(r => ({ month: r._id, sales: r.sales })));
 
-    const [topProducts] = await pool.query(`
-      SELECT 
-        p.id,
-        p.name,
-        SUM(oi.quantity) as total_sold
-      FROM products p
-      JOIN order_items oi ON p.id = oi.product_id
-      GROUP BY p.id, p.name
-      ORDER BY total_sold DESC
-      LIMIT 10
-    `);
+    const topProducts = await Order.aggregate([
+      { $unwind: '$items' },
+      { $group: { _id: '$items.product', totalSold: { $sum: '$items.quantity' } } },
+      { $sort: { totalSold: -1 } },
+      { $limit: 10 },
+      { $lookup: { from: 'products', localField: '_id', foreignField: '_id', as: 'product' } },
+      { $unwind: '$product' },
+      { $project: { id: '$_id', name: '$product.name', totalSold: 1 } }
+    ]);
 
     res.json({
-      totalOrders: ordersResult[0].total,
-      totalRevenue: revenueResult[0].total || 0,
-      totalProducts: productsResult[0].total,
-      totalCustomers: customersResult[0].total,
+      totalOrders,
+      totalRevenue,
+      totalProducts,
+      totalCustomers,
       monthlySales,
       topProducts
     });
@@ -87,8 +86,38 @@ const getDashboardStats = async (req, res) => {
   }
 };
 
+const sendOtp = async (req, res) => {
+  try {
+    // Temporary: Just return success (you can implement actual OTP sending later)
+    res.json({ message: 'OTP sent successfully (temporary implementation)' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+const verifyOtp = async (req, res) => {
+  try {
+    // Temporary: Just return success (you can implement actual OTP verification later)
+    res.json({ message: 'OTP verified successfully (temporary implementation)' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+const resetPassword = async (req, res) => {
+  try {
+    // Temporary: Just return success (you can implement actual password reset later)
+    res.json({ message: 'Password reset successfully (temporary implementation)' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
 export {
   login,
   logout,
-  getDashboardStats
+  getDashboardStats,
+  sendOtp,
+  verifyOtp,
+  resetPassword
 };

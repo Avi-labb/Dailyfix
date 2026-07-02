@@ -38,7 +38,7 @@ function CartPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-4">
             {cart.map(item => (
-              <div key={item.product_id} className="flex gap-6 p-6 bg-white rounded-2xl shadow-lg border border-slate-100">
+              <div key={item.productId} className="flex gap-6 p-6 bg-white rounded-2xl shadow-lg border border-slate-100">
                 <div className="w-32 h-32 bg-gradient-to-br from-emerald-50 to-white rounded-xl overflow-hidden flex items-center justify-center flex-shrink-0 border border-slate-100">
                   <img
                     src={item.product.images ? item.product.images[0] : item.product.image}
@@ -55,21 +55,21 @@ function CartPage() {
                     <div className="flex items-center gap-4">
                       <div className="flex items-center bg-slate-50 rounded-full border border-slate-200 overflow-hidden">
                         <button
-                          onClick={() => updateQuantity(item.product_id, Math.max(1, item.quantity - 1))}
+                          onClick={() => updateQuantity(item.productId, Math.max(1, item.quantity - 1))}
                           className="px-4 py-2 text-slate-600 hover:bg-slate-100 transition-colors"
                         >
                           <Minus size={16} />
                         </button>
                         <span className="px-6 py-2 font-semibold text-slate-800">{item.quantity}</span>
                         <button
-                          onClick={() => updateQuantity(item.product_id, item.quantity + 1)}
+                          onClick={() => updateQuantity(item.productId, item.quantity + 1)}
                           className="px-4 py-2 text-slate-600 hover:bg-slate-100 transition-colors"
                         >
                           <Plus size={16} />
                         </button>
                       </div>
                       <button
-                        onClick={() => setItemToRemove(item.product_id)}
+                        onClick={() => setItemToRemove(item.productId)}
                         className="text-red-500 hover:text-red-700 flex items-center gap-2 text-sm font-semibold"
                       >
                         <Trash2 size={16} />
@@ -77,7 +77,7 @@ function CartPage() {
                       </button>
                     </div>
                     <p className="text-xl font-bold text-emerald-600">
-                      ₹{(item.product.discount_price || item.product.price) * item.quantity}
+                      ₹{(item.product.discountPrice || item.product.price) * item.quantity}
                     </p>
                   </div>
                 </div>

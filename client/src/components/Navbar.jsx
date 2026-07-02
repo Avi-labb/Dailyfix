@@ -37,13 +37,13 @@ const Navbar = () => {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-[9999] py-3 sm:py-4 px-8 md:px-16 bg-slate-900/95 backdrop-blur-xl shadow-lg">
+    <header class="fixed top-0 left-0 right-0 z-[9999] py-3 sm:py-4 px-8 md:px-16 bg-black/70 backdrop-blur-lg shadow-sm">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3">
             <img
               src={logo}
               alt="Dailyfix"
-              className="h-10 md:h-12 w-auto"
+              className="h-8 md:h-10 w-auto"
             />
           </Link>
           

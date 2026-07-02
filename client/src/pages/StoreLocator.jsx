@@ -64,7 +64,22 @@ const StoreLocator = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const [activeStore, setActiveStore] = useState(null)
   const [viewMode, setViewMode] = useState('list')
+  const [isMobile, setIsMobile] = useState(false)
+  const [isClient, setIsClient] = useState(false)
   const storeListRef = useRef(null)
+
+  // Wait for client side
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  // Handle responsive view
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   const filteredStores = storeRegistry.filter(store => {
     return store.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -75,7 +90,7 @@ const StoreLocator = () => {
 
   const handleStoreClick = (store) => {
     setActiveStore(store)
-    if (viewMode === 'list' && window.innerWidth < 1024) {
+    if (viewMode === 'list' && isMobile) {
       setViewMode('map')
     }
     if (storeListRef.current) {
@@ -118,7 +133,7 @@ const StoreLocator = () => {
 
         <div className="relative bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden" style={{ height: '70vh', minHeight: '550px' }}>
           {/* Sidebar (List) */}
-          <div className={`absolute left-0 top-0 w-full lg:w-[35%] h-full bg-white border-r border-slate-200 flex flex-col z-10 transition-transform duration-300 ${viewMode === 'map' && window.innerWidth < 1024 ? '-translate-x-full' : 'translate-x-0'}`}>
+          <div className={`absolute left-0 top-0 w-full lg:w-[35%] h-full bg-white border-r border-slate-200 flex flex-col z-10 transition-transform duration-300 ${viewMode === 'map' && isMobile ? '-translate-x-full' : 'translate-x-0'}`}>
             <div className="p-5 border-b border-slate-100">
               <div className="relative">
                 <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -158,28 +173,30 @@ const StoreLocator = () => {
           </div>
 
           {/* Map */}
-          <div className={`absolute left-0 top-0 w-full lg:left-[35%] lg:w-[65%] h-full transition-transform duration-300 ${viewMode === 'list' && window.innerWidth < 1024 ? 'translate-x-full' : 'translate-x-0'}`}>
-            <MapContainer
-              center={[19.1000, 72.8400]}
-              zoom={12}
-              zoomControl={false}
-              style={{ width: '100%', height: '100%' }}
-            >
-              <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution='&copy; OpenStreetMap contributors'
-              />
-              <ZoomControl position="bottomright" />
-              <MapController activeStore={activeStore} stores={filteredStores} />
-              {filteredStores.map(store => (
-                <CustomMarker
-                  key={store.id}
-                  store={store}
-                  isActive={activeStore?.id === store.id}
-                  onClick={handleStoreClick}
+          <div className={`absolute left-0 top-0 w-full lg:left-[35%] lg:w-[65%] h-full transition-transform duration-300 ${viewMode === 'list' && isMobile ? 'translate-x-full' : 'translate-x-0'}`}>
+            {isClient && (
+              <MapContainer
+                center={[19.1000, 72.8400]}
+                zoom={12}
+                zoomControl={false}
+                style={{ width: '100%', height: '100%' }}
+              >
+                <TileLayer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='&copy; OpenStreetMap contributors'
                 />
-              ))}
-            </MapContainer>
+                <ZoomControl position="bottomright" />
+                <MapController activeStore={activeStore} stores={filteredStores} />
+                {filteredStores.map(store => (
+                  <CustomMarker
+                    key={store.id}
+                    store={store}
+                    isActive={activeStore?.id === store.id}
+                    onClick={handleStoreClick}
+                  />
+                ))}
+              </MapContainer>
+            )}
           </div>
         </div>
       </div>

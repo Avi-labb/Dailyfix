@@ -15,15 +15,15 @@ export const CartProvider = ({ children }) => {
 
   const addToCart = (product, quantity = 1) => {
     setCart(prev => {
-      const existing = prev.find(item => item.product_id === product.id)
+      const existing = prev.find(item => item.productId === product.id)
       if (existing) {
         return prev.map(item =>
-          item.product_id === product.id
+          item.productId === product.id
             ? { ...item, quantity: item.quantity + quantity }
             : item
         )
       }
-      return [...prev, { product_id: product.id, product, quantity }]
+      return [...prev, { productId: product.id, product, quantity }]
     })
     setLastAddedProduct({ product, quantity })
   }
@@ -35,13 +35,13 @@ export const CartProvider = ({ children }) => {
     }
     setCart(prev =>
       prev.map(item =>
-        item.product_id === productId ? { ...item, quantity } : item
+        item.productId === productId ? { ...item, quantity } : item
       )
     )
   }
 
   const removeFromCart = (productId) => {
-    setCart(prev => prev.filter(item => item.product_id !== productId))
+    setCart(prev => prev.filter(item => item.productId !== productId))
   }
 
   const clearCart = () => {
@@ -50,7 +50,7 @@ export const CartProvider = ({ children }) => {
 
   const getTotal = () => {
     return cart.reduce((sum, item) => {
-      const price = item.product.discount_price || item.product.price
+      const price = item.product.discountPrice || item.product.price
       return sum + price * item.quantity
     }, 0)
   }

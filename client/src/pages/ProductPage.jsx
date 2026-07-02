@@ -117,7 +117,7 @@ const ProductPage = () => {
   };
 
   return (
-    <div className="min-h-screen -mt-10" style={{ backgroundColor: '#FAF7F2' }}>
+    <div className="min-h-screen -mt-10" style={{ backgroundColor: '#f0fdf4' }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Inter:wght@400;500;600;700&display=swap');
         .pp-display { font-family: 'Bricolage Grotesque', 'Helvetica Neue', sans-serif; }
@@ -130,10 +130,10 @@ const ProductPage = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-20 py-10 lg:py-10">
         {/* Breadcrumb-ish eyebrow */}
-        <div className="pp-body text-xs tracking-widest uppercase mb-8 flex items-center gap-2" style={{ color: '#9A8F82' }}>
+        <div className="pp-body text-xs tracking-widest uppercase mb-8 flex items-center gap-2" style={{ color: '#64748b' }}>
           <span>{product.brand}</span>
           <span>/</span>
-          <span style={{ color: '#5C3A28' }}>{product.desc}</span>
+          <span style={{ color: '#065f46' }}>{product.desc}</span>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
@@ -147,8 +147,8 @@ const ProductPage = () => {
                   onClick={() => setCurrentImageIndex(index)}
                   className=" w-16 h-16 sm:w-20 sm:h-20 p-1 rounded-lg overflow-hidden border-2 transition-all"
                   style={{
-                    borderColor: index === currentImageIndex ? '#C8852E' : 'transparent',
-                    backgroundColor: '#F0EAE0'
+                    borderColor: index === currentImageIndex ? '#10b981' : 'transparent',
+                    backgroundColor: '#ecfdf5'
                   }}
                   aria-label={`View image ${index + 1}`}
                 >
@@ -166,7 +166,7 @@ const ProductPage = () => {
               <div
                 ref={imageRef}
                 className="pp-zoom-cursor aspect-square rounded-2xl overflow-hidden relative border p-3"
-                style={{ backgroundColor: '#F0EAE0', borderColor: '#E5DCCC' }}
+                style={{ backgroundColor: '#ecfdf5', borderColor: '#a7f3d0' }}
                 onMouseEnter={() => setShowZoom(true)}
                 onMouseLeave={() => setShowZoom(false)}
                 onMouseMove={handleMouseMove}
@@ -209,23 +209,23 @@ const ProductPage = () => {
           {/* RIGHT: Product details */}
           <div className="flex flex-col gap-7">
             <div>
-              <h1 className="pp-display text-3xl md:text-[2.75rem] leading-[1.05] font-bold" style={{ color: '#231F1C' }}>
+              <h1 className="pp-display text-3xl md:text-[2.75rem] leading-[1.05] font-bold" style={{ color: '#0f172a' }}>
                 {product.name}
               </h1>
-              <p className="pp-body mt-2 text-sm" style={{ color: '#9A8F82' }}>
+              <p className="pp-body mt-2 text-sm" style={{ color: '#64748b' }}>
                 SKU {product.sku} &middot; by {product.brand}
               </p>
             </div>
 
             {/* Price */}
             <div className="flex items-baseline gap-3 flex-wrap">
-              <span className="pp-display text-4xl font-extrabold" style={{ color: '#5C3A28' }}>
+              <span className="pp-display text-4xl font-extrabold" style={{ color: '#065f46' }}>
                 ₹{product.price}
               </span>
             </div>
 
             {/* Description */}
-            <p className="pp-body text-base leading-relaxed" style={{ color: '#54493E' }}>
+            <p className="pp-body text-base leading-relaxed" style={{ color: '#475569' }}>
               {product.description}
             </p>
 
@@ -239,7 +239,7 @@ const ProductPage = () => {
                 <div
                   key={label}
                   className="pp-body flex flex-col items-center gap-1.5 text-center text-xs font-medium rounded-xl py-3 px-2"
-                  style={{ backgroundColor: '#F0EAE0', color: '#5C3A28' }}
+                  style={{ backgroundColor: '#ecfdf5', color: '#065f46' }}
                 >
                   <Icon size={18} strokeWidth={2} />
                   {label}
@@ -249,26 +249,26 @@ const ProductPage = () => {
 
             {/* Quantity selector */}
             <div className="flex items-center gap-4">
-              <span className="pp-body text-sm font-semibold" style={{ color: '#231F1C' }}>Quantity</span>
+              <span className="pp-body text-sm font-semibold" style={{ color: '#0f172a' }}>Quantity</span>
               <div
                 className="flex items-center rounded-full border overflow-hidden"
-                style={{ borderColor: '#E5DCCC' }}
+                style={{ borderColor: '#a7f3d0' }}
               >
                 <button
                   onClick={decrement}
-                  className="pp-transition w-10 h-10 flex items-center justify-center hover:bg-[#F0EAE0]"
-                  style={{ color: '#5C3A28' }}
+                  className="pp-transition w-10 h-10 flex items-center justify-center hover:bg-[#ecfdf5]"
+                  style={{ color: '#065f46' }}
                   aria-label="Decrease quantity"
                 >
                   <Minus size={16} />
                 </button>
-                <span className="pp-body w-10 text-center font-semibold" style={{ color: '#231F1C' }}>
+                <span className="pp-body w-10 text-center font-semibold" style={{ color: '#0f172a' }}>
                   {quantity}
                 </span>
                 <button
                   onClick={increment}
-                  className="pp-transition w-10 h-10 flex items-center justify-center hover:bg-[#F0EAE0]"
-                  style={{ color: '#5C3A28' }}
+                  className="pp-transition w-10 h-10 flex items-center justify-center hover:bg-[#ecfdf5]"
+                  style={{ color: '#065f46' }}
                   aria-label="Increase quantity"
                 >
                   <Plus size={16} />
@@ -281,8 +281,8 @@ const ProductPage = () => {
               <button
                 onClick={handleAddToCart}
                 disabled={product.stock === 0}
-                className="pp-body pp-transition flex-1 flex items-center justify-center gap-2 rounded-full font-semibold py-4 px-6 border-2 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#5C3A28] hover:text-[#FAF7F2]"
-                style={{ borderColor: '#5C3A28', color: '#5C3A28', backgroundColor: 'transparent' }}
+                className="pp-body pp-transition flex-1 flex items-center justify-center gap-2 rounded-full font-semibold py-4 px-6 border-2 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#065f46] hover:text-white"
+                style={{ borderColor: '#10b981', color: '#065f46', backgroundColor: 'transparent' }}
               >
                 <ShoppingBag size={18} />
                 {addedToCart ? 'Added!' : 'Add to Cart'}
@@ -294,7 +294,7 @@ const ProductPage = () => {
                 }}
                 disabled={product.stock === 0}
                 className="pp-body pp-transition flex-1 flex items-center justify-center gap-2 rounded-full font-semibold py-4 px-6 disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90"
-                style={{ backgroundColor: '#C8852E', color: '#FAF7F2' }}
+                style={{ backgroundColor: '#10b981', color: 'white' }}
               >
                 <Zap size={18} />
                 Buy Now
@@ -313,22 +313,22 @@ const ProductPage = () => {
           onClick={() => setLightboxOpen(false)}
         >
           <button
-            onClick={() => setLightboxOpen(false)}
-            className="absolute top-5 right-5 w-11 h-11 rounded-full flex items-center justify-center"
-            style={{ backgroundColor: '#FAF7F2', color: '#231F1C' }}
-            aria-label="Close"
-          >
-            <X size={22} />
-          </button>
+              onClick={() => setLightboxOpen(false)}
+              className="absolute top-5 right-5 w-11 h-11 rounded-full flex items-center justify-center"
+              style={{ backgroundColor: '#ecfdf5', color: '#065f46' }}
+              aria-label="Close"
+            >
+              <X size={22} />
+            </button>
 
-          <button
-            onClick={(e) => { e.stopPropagation(); prevImage(); }}
-            className="absolute left-4 sm:left-8 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full flex items-center justify-center"
-            style={{ backgroundColor: '#FAF7F2', color: '#231F1C' }}
-            aria-label="Previous image"
-          >
-            <ChevronLeft size={22} />
-          </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); prevImage(); }}
+              className="absolute left-4 sm:left-8 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full flex items-center justify-center"
+              style={{ backgroundColor: '#ecfdf5', color: '#065f46' }}
+              aria-label="Previous image"
+            >
+              <ChevronLeft size={22} />
+            </button>
 
           <img
             src={product.images[currentImageIndex]}
@@ -338,12 +338,12 @@ const ProductPage = () => {
           />
 
           <button
-            onClick={(e) => { e.stopPropagation(); nextImage(); }}
-            className="absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full flex items-center justify-center"
-            style={{ backgroundColor: '#FAF7F2', color: '#231F1C' }}
-            aria-label="Next image"
-          >
-            <ChevronRight size={22} />
+              onClick={(e) => { e.stopPropagation(); nextImage(); }}
+              className="absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full flex items-center justify-center"
+              style={{ backgroundColor: '#ecfdf5', color: '#065f46' }}
+              aria-label="Next image"
+            >
+              <ChevronRight size={22} />
           </button>
         </div>
       )}

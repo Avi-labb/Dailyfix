@@ -1,13 +1,15 @@
-import pool from '../config/db.js';
+import Category from '../models/Category.js';
+import Subcategory from '../models/Subcategory.js';
 
 const getAllCategories = async (req, res) => {
   try {
-    const [categories] = await pool.query('SELECT * FROM categories');
+    const categories = await Category.find();
+    const categoriesWithSubcategories = [];
     for (let category of categories) {
-      const [subcategories] = await pool.query('SELECT * FROM subcategories WHERE category_id = ?', [category.id]);
-      category.subcategories = subcategories;
+      const subcategories = await Subcategory.find({ category: category._id });
+      categoriesWithSubcategories.push({ ...category.toObject(), subcategories });
     }
-    res.json(categories);
+    res.json(categoriesWithSubcategories);
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
@@ -15,14 +17,12 @@ const getAllCategories = async (req, res) => {
 
 const getCategoryById = async (req, res) => {
   try {
-    const [categories] = await pool.query('SELECT * FROM categories WHERE id = ? OR slug = ?', [req.params.id, req.params.id]);
-    if (categories.length === 0) {
+    const category = await Category.findOne({ $or: [{ _id: req.params.id }, { slug: req.params.id }] });
+    if (!category) {
       return res.status(404).json({ message: 'Category not found' });
     }
-    const category = categories[0];
-    const [subcategories] = await pool.query('SELECT * FROM subcategories WHERE category_id = ?', [category.id]);
-    category.subcategories = subcategories;
-    res.json(category);
+    const subcategories = await Subcategory.find({ category: category._id });
+    res.json({ ...category.toObject(), subcategories });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
@@ -31,11 +31,9 @@ const getCategoryById = async (req, res) => {
 const createCategory = async (req, res) => {
   try {
     const { name, slug, description, image } = req.body;
-    const [result] = await pool.query(
-      'INSERT INTO categories (name, slug, description, image) VALUES (?, ?, ?, ?)',
-      [name, slug, description, image]
-    );
-    res.status(201).json({ message: 'Category created', categoryId: result.insertId });
+    const category = new Category({ name, slug, description, image });
+    await category.save();
+    res.status(201).json({ message: 'Category created', categoryId: category._id });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
@@ -44,10 +42,7 @@ const createCategory = async (req, res) => {
 const updateCategory = async (req, res) => {
   try {
     const { name, slug, description, image } = req.body;
-    await pool.query(
-      'UPDATE categories SET name=?, slug=?, description=?, image=? WHERE id=?',
-      [name, slug, description, image, req.params.id]
-    );
+    await Category.findByIdAndUpdate(req.params.id, { name, slug, description, image });
     res.json({ message: 'Category updated' });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -56,7 +51,8 @@ const updateCategory = async (req, res) => {
 
 const deleteCategory = async (req, res) => {
   try {
-    await pool.query('DELETE FROM categories WHERE id = ?', [req.params.id]);
+    await Category.findByIdAndDelete(req.params.id);
+    await Subcategory.deleteMany({ category: req.params.id });
     res.json({ message: 'Category deleted' });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -65,7 +61,7 @@ const deleteCategory = async (req, res) => {
 
 const getAllSubcategories = async (req, res) => {
   try {
-    const [subcategories] = await pool.query('SELECT * FROM subcategories');
+    const subcategories = await Subcategory.find();
     res.json(subcategories);
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -74,12 +70,10 @@ const getAllSubcategories = async (req, res) => {
 
 const createSubcategory = async (req, res) => {
   try {
-    const { category_id, name, slug } = req.body;
-    const [result] = await pool.query(
-      'INSERT INTO subcategories (category_id, name, slug) VALUES (?, ?, ?)',
-      [category_id, name, slug]
-    );
-    res.status(201).json({ message: 'Subcategory created', subcategoryId: result.insertId });
+    const { category, name, slug } = req.body;
+    const subcategory = new Subcategory({ category, name, slug });
+    await subcategory.save();
+    res.status(201).json({ message: 'Subcategory created', subcategoryId: subcategory._id });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
@@ -87,11 +81,8 @@ const createSubcategory = async (req, res) => {
 
 const updateSubcategory = async (req, res) => {
   try {
-    const { category_id, name, slug } = req.body;
-    await pool.query(
-      'UPDATE subcategories SET category_id=?, name=?, slug=? WHERE id=?',
-      [category_id, name, slug, req.params.id]
-    );
+    const { category, name, slug } = req.body;
+    await Subcategory.findByIdAndUpdate(req.params.id, { category, name, slug });
     res.json({ message: 'Subcategory updated' });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -100,7 +91,7 @@ const updateSubcategory = async (req, res) => {
 
 const deleteSubcategory = async (req, res) => {
   try {
-    await pool.query('DELETE FROM subcategories WHERE id = ?', [req.params.id]);
+    await Subcategory.findByIdAndDelete(req.params.id);
     res.json({ message: 'Subcategory deleted' });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
