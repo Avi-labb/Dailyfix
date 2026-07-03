@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
 import { CartProvider } from './context/CartContext'
-import { AuthProvider } from './context/AuthContext'
+import { AuthProvider } from './context/AuthContext.jsx'
 import { useEffect } from 'react'
 
 const ScrollToTop = () => {
@@ -30,7 +30,7 @@ import AdminDashboard from './pages/admin/Dashboard'
 import AdminProducts from './pages/admin/Products'
 import AdminOrders from './pages/admin/Orders'
 import AdminCategories from './pages/admin/Categories'
-import AdminCoupons from './pages/admin/Coupons'
+
 import AdminLayout from './layouts/AdminLayout'
 import MainLayout from './layouts/MainLayout'
 
@@ -65,7 +65,7 @@ function App() {
               <Route path="/admin/products" element={<AdminProducts />} />
               <Route path="/admin/orders" element={<AdminOrders />} />
               <Route path="/admin/categories" element={<AdminCategories />} />
-              <Route path="/admin/coupons" element={<AdminCoupons />} />
+
             </Route>
           </Routes>
         </Router>

@@ -4,7 +4,7 @@ import { Mail, Lock, Eye, EyeOff, ArrowRight, ArrowLeft, Shield } from 'lucide-r
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { adminAPI } from '../../services/api'
-import { useAuth } from '../../context/AuthContext'
+import { useAuth } from '../../context/AuthContext.jsx'
 
 // Simple ElegantHeaderText component
 const ElegantHeaderText = ({ text }) => (

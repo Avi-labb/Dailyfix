@@ -6,7 +6,6 @@ import adminOrderTemplate from '../templates/adminOrderTemplate.js';
 import Customer from '../models/Customer.js';
 import Order from '../models/Order.js';
 import Product from '../models/Product.js';
-import Coupon from '../models/Coupon.js';
 import delhiveryService from '../utils/delhivery.js';
 
 // Initialize Razorpay instance

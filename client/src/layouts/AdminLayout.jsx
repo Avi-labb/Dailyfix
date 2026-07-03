@@ -3,10 +3,12 @@ import { LayoutDashboard, Package, ShoppingCart, Tags, LogOut } from 'lucide-rea
 import api from '../services/api'
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
+import { useAuth } from '../context/AuthContext.jsx'
 
 function AdminLayout() {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
+  const { logout } = useAuth()
 
   useEffect(() => {
     checkAuth()
@@ -24,9 +26,12 @@ function AdminLayout() {
   const handleLogout = async () => {
     try {
       await api.post('/admin/logout')
+      logout()
       navigate('/admin/login')
       toast.success('Logged out successfully')
     } catch {
+      logout()
+      navigate('/admin/login')
       toast.error('Logout failed')
     }
   }
@@ -71,12 +76,7 @@ function AdminLayout() {
                 Categories
               </Link>
             </li>
-            <li>
-              <Link to="/admin/coupons" className="flex items-center gap-3 p-3 rounded hover:bg-gray-800">
-                <Tags size={20} />
-                Coupons
-              </Link>
-            </li>
+
           </ul>
         </nav>
         <div className="absolute bottom-4 left-4 w-56">

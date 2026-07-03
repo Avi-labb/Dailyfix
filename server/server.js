@@ -13,8 +13,6 @@ import adminRoutes from './routes/adminRoutes.js';
 import productRoutes from './routes/productRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
-import couponRoutes from './routes/couponRoutes.js';
-import bannerRoutes from './routes/bannerRoutes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -44,8 +42,6 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/orders', orderRoutes);
-app.use('/api/coupons', couponRoutes);
-app.use('/api/banners', bannerRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'DailyFixCare API' });
