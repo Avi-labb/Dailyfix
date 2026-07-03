@@ -53,4 +53,71 @@ export const adminAPI = {
   }
 }
 
+// Order & Delhivery API functions
+export const orderAPI = {
+  createOrder: async (data) => {
+    try {
+      const res = await api.post('/orders', data)
+      return { ok: true, data: res.data }
+    } catch (err) {
+      return { ok: false, data: err.response?.data || { message: 'Order failed' } }
+    }
+  },
+  
+  getOrderById: async (id) => {
+    try {
+      const res = await api.get(`/orders/${id}`)
+      return { ok: true, data: res.data }
+    } catch (err) {
+      return { ok: false, data: err.response?.data || { message: 'Failed to get order' } }
+    }
+  },
+  
+  createRazorpayOrder: async (amount) => {
+    try {
+      const res = await api.post('/orders/create-razorpay-order', { amount })
+      return { ok: true, data: res.data }
+    } catch (err) {
+      return { ok: false, data: err.response?.data || { message: 'Failed to create Razorpay order' } }
+    }
+  },
+  
+  verifyPayment: async (data) => {
+    try {
+      const res = await api.post('/orders/verify-payment', data)
+      return { ok: true, data: res.data }
+    } catch (err) {
+      return { ok: false, data: err.response?.data || { message: 'Payment verification failed' } }
+    }
+  },
+  
+  // Delhivery functions
+  createDelhiveryShipment: async (orderId) => {
+    try {
+      const res = await api.post(`/orders/${orderId}/create-shipment`)
+      return { ok: true, data: res.data }
+    } catch (err) {
+      return { ok: false, data: err.response?.data || { message: 'Failed to create shipment' } }
+    }
+  },
+  
+  trackOrder: async (orderId) => {
+    try {
+      const res = await api.get(`/orders/${orderId}/track`)
+      return { ok: true, data: res.data }
+    } catch (err) {
+      return { ok: false, data: err.response?.data || { message: 'Failed to track order' } }
+    }
+  },
+  
+  getShippingRate: async (pincode, weight = 0.5) => {
+    try {
+      const res = await api.get('/orders/shipping/rate', { params: { pincode, weight } })
+      return { ok: true, data: res.data }
+    } catch (err) {
+      return { ok: false, data: err.response?.data || { message: 'Failed to get shipping rate' } }
+    }
+  }
+}
+
 export default api

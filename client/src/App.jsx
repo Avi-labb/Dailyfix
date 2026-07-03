@@ -24,6 +24,7 @@ import CartPage from './pages/CartPage'
 import CheckoutPage from './pages/CheckoutPage'
 import OrderSuccessPage from './pages/OrderSuccessPage'
 import OrderTrackingPage from './pages/OrderTrackingPage'
+import Debug from './pages/Debug'
 import AdminLogin from './pages/admin/Login'
 import AdminDashboard from './pages/admin/Dashboard'
 import AdminProducts from './pages/admin/Products'
@@ -55,6 +56,7 @@ function App() {
               <Route path="/checkout" element={<CheckoutPage />} />
               <Route path="/order-success/:id" element={<OrderSuccessPage />} />
               <Route path="/track-order" element={<OrderTrackingPage />} />
+            <Route path="/debug" element={<Debug />} />
             </Route>
             
             <Route path="/admin/login" element={<AdminLogin />} />

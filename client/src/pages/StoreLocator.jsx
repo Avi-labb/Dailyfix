@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { Search, MapPin, ArrowLeft, List, Map as MapIcon } from 'lucide-react'
-import { MapContainer, TileLayer, Marker, Popup, useMap, ZoomControl } from 'react-leaflet'
-import L from 'leaflet'
-import 'leaflet/dist/leaflet.css'
+import StoreLocatorMap from './StoreLocatorMap'
 
 const storeRegistry = [
   { id: 'store1', lat: 19.1198, lng: 72.8733, name: 'KARTIKA MEDICAL', storeId: 'S0001', area: 'Marol', line2: 'Andheri East', city: 'Mumbai, Maharashtra' },
@@ -21,57 +19,24 @@ const storeRegistry = [
   { id: 'store13', lat: 19.1200, lng: 72.8800, name: 'METRO MART NX', storeId: 'S0013', area: 'Pump House', line2: 'Andheri East', city: 'Mumbai, Maharashtra' }
 ]
 
-const MapController = ({ activeStore, stores }) => {
-  const map = useMap()
-
-  useEffect(() => {
-    if (activeStore) {
-      map.setView([activeStore.lat, activeStore.lng], 15, { animate: true })
-    } else if (stores.length > 0) {
-      const bounds = stores.map(s => [s.lat, s.lng])
-      map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 })
-    }
-  }, [activeStore, stores, map])
-
-  return null
-}
-
-const CustomMarker = ({ store, isActive, onClick }) => {
-  return (
-    <Marker
-      position={[store.lat, store.lng]}
-      eventHandlers={{ click: () => onClick(store) }}
-      icon={L.divIcon({
-        className: isActive ? 'active-marker' : '',
-        html: `<div class="${isActive ? 'scale-115' : ''} w-8 h-8 rounded-full rounded-br-none bg-emerald-500 rotate-[-45deg] flex items-center justify-center border-2 border-white shadow-lg transition-transform"><div class="w-3 h-3 rounded-full bg-white"></div></div>`,
-        iconSize: [32, 32],
-        iconAnchor: [16, 32],
-        popupAnchor: [0, -28]
-      })}
-    >
-      <Popup className="rounded-xl shadow-xl">
-        <div className="font-sans p-1">
-          <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">{store.storeId}</span>
-          <h5 className="mt-1 mb-2 text-sm font-bold text-slate-800">{store.name}</h5>
-          <p className="text-xs text-slate-500 leading-relaxed">{store.area}, {store.line2}<br/>{store.city}</p>
-        </div>
-      </Popup>
-    </Marker>
-  )
-}
-
 const StoreLocator = () => {
   const [searchQuery, setSearchQuery] = useState('')
-  const [activeStore, setActiveStore] = useState(null)
   const [viewMode, setViewMode] = useState('list')
   const [isMobile, setIsMobile] = useState(false)
-  const [isClient, setIsClient] = useState(false)
+  const [activeStore, setActiveStore] = useState(null)
   const storeListRef = useRef(null)
 
-  // Wait for client side
-  useEffect(() => {
-    setIsClient(true)
-  }, [])
+  const handleStoreClick = (store) => {
+    setActiveStore(store)
+    // Scroll to the store card in the list
+    const storeElement = document.getElementById(store.id)
+    if (storeElement && storeListRef.current) {
+      storeListRef.current.scrollTo({
+        top: storeElement.offsetTop - 20,
+        behavior: 'smooth'
+      })
+    }
+  }
 
   // Handle responsive view
   useEffect(() => {
@@ -88,21 +53,8 @@ const StoreLocator = () => {
            store.storeId.toLowerCase().includes(searchQuery.toLowerCase())
   })
 
-  const handleStoreClick = (store) => {
-    setActiveStore(store)
-    if (viewMode === 'list' && isMobile) {
-      setViewMode('map')
-    }
-    if (storeListRef.current) {
-      const card = document.getElementById(store.id)
-      if (card) {
-        card.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-      }
-    }
-  }
-
   return (
-    <div className="min-h-screen py-20 px-8 md:px-16 bg-slate-50">
+    <div className="min-h-screen mb-9 px-8 md:px-16 bg-slate-50">
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
           <div>
@@ -152,7 +104,7 @@ const StoreLocator = () => {
                   key={store.id}
                   id={store.id}
                   onClick={() => handleStoreClick(store)}
-                  className={`store-card p-5 border-b border-slate-100 cursor-pointer flex gap-4 transition-all ${activeStore?.id === store.id ? 'bg-emerald-50 border-l-4 border-l-emerald-500' : 'border-l-4 border-l-transparent hover:bg-slate-50'}`}
+                  className={`store-card p-5 border-b border-slate-300 cursor-pointer flex gap-4 transition-all hover:bg-slate-50 ${activeStore?.id === store.id ? 'bg-emerald-50 border-l-4 border-emerald-500' : ''}`}
                 >
                   <div className="flex-shrink-0">
                     <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-500">
@@ -164,8 +116,8 @@ const StoreLocator = () => {
                       <span className="inline-block px-2 py-0.5 bg-slate-100 text-slate-600 font-bold tracking-wide rounded text-[10px] border border-slate-200">{store.storeId}</span>
                     </div>
                     <h4 className="font-bold text-slate-800 text-sm tracking-tight mb-1">{store.name}</h4>
-                    <p className="text-slate-500 text-xs leading-relaxed">{store.area}, {store.line2}</p>
-                    <p className="text-slate-400 text-[11px] mt-0.5">{store.city}</p>
+                    <p className="text-slate-800 font-medium text-xs leading-relaxed">{store.area}, {store.line2}</p>
+                    <p className="text-slate-600 font-medium text-[11px] mt-0.5">{store.city}</p>
                   </div>
                 </div>
               ))}
@@ -174,29 +126,11 @@ const StoreLocator = () => {
 
           {/* Map */}
           <div className={`absolute left-0 top-0 w-full lg:left-[35%] lg:w-[65%] h-full transition-transform duration-300 ${viewMode === 'list' && isMobile ? 'translate-x-full' : 'translate-x-0'}`}>
-            {isClient && (
-              <MapContainer
-                center={[19.1000, 72.8400]}
-                zoom={12}
-                zoomControl={false}
-                style={{ width: '100%', height: '100%' }}
-              >
-                <TileLayer
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  attribution='&copy; OpenStreetMap contributors'
-                />
-                <ZoomControl position="bottomright" />
-                <MapController activeStore={activeStore} stores={filteredStores} />
-                {filteredStores.map(store => (
-                  <CustomMarker
-                    key={store.id}
-                    store={store}
-                    isActive={activeStore?.id === store.id}
-                    onClick={handleStoreClick}
-                  />
-                ))}
-              </MapContainer>
-            )}
+            <StoreLocatorMap 
+              activeStore={activeStore} 
+              stores={storeRegistry} 
+              handleStoreClick={handleStoreClick} 
+            />
           </div>
         </div>
       </div>

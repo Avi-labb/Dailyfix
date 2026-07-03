@@ -7,6 +7,7 @@ import Customer from '../models/Customer.js';
 import Order from '../models/Order.js';
 import Product from '../models/Product.js';
 import Coupon from '../models/Coupon.js';
+import delhiveryService from '../utils/delhivery.js';
 
 // Initialize Razorpay instance
 const razorpay = new Razorpay({
@@ -320,11 +321,122 @@ const verifyPayment = async (req, res) => {
   }
 };
 
+const createDelhiveryShipment = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const order = await Order.findOne({ orderId }).populate('items.product');
+    
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    const shippingAddress = JSON.parse(order.shippingAddress);
+    
+    // Prepare shipment data
+    const shipmentData = {
+      shipments: [{
+        name: `${shippingAddress.firstName} ${shippingAddress.lastName}`,
+        add: `${shippingAddress.address}, ${shippingAddress.city}`,
+        pin: shippingAddress.pincode,
+        city: shippingAddress.city,
+        state: shippingAddress.state,
+        country: 'India',
+        phone: shippingAddress.phone,
+        order: order.orderId,
+        payment_mode: order.paymentMethod === 'cod' ? 'COD' : 'Prepaid',
+        shipping_mode: 'Surface',
+        cod_amount: order.paymentMethod === 'cod' ? order.total : 0,
+        product_desc: order.items.map(item => `${item.product.name} x${item.quantity}`).join(', ')
+      }]
+    };
+
+    // Create shipment with Delhivery
+    const delhiveryResponse = await delhiveryService.createShipment(shipmentData);
+    
+    if (delhiveryResponse && delhiveryResponse.shipments && delhiveryResponse.shipments.length > 0) {
+      const waybill = delhiveryResponse.shipments[0].waybill;
+      
+      // Update order
+      order.delhiveryWaybill = waybill;
+      order.delhiveryStatus = 'Manifested';
+      order.shipmentCreatedAt = new Date();
+      order.status = 'Shipped';
+      await order.save();
+      
+      return res.json({ 
+        message: 'Shipment created successfully', 
+        waybill,
+        delhiveryResponse 
+      });
+    } else {
+      return res.status(500).json({ message: 'Failed to create shipment with Delhivery' });
+    }
+    
+  } catch (error) {
+    console.error('Create Delhivery shipment error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+const trackDelhiveryOrder = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const order = await Order.findOne({ orderId });
+    
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    if (!order.delhiveryWaybill) {
+      return res.status(400).json({ message: 'No shipment created for this order' });
+    }
+
+    // Track shipment with Delhivery
+    const trackingData = await delhiveryService.trackShipment(order.delhiveryWaybill);
+    
+    // Update order with latest tracking data
+    order.delhiveryTrackingData = trackingData;
+    if (trackingData && trackingData.ShipmentData && trackingData.ShipmentData.length > 0) {
+      const latestStatus = trackingData.ShipmentData[0].Shipment;
+      order.delhiveryStatus = latestStatus.Status?.status || 'In Transit';
+      
+      if (order.delhiveryStatus === 'Delivered') {
+        order.status = 'Delivered';
+      }
+    }
+    await order.save();
+    
+    res.json({ 
+      message: 'Tracking data retrieved successfully', 
+      order,
+      trackingData 
+    });
+    
+  } catch (error) {
+    console.error('Track Delhivery order error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+const getShippingRate = async (req, res) => {
+  try {
+    const { pincode, weight = 0.5 } = req.query;
+    const rate = delhiveryService.calculateShipping(pincode, weight);
+    res.json({ pincode, weight, rate });
+  } catch (error) {
+    console.error('Shipping rate calculation error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
 export {
   createOrder,
   getOrderById,
   getAllOrders,
   updateOrderStatus,
   createRazorpayOrder,
-  verifyPayment
+  verifyPayment,
+  createDelhiveryShipment,
+  trackDelhiveryOrder,
+  getShippingRate
 };

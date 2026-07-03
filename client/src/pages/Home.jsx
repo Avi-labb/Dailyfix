@@ -135,7 +135,7 @@ const Home = () => {
       {/* About Us Section */}
       <section className="py-20 px-4 sm:px-8 md:px-16">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-10 items-center">
             {/* Left - Dynamic Image Layout */}
             <div className="lg:col-span-6 relative hidden sm:flex justify-center lg:justify-start">
               {/* Decorative background shape */}
@@ -144,7 +144,7 @@ const Home = () => {
               <div className="relative group">
                 <div className="absolute inset-0 bg-stone-900/10 rounded-2xl blur-xl transform translate-x-4 translate-y-4 transition-transform duration-500 group-hover:translate-x-2 group-hover:translate-y-2"></div>
                 <div className="relative w-72 sm:w-80 md:w-[400px] h-[450px] bg-gradient-to-tr from-stone-200 to-stone-100 rounded-2xl shadow-2xl ring-1 ring-black/5 overflow-hidden transition-transform duration-500 group-hover:scale-[1.02] z-10">
-                  <img src={poster} alt="Dailyfix Poster" className="w-full h-full object-cover" />
+                  <img src={poster} alt="Dailyfix Poster" className="w-full h-full" />
                 </div>
                 <div className="absolute -bottom-12 -right-6 md:right-[-20px] bg-white p-6 rounded-xl shadow-xl border border-stone-100 max-w-[200px] z-20">
                   <p className="text-3xl font-black text-emerald-500">100%</p>
@@ -237,7 +237,7 @@ const Home = () => {
         </div>
       </section>
 
-<section class="min-h-screen flex flex-col lg:flex-row">
+<section className="min-h-screen flex flex-col lg:flex-row">
     <div class="lg:w-1/2 bg-black">
         <div class="w-full h-full min-h-[400px] lg:min-h-screen flex items-center justify-center">
             <iframe 
@@ -251,20 +251,21 @@ const Home = () => {
         </div>
     </div>
     
-    <div class="lg:w-1/2 bg-black flex items-center p-8 lg:p-16">
-        <div class="max-w-lg">
-            <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+    
+    <div className="lg:w-1/2 bg-black flex items-center p-8 lg:p-16">
+        <div className="max-w-lg">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
                 TRANSFORM YOUR LOOK WITH DAILYFIX
             </h2>
-            <p class="text-white/70 text-lg mb-8">
+            <p className="text-white/70 text-lg mb-8">
                 Premium beard colour made with natural ingredients for a perfect, natural-looking coverage. Ammonia-free formula designed specifically for men's grooming needs.
             </p>
-            <a href="shop.php" class="inline-flex items-center gap-3 text-white font-semibold border-2 border-white px-6 py-3 rounded-full hover:bg-white hover:text-black transition-all">
+            <Link to="/shop" className="inline-flex items-center gap-3 text-white font-semibold border-2 border-white px-6 py-3 rounded-full hover:bg-white hover:text-black transition-all">
                 Shop Now
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
                 </svg>
-            </a>
+            </Link>
         </div>
     </div>
 </section>

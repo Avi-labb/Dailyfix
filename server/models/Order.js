@@ -64,6 +64,23 @@ const orderSchema = new mongoose.Schema({
     type: String,
   },
   items: [orderItemSchema],
+  
+  // Delhivery Integration Fields
+  delhiveryWaybill: {
+    type: String,
+  },
+  delhiveryStatus: {
+    type: String,
+  },
+  delhiveryTrackingData: {
+    type: mongoose.Schema.Types.Mixed,
+  },
+  shipmentCreatedAt: {
+    type: Date,
+  },
+  estimatedDelivery: {
+    type: Date,
+  },
 }, {
   timestamps: true,
 });
