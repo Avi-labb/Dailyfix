@@ -8,11 +8,16 @@ import Order from '../models/Order.js';
 import Product from '../models/Product.js';
 import delhiveryService from '../utils/delhivery.js';
 
-// Initialize Razorpay instance
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET,
-});
+// Initialize Razorpay instance only if keys are available
+let razorpay = null;
+if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
+  razorpay = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET,
+  });
+} else {
+  console.log('⚠️ Razorpay keys not found - payment features will be disabled');
+}
 
 const generateOrderId = () => {
   return 'DFC' + crypto.randomBytes(4).toString('hex').toUpperCase();
@@ -20,7 +25,7 @@ const generateOrderId = () => {
 
 const createOrder = async (req, res) => {
   try {
-    const { customer, items, shippingAddress, billingAddress, paymentMethod, couponCode } = req.body;
+    const { customer, items, shippingAddress, billingAddress, paymentMethod } = req.body;
     
     // Validate email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -74,34 +79,6 @@ const createOrder = async (req, res) => {
     }
 
     let discount = 0;
-    let coupon = null;
-    if (couponCode) {
-      coupon = await Coupon.findOne({ 
-        code: couponCode, 
-        active: true, 
-        validFrom: { $lte: new Date() },
-        $or: [{ validTo: null }, { validTo: { $gte: new Date() } }]
-      });
-      
-      if (coupon) {
-        if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) {
-          return res.status(400).json({ message: 'Coupon usage limit reached' });
-        }
-        if (coupon.minOrderValue && total < coupon.minOrderValue) {
-          return res.status(400).json({ message: `Minimum order value for coupon is ${coupon.minOrderValue}` });
-        }
-        if (coupon.discountType === 'percentage') {
-          discount = (total * coupon.discountValue) / 100;
-          if (coupon.maxDiscount && discount > coupon.maxDiscount) {
-            discount = coupon.maxDiscount;
-          }
-        } else {
-          discount = coupon.discountValue;
-        }
-        coupon.usedCount += 1;
-        await coupon.save();
-      }
-    }
 
     const tax = total * 0.05; // 5% GST
     const shipping = total > 500 ? 0 : 50;
@@ -262,6 +239,10 @@ const updateOrderStatus = async (req, res) => {
 // Create Razorpay order
 const createRazorpayOrder = async (req, res) => {
   try {
+    if (!razorpay) {
+      return res.status(501).json({ message: 'Payment features are disabled' });
+    }
+    
     const { amount } = req.body; // amount in INR (rupees)
     if (!amount || amount <= 0) {
       return res.status(400).json({ message: 'Invalid amount' });
@@ -292,6 +273,10 @@ const createRazorpayOrder = async (req, res) => {
 // Verify Razorpay payment
 const verifyPayment = async (req, res) => {
   try {
+    if (!razorpay) {
+      return res.status(501).json({ message: 'Payment features are disabled' });
+    }
+    
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderId } = req.body;
 
     // Generate signature

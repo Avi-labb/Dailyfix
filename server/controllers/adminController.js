@@ -4,32 +4,13 @@ import Admin from '../models/Admin.js';
 import Order from '../models/Order.js';
 import Product from '../models/Product.js';
 import Customer from '../models/Customer.js';
-
-// Function to initialize admin (creates if doesn't exist)
-const initializeAdmin = async () => {
-  try {
-    const existingAdmin = await Admin.findOne({ email: process.env.ADMIN_EMAIL });
-    if (!existingAdmin) {
-      const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
-      const admin = new Admin({
-        email: process.env.ADMIN_EMAIL,
-        password: hashedPassword
-      });
-      await admin.save();
-      console.log('Admin account initialized');
-    }
-  } catch (error) {
-    console.error('Error initializing admin:', error);
-  }
-};
-
-// Initialize admin on server start
-initializeAdmin();
+import transporter from '../utils/sendEmail.js';
+import generateToken from '../utils/generateToken.js';
 
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({
@@ -39,36 +20,40 @@ export const login = async (req, res) => {
     }
 
     const admin = await Admin.findOne({ email });
+
     if (!admin) {
+      console.log("Admin NOT found!");
       return res.status(401).json({
         success: false,
-        message: "Invalid credentials",
+        message: "Invalid Email",
       });
     }
 
-    const isPasswordValid = await bcrypt.compare(password, admin.password);
-    if (!isPasswordValid) {
+    const isMatch = await bcrypt.compare(
+      password,
+      admin.password
+    );
+
+    if (!isMatch) {
       return res.status(401).json({
         success: false,
-        message: "Invalid credentials",
+        message: "Invalid Password",
       });
     }
-
-    const token = jwt.sign({ id: admin._id, email: admin.email }, process.env.JWT_SECRET, { expiresIn: '7d' });
-    
-    res.cookie('admin_token', token, {
+    const token = generateToken(admin._id);
+    res.cookie("adminToken", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: false, // localhost uses HTTP
+      sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      sameSite: 'lax'
     });
 
-    return res.status(200).json({ 
+    return res.status(200).json({
       success: true,
-      message: 'Login successful',
-      token, 
+      message: "Login successful",
+      token,
     });
-  
+
   } catch (error) {
     return res.status(500).json({
       success: false,
@@ -101,7 +86,62 @@ export const sendOtp = async (req, res) => {
 
     await admin.save();
 
-    console.log('OTP sent to', email, ':', otp);
+    await transporter.sendMail({
+      from: process.env.SMTP_USER,
+      to: email,
+      subject: "Password Reset OTP",
+      html: `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e5e5e5; border-radius: 10px; overflow: hidden;">
+      
+      <div style="background: #1f2937; padding: 20px; text-align: center;">
+        <h1 style="color: #ffffff; margin: 0;">
+          Admin Panel
+        </h1>
+      </div>
+
+      <div style="padding: 30px;">
+        <h2 style="color: #111827;">
+          Password Reset Request
+        </h2>
+
+        <p style="font-size: 16px; color: #4b5563; line-height: 1.6;">
+          We received a request to reset your password.
+          Use the OTP below to continue.
+        </p>
+
+        <div style="text-align: center; margin: 30px 0;">
+          <span style="
+            display: inline-block;
+            background: #f3f4f6;
+            padding: 15px 30px;
+            font-size: 32px;
+            font-weight: bold;
+            letter-spacing: 8px;
+            color: #2563eb;
+            border-radius: 8px;
+          ">
+            ${otp}
+          </span>
+        </div>
+
+        <p style="font-size: 15px; color: #4b5563;">
+          This OTP is valid for <strong>5 minutes</strong>.
+        </p>
+
+        <p style="font-size: 15px; color: #4b5563;">
+          If you did not request a password reset, you can safely ignore this email.
+        </p>
+      </div>
+
+      <div style="background: #f9fafb; padding: 15px; text-align: center;">
+        <p style="margin: 0; color: #6b7280; font-size: 13px;">
+          © ${new Date().getFullYear()} Admin Panel. All rights reserved.
+        </p>
+      </div>
+
+    </div>
+  `,
+    });
 
     return res.status(200).json({
       success: true,
@@ -197,7 +237,7 @@ export const resetPassword = async (req, res) => {
 };
 
 export const logout = (req, res) => {
-  res.cookie("admin_token", "", {
+  res.cookie("adminToken", "", {
     httpOnly: true,
     expires: new Date(0),
   });

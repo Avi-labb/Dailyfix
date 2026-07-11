@@ -59,7 +59,7 @@ function AdminLogin() {
     setIsLoading(false);
     if (result.ok) {
       login(result.data.token);
-      navigate('/admin/dashboard');
+      navigate('/admin');
     } else {
       setMessage(result.data.message || 'Identity verification rejected');
       setMessageType('error');
