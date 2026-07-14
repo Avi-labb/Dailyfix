@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Minus, Plus, ShoppingBag, Zap, Leaf, ShieldCheck, Truck, X } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import api from '../services/api';
 
 // Import all product images
 // Natural Black
@@ -28,6 +29,12 @@ import db4 from '../assets/images/DARK BROWN/04.png';
 import db5 from '../assets/images/DARK BROWN/05.jpg';
 import db6 from '../assets/images/DARK BROWN/06.jpg';
 
+const productImageMap = {
+  'natural-black': [nb1, nb2, nb3, nb4, nb5, nb6],
+  'black-brown': [bb1, bb2, bb3, bb4, bb5, bb6],
+  'dark-brown': [db1, db2, db3, db4, db5, db6]
+};
+
 const ProductPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -37,55 +44,38 @@ const ProductPage = () => {
   const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
   const imageRef = useRef(null);
   const { addToCart } = useCart();
 
   useEffect(() => {
-    setCurrentImageIndex(0);
+    const fetchProduct = async () => {
+      try {
+        const res = await api.get(`/products/${id}`);
+        const apiProduct = res.data;
+        const mappedProduct = {
+          id: apiProduct._id,
+          name: apiProduct.name,
+          desc: 'Ammonia-Free Formula',
+          price: apiProduct.price,
+          images: productImageMap[apiProduct.slug] || productImageMap['natural-black'],
+          slug: apiProduct.slug,
+          sku: apiProduct.sku,
+          brand: apiProduct.brand,
+          stock: apiProduct.stock,
+          description: apiProduct.description
+        };
+        setProduct(mappedProduct);
+        setCurrentImageIndex(0);
+      } catch (error) {
+        console.error('Failed to fetch product:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProduct();
   }, [id]);
-
-  const products = [
-    {
-      id: 1,
-      name: "Men's Beard Colour (Natural Black)",
-      desc: "Ammonia-Free Formula",
-      price: 450,
-      images: [nb1, nb2, nb3, nb4, nb5, nb6],
-      slug: 'natural-black',
-      sku: 'DF-NB-001',
-      brand: 'Dailyfix',
-      stock: 100,
-      description: "Our Natural Black Beard Colour gives you a perfect, natural-looking black shade. Formulated without ammonia, it's gentle on your skin and beard."
-    },
-    {
-      id: 2,
-      name: "Men's Beard Colour (Black Brown)",
-      desc: "Ammonia-Free Formula",
-      price: 450,
-      images: [bb1, bb2, bb3, bb4, bb5, bb6],
-      slug: 'black-brown',
-      sku: 'DF-BB-002',
-      brand: 'Dailyfix',
-      stock: 100,
-      description: "Our Black Brown Beard Colour provides a rich, warm brownish-black hue. Perfect for a natural, distinguished look."
-    },
-    {
-      id: 3,
-      name: "Men's Beard Colour (Dark Brown)",
-      desc: "Ammonia-Free Formula",
-      price: 450,
-      images: [db1, db2, db3, db4, db5, db6],
-      slug: 'dark-brown',
-      sku: 'DF-DB-003',
-      brand: 'Dailyfix',
-      stock: 100,
-      description: "Our Dark Brown Beard Colour offers a classic, deep brown shade. Blends seamlessly for a natural, well-groomed appearance."
-    }
-  ];
-
-  const product = products.find(p =>
-    p.id.toString() === id || p.slug === id
-  ) || products[0];
 
   const nextImage = () => {
     setCurrentImageIndex((prev) =>
@@ -115,6 +105,22 @@ const ProductPage = () => {
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 1800);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f0fdf4' }}>
+        <div className="text-slate-600">Loading product...</div>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f0fdf4' }}>
+        <div className="text-slate-600">Product not found</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen -mt-10" style={{ backgroundColor: '#f0fdf4' }}>

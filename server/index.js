@@ -34,7 +34,7 @@ app.use(cors({ origin: (origin, callback) => {
     callback(new Error('Not allowed by CORS'));
   }
 }, credentials: true }));
-app.use(express.json());
+app.use(express.static(path.join(__dirname, "dist")));
 app.use(cookieParser());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 

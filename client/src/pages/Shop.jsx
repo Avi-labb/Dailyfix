@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Leaf, ShieldCheck, Truck } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 import product1 from '../assets/images/001 Natural black1.png';
 import product2 from '../assets/images/002 Brown black2.png';
 import product3 from '../assets/images/003 Drak brown3.png';
+import api from '../services/api';
 
 const TRUST_POINTS = [
   { icon: Leaf, label: 'Ammonia-Free Formula' },
@@ -12,65 +13,48 @@ const TRUST_POINTS = [
   { icon: Truck, label: 'Fast, Discreet Shipping' },
 ];
 
+const productImageMap = {
+  'natural-black': product1,
+  'black-brown': product2,
+  'dark-brown': product3
+};
+
 const Shop = () => {
   const shouldReduceMotion = useReducedMotion();
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const products = [
-    { 
-      id: 1, 
-      name: "Men's Beard Colour (Natural Black)", 
-      desc: "Ammonia-Free Formula", 
-      price: 450, 
-      discount_price: null, 
-      image: product1,
-      slug: 'natural-black',
-      sku: 'DF-NB-001',
-      brand: 'Dailyfix',
-      category_id: 1,
-      stock: 100,
-      featured: true,
-      best_seller: true,
-      new_arrival: true,
-      rating: 4.8,
-      reviews_count: 150
-    },
-    { 
-      id: 2, 
-      name: "Men's Beard Colour (Black Brown)", 
-      desc: "Ammonia-Free Formula", 
-      price: 450, 
-      discount_price: null, 
-      image: product2,
-      slug: 'black-brown',
-      sku: 'DF-BB-002',
-      brand: 'Dailyfix',
-      category_id: 1,
-      stock: 100,
-      featured: true,
-      best_seller: true,
-      new_arrival: true,
-      rating: 4.7,
-      reviews_count: 120
-    },
-    { 
-      id: 3, 
-      name: "Men's Beard Colour (Dark Brown)", 
-      desc: "Ammonia-Free Formula", 
-      price: 450, 
-      discount_price: null, 
-      image: product3,
-      slug: 'dark-brown',
-      sku: 'DF-DB-003',
-      brand: 'Dailyfix',
-      category_id: 1,
-      stock: 100,
-      featured: true,
-      best_seller: true,
-      new_arrival: true,
-      rating: 4.6,
-      reviews_count: 100
-    }
-  ];
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await api.get('/products');
+        const mappedProducts = res.data.products.map((product) => ({
+          id: product._id,
+          name: product.name,
+          desc: 'Ammonia-Free Formula',
+          price: product.price,
+          discount_price: product.discountPrice,
+          image: productImageMap[product.slug] || product1,
+          slug: product.slug,
+          sku: product.sku,
+          brand: product.brand,
+          category_id: product.category,
+          stock: product.stock,
+          featured: product.featured,
+          best_seller: product.bestSeller,
+          new_arrival: product.newArrival,
+          rating: product.rating,
+          reviews_count: product.reviewsCount
+        }));
+        setProducts(mappedProducts);
+      } catch (error) {
+        console.error('Failed to fetch products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
 
   // Helper for consistent, motion-safe fade-up entrances in the hero
   const fadeUp = (delay = 0) => ({
@@ -137,7 +121,11 @@ const Shop = () => {
           </span>
         </div>
 
-        {products.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-24 text-slate-500">
+            Loading products...
+          </div>
+        ) : products.length === 0 ? (
           <div className="text-center py-24 text-slate-500">
             No products available right now — check back soon.
           </div>

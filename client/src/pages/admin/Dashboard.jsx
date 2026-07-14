@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import api from '../../services/api'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
 function AdminDashboard() {
   const [stats, setStats] = useState(null)
@@ -25,6 +24,11 @@ function AdminDashboard() {
       </div>
     )
   }
+
+  // Calculate max sales for bar chart scaling
+  const maxSales = stats.monthlySales?.length > 0 
+    ? Math.max(...stats.monthlySales.map(m => m.sales)) 
+    : 0
 
   return (
     <div>
@@ -52,21 +56,29 @@ function AdminDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white p-6 rounded-lg shadow">
           <h3 className="font-semibold mb-4">Monthly Sales</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={stats.monthlySales}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="sales" fill="#10b981" />
-            </BarChart>
-          </ResponsiveContainer>
+          <div className="space-y-4">
+            {stats.monthlySales?.map((item) => {
+              const percentage = maxSales > 0 ? (item.sales / maxSales) * 100 : 0
+              return (
+                <div key={item.month} className="flex items-center gap-4">
+                  <div className="w-24 text-sm text-gray-600">{item.month}</div>
+                  <div className="flex-1 h-8 bg-gray-100 rounded-lg overflow-hidden">
+                    <div 
+                      className="h-full bg-emerald-500 transition-all duration-500"
+                      style={{ width: `${percentage}%` }}
+                    />
+                  </div>
+                  <div className="w-20 text-right font-semibold">₹{item.sales}</div>
+                </div>
+              )
+            })}
+          </div>
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow">
           <h3 className="font-semibold mb-4">Top Products</h3>
           <div className="space-y-4">
-            {stats.topProducts.map((product, index) => (
+            {stats.topProducts?.map((product, index) => (
               <div key={product.id} className="flex justify-between items-center">
                 <span>{index + 1}. {product.name}</span>
                 <span className="font-semibold">{product.totalSold} sold</span>
