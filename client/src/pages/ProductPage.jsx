@@ -134,7 +134,7 @@ const ProductPage = () => {
         }
       `}</style>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-20 py-10 lg:py-10">
+      <div className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-20 py-10 lg:py-10">
         {/* Breadcrumb-ish eyebrow */}
         <div className="pp-body text-xs tracking-widest uppercase mb-8 flex items-center gap-2" style={{ color: '#64748b' }}>
           <span>{product.brand}</span>

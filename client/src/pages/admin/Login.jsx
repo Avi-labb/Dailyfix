@@ -207,7 +207,6 @@ function AdminLogin() {
                     className="w-full pl-11 pr-4 py-3 bg-neutral-950 border border-neutral-700 rounded-xl text-sm text-neutral-200 placeholder-neutral-500 focus:outline-none focus:border-neutral-500 transition-all duration-500 font-light shadow-inner tracking-wide autofill:shadow-[0_0_0_30px_#050506_inset] autofill:text-neutral-200 [-webkit-text-fill-color:#e4e4e7]"
                     placeholder="example@gmail.com..."
                   />
-                  {/* Premium Underline Highlight Micro-Interaction */}
                   <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[1px] bg-neutral-400 group-focus-within:w-[92%] transition-all duration-500 ease-out" />
                 </div>
               </motion.div>

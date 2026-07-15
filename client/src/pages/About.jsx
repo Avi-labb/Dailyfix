@@ -17,7 +17,7 @@ const About = () => {
         <div className="absolute inset-0 opacity-20">
           <img src={banner} alt="Dailyfix Banner" className="w-full h-full object-cover" />
         </div>
-        <div className="relative max-w-7xl mx-auto text-center z-10">
+        <div className="relative max-w-9xl mx-auto text-center z-10">
           <p className="text-emerald-500 font-semibold text-xs md:text-sm tracking-widest uppercase mb-4 md:mb-6">
             About Us
           </p>
@@ -29,7 +29,7 @@ const About = () => {
       
       {/* About Content Section 1 */}
       <section className="py-12 md:py-20 px-4 sm:px-8 md:px-16">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-9xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-12 lg:gap-16 p-2 md:p-4">
             {/* Hidden Image Container - Visible on md screens and up */}
             <div className="hidden md:block relative w-full max-w-md mx-auto lg:max-w-none">
@@ -84,7 +84,7 @@ const About = () => {
       
       {/* Product Gallery Section */}
       <section className="py-12 md:py-20 px-4 sm:px-8 md:px-16 bg-stone-50/50">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-9xl mx-auto">
           <div className="text-center mb-10 md:mb-16">
             <p className="text-emerald-500 font-semibold text-xs md:text-sm tracking-widest uppercase mb-2 md:mb-4">
               Our Products
@@ -149,7 +149,7 @@ const About = () => {
       
       {/* Product Features Section */}
       <section className="py-12 md:py-20 px-4 sm:px-8 md:px-16">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-9xl mx-auto">
           <div className="text-center mb-10 md:mb-16">
             <p className="text-emerald-500 font-semibold text-xs md:text-sm tracking-widest uppercase mb-2 md:mb-4">
               What Makes Us Different
@@ -214,7 +214,7 @@ const About = () => {
       
       {/* Values Section */}
       <section className="py-12 md:py-20 px-4 sm:px-8 md:px-16 bg-stone-50">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-9xl mx-auto">
           <div className="text-center mb-10 md:mb-16">
             <p className="text-emerald-500 font-semibold text-xs md:text-sm tracking-widest uppercase mb-2 md:mb-4">
               Our Values

@@ -86,7 +86,7 @@ function OrderSummaryPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-stone-50 to-white">
-      <div className="max-w-6xl mx-auto px-4 py-4">
+      <div className="max-w-9xl mx-auto px-4 py-4">
         <button 
           onClick={() => navigate('/checkout')}
           className="mb-6 flex items-center gap-2 text-slate-600 hover:text-emerald-600 transition-colors font-medium"

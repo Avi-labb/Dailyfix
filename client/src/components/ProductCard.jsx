@@ -31,13 +31,8 @@ const ProductCard = ({ product }) => {
           )}
           <div className="flex items-center gap-2 mb-4">
             <span className="text-2xl font-bold text-emerald-600">
-              ₹{product.discount_price || product.price}
+              ₹{product.price}
             </span>
-            {product.discount_price && (
-              <span className="text-lg text-slate-400 line-through">
-                ₹{product.price}
-              </span>
-            )}
           </div>
           <button
             onClick={handleAddToCart}

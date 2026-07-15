@@ -31,18 +31,11 @@ const Home = () => {
           name: product.name,
           desc: 'Ammonia-Free Formula',
           price: product.price,
-          discount_price: product.discountPrice,
           image: productImageMap[product.slug] || product1,
           slug: product.slug,
           sku: product.sku,
           brand: product.brand,
-          category_id: product.category,
-          stock: product.stock,
-          featured: product.featured,
-          best_seller: product.bestSeller,
-          new_arrival: product.newArrival,
-          rating: product.rating,
-          reviews_count: product.reviewsCount
+          stock: product.stock
         }));
         setProducts(mappedProducts);
       } catch (error) {
@@ -84,7 +77,7 @@ const Home = () => {
         </div>
 
         {/* Content Overlay */}
-        <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-12 lg:px-10 h-[calc(100vh-5rem)] flex items-center justify-start">
+        <div className="relative z-10 max-w-9xl mx-auto px-6 sm:px-12 lg:px-10 h-[calc(100vh-5rem)] flex items-center justify-start">
           <motion.div 
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
@@ -92,12 +85,12 @@ const Home = () => {
             className="space-y-8 text-left max-w-xl"
           >
             {/* Brand Badge */}
-            <div>
+            <div className='px-10 sm:px-20'>
               <div className="inline-flex items-center gap-2 mb-5 bg-white/10 border border-white/20 px-4 py-1.5 rounded-full backdrop-blur-md">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 <p className="text-white font-bold text-xs tracking-widest uppercase">Dailyfix Grooming</p>
               </div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-4xl  mb-60 sm:mb-0  font-medium text-white tracking-tight leading-[1.1]">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl  mb-60 sm:mb-0  font-semibold text-white tracking-tight leading-[1.1]">
                 Premium Men's <br />
                 <span className="text-emerald-500">Beard Colour</span> <br />
                 for a Perfect Look
@@ -105,7 +98,7 @@ const Home = () => {
             </div>
 
             {/* Call To Actions */}
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-4 px-10 sm:px-20">
               <Link
                 to="/shop"
                 className="group bg-emerald-500 text-white font-bold py-4 px-10 rounded-full hover:bg-emerald-400 transition-all duration-300 shadow-xl hover:shadow-2xl hover:-translate-y-0.5 inline-flex items-center gap-2"
@@ -119,13 +112,13 @@ const Home = () => {
       </section>
 
       {/* About Us Section */}
-      <section className="py-20 px-4 sm:px-8 md:px-16">
+      <section className="py-20 px-4 sm:px-8 md:px-20">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-10 items-center">
             {/* Left - Dynamic Image Layout */}
             <div className="lg:col-span-6 relative hidden sm:flex justify-center lg:justify-start">
               {/* Decorative background shape */}
-              <div className="absolute -bottom-6 -right-6 w-72 h-72 bg-emerald-50 rounded-full filter blur-3xl opacity-70"></div>
+              <div className="absolute -bottom-6 -right-6 w-72 h-82 bg-emerald-50 rounded-full filter blur-3xl opacity-70"></div>
 
               <div className="relative group">
                 <div className="absolute inset-0 bg-stone-900/10 rounded-2xl blur-xl transform translate-x-4 translate-y-4 transition-transform duration-500 group-hover:translate-x-2 group-hover:translate-y-2"></div>
@@ -185,7 +178,7 @@ const Home = () => {
 
       {/* Product Showcase Section */}
       <section className="py-24 px-4 sm:px-6 lg:px-8 bg-stone-100">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-9xl mx-auto">
           <div className="mb-16 flex flex-col md:flex-row md:items-end md:justify-between gap-8 pb-4">
             <div className="space-y-4">
               <div className="inline-flex items-center gap-2.5 bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full border border-emerald-100/80">
@@ -263,7 +256,7 @@ const Home = () => {
 
       {/* Benefits Section */}
       <section className="py-20 px-4 sm:px-8 md:px-16">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-9xl mx-auto">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -334,7 +327,7 @@ const Home = () => {
       {/* Get Started Section */}
       <section className="py-20 px-4 sm:px-8 md:px-16 bg-white relative overflow-hidden">
         <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-black absolute inset-0 opacity-90"></div>
-        <div className="max-w-7xl mx-auto relative z-10">
+        <div className="max-w-9xl mx-auto relative z-10">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}

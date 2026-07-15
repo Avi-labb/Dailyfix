@@ -26,7 +26,12 @@ const limiter = rateLimit({
 
 app.use(limiter);
 app.use(helmet());
-const allowedOrigins = ['http://localhost:5173', 'http://localhost:5174'];
+const allowedOrigins = [
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "https://dailyfixcare.com",
+    "https://www.dailyfixcare.com"
+];
 app.use(cors({ origin: (origin, callback) => {
   if (!origin || allowedOrigins.includes(origin)) {
     callback(null, true);
@@ -42,6 +47,10 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/orders', orderRoutes);
+
+app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "dist", "index.html"));
+});
 
 app.get('/', (req, res) => {
   res.json({ message: 'DailyFixCare API' });

@@ -12,6 +12,9 @@ build/
 # Uploads
 server/uploads/*
 
+# MongoDB data directory (should never be committed)
+server/data/
+
 # Logs
 *.log
 npm-debug.log*

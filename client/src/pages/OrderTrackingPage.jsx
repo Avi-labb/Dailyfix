@@ -43,7 +43,7 @@ function OrderTrackingPage() {
   const currentStepIndex = statusSteps.findIndex(s => s.status === order?.status)
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-16">
+    <div className="max-w-9xl mx-auto px-4 py-16">
       <h1 className="text-3xl font-bold text-center mb-8">Track Your Order</h1>
       
       <div className="flex gap-2 mb-8">

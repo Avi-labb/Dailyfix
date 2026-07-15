@@ -25,8 +25,10 @@ const orderSchema = new mongoose.Schema({
     unique: true,
   },
   customer: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Customer',
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
+    email: { type: String, required: true },
+    phone: { type: String, required: true }
   },
   total: {
     type: Number,
@@ -40,10 +42,6 @@ const orderSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
-  discount: {
-    type: Number,
-    default: 0,
-  },
   status: {
     type: String,
     enum: ['Pending', 'Confirmed', 'Processing', 'Shipped', 'Delivered', 'Cancelled'],
@@ -51,6 +49,9 @@ const orderSchema = new mongoose.Schema({
   },
   paymentMethod: {
     type: String,
+    enum: ['COD'],
+    default: 'COD',
+    required: true
   },
   paymentStatus: {
     type: String,
@@ -58,10 +59,10 @@ const orderSchema = new mongoose.Schema({
     default: 'Pending',
   },
   shippingAddress: {
-    type: String,
-  },
-  billingAddress: {
-    type: String,
+    address: { type: String, required: true },
+    city: { type: String, required: true },
+    state: { type: String, required: true },
+    pincode: { type: String, required: true },
   },
   items: [orderItemSchema],
   

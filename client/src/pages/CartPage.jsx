@@ -11,7 +11,7 @@ function CartPage() {
   if (cart.length === 0) {
     return (
       <div className="min-h-screen -mt-10  py-20 px-8 md:px-16 bg-gradient-to-br from-emerald-50 to-white">
-        <div className="max-w-7xl mx-auto text-center mt-20">
+        <div className="max-w-9xl mx-auto text-center mt-20">
           <ShoppingCart size={64} className="mx-auto text-gray-300 mb-4" />
           <h2 className="text-2xl font-bold text-slate-800 mb-2">Your cart is empty</h2>
           <p className="text-gray-600 mb-6">Add some products to get started!</p>
@@ -33,7 +33,7 @@ function CartPage() {
 
   return (
     <div className="min-h-screen -mt-20 py-20 px-8 md:px-16 bg-gradient-to-br from-emerald-50 to-white">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-9xl mx-auto">
         <h1 className="text-3xl md:text-4xl font-serif text-slate-800 mb-8">Shopping Cart</h1>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-4">
@@ -77,7 +77,7 @@ function CartPage() {
                       </button>
                     </div>
                     <p className="text-xl font-bold text-emerald-600">
-                      ₹{(item.product.discountPrice || item.product.price) * item.quantity}
+                      ₹{item.product.price * item.quantity}
                     </p>
                   </div>
                 </div>

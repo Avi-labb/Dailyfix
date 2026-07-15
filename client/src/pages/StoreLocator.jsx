@@ -55,7 +55,7 @@ const StoreLocator = () => {
 
   return (
     <div className="min-h-screen mb-9 px-8 md:px-16 bg-slate-50">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-9xl mx-auto">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
           <div>
             <Link to="/" className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-emerald-500 transition-colors mb-2 group">

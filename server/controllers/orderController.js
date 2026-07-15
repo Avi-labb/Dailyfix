@@ -1,23 +1,10 @@
 import crypto from 'crypto';
-import Razorpay from 'razorpay';
 import sendEmail from '../utils/sendEmail.js';
 import customerOrderTemplate from '../templates/customerOrderTemplate.js';
 import adminOrderTemplate from '../templates/adminOrderTemplate.js';
-import Customer from '../models/Customer.js';
 import Order from '../models/Order.js';
 import Product from '../models/Product.js';
 import delhiveryService from '../utils/delhivery.js';
-
-// Initialize Razorpay instance only if keys are available
-let razorpay = null;
-if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
-  razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID,
-    key_secret: process.env.RAZORPAY_KEY_SECRET,
-  });
-} else {
-  console.log('⚠️ Razorpay keys not found - payment features will be disabled');
-}
 
 const generateOrderId = () => {
   return 'DFC' + crypto.randomBytes(4).toString('hex').toUpperCase();
@@ -25,26 +12,14 @@ const generateOrderId = () => {
 
 const createOrder = async (req, res) => {
   try {
-    const { customer, items, shippingAddress, billingAddress, paymentMethod } = req.body;
+    const { customer, items, shippingAddress } = req.body;
     
-    // Validate email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!customer.email || !emailRegex.test(customer.email)) {
-      return res.status(400).json({ message: 'Please provide a valid email address' });
+    // Validate required fields
+    if (!customer.firstName || !customer.lastName || !customer.email || !customer.phone) {
+      return res.status(400).json({ message: 'Please provide all customer details' });
     }
-    
-    let customerDoc = null;
-    if (customer.email || customer.phone) {
-      customerDoc = await Customer.findOne({ $or: [{ email: customer.email }, { phone: customer.phone }] });
-      if (!customerDoc) {
-        customerDoc = new Customer({
-          firstName: customer.firstName,
-          lastName: customer.lastName,
-          email: customer.email,
-          phone: customer.phone
-        });
-        await customerDoc.save();
-      }
+    if (!shippingAddress.address || !shippingAddress.city || !shippingAddress.state || !shippingAddress.pincode) {
+      return res.status(400).json({ message: 'Please provide complete shipping address' });
     }
 
     let total = 0;
@@ -57,7 +32,7 @@ const createOrder = async (req, res) => {
         return res.status(404).json({ message: `Product with ID ${item.productId} not found` });
       }
       
-      const itemPrice = product.discountPrice || product.price;
+      const itemPrice = product.price;
       const itemTotal = itemPrice * item.quantity;
       total += itemTotal;
       
@@ -78,24 +53,26 @@ const createOrder = async (req, res) => {
       });
     }
 
-    let discount = 0;
-
     const tax = total * 0.05; // 5% GST
     const shipping = total > 500 ? 0 : 50;
-    const grandTotal = total - discount + tax + shipping;
+    const grandTotal = total + tax + shipping;
 
     const orderId = generateOrderId();
     const order = new Order({
       orderId,
-      customer: customerDoc?._id,
+      customer: {
+        firstName: customer.firstName,
+        lastName: customer.lastName,
+        email: customer.email,
+        phone: customer.phone
+      },
       total: grandTotal,
       tax,
       shipping,
-      discount,
-      paymentMethod,
-      shippingAddress: JSON.stringify(shippingAddress),
-      billingAddress: JSON.stringify(billingAddress),
-      items: orderItemsDb
+      paymentMethod: 'COD',
+      shippingAddress: shippingAddress,
+      items: orderItemsDb,
+      status: 'Confirmed'
     });
     await order.save();
 
@@ -107,7 +84,51 @@ const createOrder = async (req, res) => {
     }
     
     // ------------------------------
-    // Send emails asynchronously after order is created
+    // Automatically create Delhivery shipment
+    // ------------------------------
+    try {
+      // Prepare shipment data
+      const shipmentData = {
+        shipments: [{
+          name: `${customer.firstName} ${customer.lastName}`,
+          add: `${shippingAddress.address}, ${shippingAddress.city}`,
+          pin: shippingAddress.pincode,
+          city: shippingAddress.city,
+          state: shippingAddress.state,
+          country: 'India',
+          phone: customer.phone,
+          order: orderId,
+          payment_mode: 'COD',
+          shipping_mode: 'Surface',
+          cod_amount: grandTotal,
+          product_desc: orderItems.map(item => `${item.name} x${item.quantity}`).join(', ')
+        }]
+      };
+
+      // Create shipment with Delhivery
+      const delhiveryResponse = await delhiveryService.createShipment(shipmentData);
+      
+      if (delhiveryResponse && delhiveryResponse.shipments && delhiveryResponse.shipments.length > 0) {
+        const waybill = delhiveryResponse.shipments[0].waybill;
+        
+        // Update order
+        order.delhiveryWaybill = waybill;
+        order.delhiveryStatus = 'Manifested';
+        order.shipmentCreatedAt = new Date();
+        order.status = 'Shipped';
+        // Calculate estimated delivery (7 days from now)
+        const estimatedDelivery = new Date();
+        estimatedDelivery.setDate(estimatedDelivery.getDate() + 7);
+        order.estimatedDelivery = estimatedDelivery;
+        await order.save();
+      }
+    } catch (shipmentError) {
+      console.error('❌ Error creating Delhivery shipment:', shipmentError);
+      // Don't fail the order if shipment creation fails
+    }
+    
+    // ------------------------------
+    // Send emails asynchronously
     // ------------------------------
     
     // Format date for email
@@ -126,13 +147,6 @@ const createOrder = async (req, res) => {
       day: 'numeric' 
     });
     
-    // Format payment method for display
-    const paymentMethodDisplay = paymentMethod === 'cod' 
-      ? 'Cash on Delivery' 
-      : 'UPI / Card / Netbanking';
-    
-    const paymentStatus = paymentMethod === 'cod' ? 'Pending (COD)' : 'Paid';
-    
     // 1. Send Customer Confirmation Email
     const customerEmailData = {
       orderId: orderId,
@@ -140,11 +154,10 @@ const createOrder = async (req, res) => {
       orderDate: orderDate,
       items: orderItems,
       shippingAddress: shippingAddress,
-      paymentMethod: paymentMethodDisplay,
-      paymentStatus: paymentStatus,
+      paymentMethod: 'Cash on Delivery',
+      paymentStatus: 'Pending (COD)',
       subtotal: total,
       shipping: shipping,
-      discount: discount,
       gst: tax,
       grandTotal: grandTotal,
       estimatedDelivery: estDeliveryDate,
@@ -158,23 +171,21 @@ const createOrder = async (req, res) => {
       customerPhone: customer.phone,
       orderDate: orderDate,
       shippingAddress: shippingAddress,
-      paymentMethod: paymentMethodDisplay,
-      paymentStatus: paymentStatus,
+      paymentMethod: 'Cash on Delivery',
+      paymentStatus: 'Pending (COD)',
       items: orderItems,
       grandTotal: grandTotal,
     };
 
-    // Send emails (don't wait for them to complete, just log errors)
+    // Send emails (don't wait for them to complete)
     (async () => {
       try {
-        // Send customer confirmation
         await sendEmail({
           to: customer.email,
           subject: `Order Confirmation - ${orderId} | DailyFixCare`,
           html: customerOrderTemplate(customerEmailData)
         });
         
-        // Send admin notification
         if (process.env.ADMIN_EMAIL) {
           await sendEmail({
             to: process.env.ADMIN_EMAIL,
@@ -183,7 +194,6 @@ const createOrder = async (req, res) => {
           });
         }
       } catch (emailError) {
-        // Log but don't fail the order if email fails
         console.error('❌ Error sending emails:', emailError.message);
       }
     })();
@@ -236,132 +246,6 @@ const updateOrderStatus = async (req, res) => {
   }
 };
 
-// Create Razorpay order
-const createRazorpayOrder = async (req, res) => {
-  try {
-    if (!razorpay) {
-      return res.status(501).json({ message: 'Payment features are disabled' });
-    }
-    
-    const { amount } = req.body; // amount in INR (rupees)
-    if (!amount || amount <= 0) {
-      return res.status(400).json({ message: 'Invalid amount' });
-    }
-
-    const options = {
-      amount: Math.round(amount * 100), // Convert to paise
-      currency: 'INR',
-      receipt: crypto.randomBytes(10).toString('hex'),
-    };
-
-    const order = await razorpay.orders.create(options);
-    res.json({
-      success: true,
-      order: {
-        id: order.id,
-        amount: order.amount,
-        currency: order.currency,
-      },
-      keyId: process.env.RAZORPAY_KEY_ID,
-    });
-  } catch (error) {
-    console.error('Razorpay order creation error:', error);
-    res.status(500).json({ message: 'Failed to create Razorpay order', error: error.message });
-  }
-};
-
-// Verify Razorpay payment
-const verifyPayment = async (req, res) => {
-  try {
-    if (!razorpay) {
-      return res.status(501).json({ message: 'Payment features are disabled' });
-    }
-    
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderId } = req.body;
-
-    // Generate signature
-    const hmac = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET);
-    hmac.update(razorpay_order_id + '|' + razorpay_payment_id);
-    const generatedSignature = hmac.digest('hex');
-
-    // Verify signature
-    if (generatedSignature !== razorpay_signature) {
-      return res.status(400).json({ message: 'Payment verification failed' });
-    }
-
-    // If orderId is provided, you can update order status here
-    if (orderId) {
-      const order = await Order.findOne({ orderId });
-      if (order) {
-        order.paymentStatus = 'Paid';
-        await order.save();
-      }
-    }
-
-    res.json({ success: true, message: 'Payment verified successfully' });
-  } catch (error) {
-    console.error('Payment verification error:', error);
-    res.status(500).json({ message: 'Failed to verify payment', error: error.message });
-  }
-};
-
-const createDelhiveryShipment = async (req, res) => {
-  try {
-    const { orderId } = req.params;
-    const order = await Order.findOne({ orderId }).populate('items.product');
-    
-    if (!order) {
-      return res.status(404).json({ message: 'Order not found' });
-    }
-
-    const shippingAddress = JSON.parse(order.shippingAddress);
-    
-    // Prepare shipment data
-    const shipmentData = {
-      shipments: [{
-        name: `${shippingAddress.firstName} ${shippingAddress.lastName}`,
-        add: `${shippingAddress.address}, ${shippingAddress.city}`,
-        pin: shippingAddress.pincode,
-        city: shippingAddress.city,
-        state: shippingAddress.state,
-        country: 'India',
-        phone: shippingAddress.phone,
-        order: order.orderId,
-        payment_mode: order.paymentMethod === 'cod' ? 'COD' : 'Prepaid',
-        shipping_mode: 'Surface',
-        cod_amount: order.paymentMethod === 'cod' ? order.total : 0,
-        product_desc: order.items.map(item => `${item.product.name} x${item.quantity}`).join(', ')
-      }]
-    };
-
-    // Create shipment with Delhivery
-    const delhiveryResponse = await delhiveryService.createShipment(shipmentData);
-    
-    if (delhiveryResponse && delhiveryResponse.shipments && delhiveryResponse.shipments.length > 0) {
-      const waybill = delhiveryResponse.shipments[0].waybill;
-      
-      // Update order
-      order.delhiveryWaybill = waybill;
-      order.delhiveryStatus = 'Manifested';
-      order.shipmentCreatedAt = new Date();
-      order.status = 'Shipped';
-      await order.save();
-      
-      return res.json({ 
-        message: 'Shipment created successfully', 
-        waybill,
-        delhiveryResponse 
-      });
-    } else {
-      return res.status(500).json({ message: 'Failed to create shipment with Delhivery' });
-    }
-    
-  } catch (error) {
-    console.error('Create Delhivery shipment error:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
-};
-
 const trackDelhiveryOrder = async (req, res) => {
   try {
     const { orderId } = req.params;
@@ -386,6 +270,7 @@ const trackDelhiveryOrder = async (req, res) => {
       
       if (order.delhiveryStatus === 'Delivered') {
         order.status = 'Delivered';
+        order.paymentStatus = 'Paid'; // Mark as paid when delivered for COD
       }
     }
     await order.save();
@@ -418,9 +303,6 @@ export {
   getOrderById,
   getAllOrders,
   updateOrderStatus,
-  createRazorpayOrder,
-  verifyPayment,
-  createDelhiveryShipment,
   trackDelhiveryOrder,
   getShippingRate
 };

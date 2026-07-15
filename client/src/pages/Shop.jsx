@@ -33,18 +33,11 @@ const Shop = () => {
           name: product.name,
           desc: 'Ammonia-Free Formula',
           price: product.price,
-          discount_price: product.discountPrice,
           image: productImageMap[product.slug] || product1,
           slug: product.slug,
           sku: product.sku,
           brand: product.brand,
-          category_id: product.category,
-          stock: product.stock,
-          featured: product.featured,
-          best_seller: product.bestSeller,
-          new_arrival: product.newArrival,
-          rating: product.rating,
-          reviews_count: product.reviewsCount
+          stock: product.stock
         }));
         setProducts(mappedProducts);
       } catch (error) {
@@ -72,7 +65,7 @@ const Shop = () => {
           className="absolute -top-40 left-1/2 -translate-x-1/2 w-[640px] h-[640px] rounded-full bg-emerald-200/40 blur-3xl"
         />
 
-        <div className="relative max-w-7xl mx-auto px-6 md:px-12 pt-20 pb-14 text-center">
+        <div className="relative max-w-9xl mx-auto px-6 md:px-12 pt-20 pb-14 text-center">
           <motion.p
             {...fadeUp(0)}
             className="text-xs md:text-sm font-semibold tracking-[0.2em] text-emerald-600 uppercase mb-4"
@@ -113,7 +106,7 @@ const Shop = () => {
       </div>
 
       {/* Products */}
-      <div className="max-w-8xl mx-auto px-6 md:px-12 py-16 border border-slate-400">
+      <div className="max-w-9xl mx-auto px-6 md:px-12 py-16 border border-slate-400">
         <div className="flex items-baseline justify-between mb-8">
           <h2 className="text-2xl font-bold text-slate-900">All Shades</h2>
           <span className="text-sm text-slate-500">

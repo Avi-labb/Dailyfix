@@ -4,8 +4,19 @@ const CartContext = createContext()
 
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState(() => {
-    const saved = localStorage.getItem('cart')
-    return saved ? JSON.parse(saved) : []
+    try {
+      const saved = localStorage.getItem('cart')
+      const parsed = saved ? JSON.parse(saved) : []
+      // Clean up invalid items (items without productId or product)
+      const validItems = parsed.filter(item => item && item.productId && item.product)
+      if (validItems.length !== parsed.length) {
+        localStorage.setItem('cart', JSON.stringify(validItems))
+      }
+      return validItems
+    } catch (error) {
+      console.error('Failed to parse cart from localStorage:', error)
+      return []
+    }
   })
   const [lastAddedProduct, setLastAddedProduct] = useState(null)
 
@@ -14,6 +25,7 @@ export const CartProvider = ({ children }) => {
   }, [cart])
 
   const addToCart = (product, quantity = 1) => {
+    console.log('Adding to cart:', product, 'Quantity:', quantity)
     setCart(prev => {
       const existing = prev.find(item => item.productId === product.id)
       if (existing) {
@@ -23,7 +35,9 @@ export const CartProvider = ({ children }) => {
             : item
         )
       }
-      return [...prev, { productId: product.id, product, quantity }]
+      const newItem = { productId: product.id, product, quantity }
+      console.log('New cart item:', newItem)
+      return [...prev, newItem]
     })
     setLastAddedProduct({ product, quantity })
   }
@@ -41,7 +55,13 @@ export const CartProvider = ({ children }) => {
   }
 
   const removeFromCart = (productId) => {
-    setCart(prev => prev.filter(item => item.productId !== productId))
+    console.log('Removing item with productId:', productId)
+    console.log('Current cart:', cart)
+    setCart(prev => {
+      const filtered = prev.filter(item => item.productId !== productId)
+      console.log('New cart after filter:', filtered)
+      return filtered
+    })
   }
 
   const clearCart = () => {
@@ -50,10 +70,9 @@ export const CartProvider = ({ children }) => {
 
   const getTotal = () => {
     return cart.reduce((sum, item) => {
-      const price = item.product.discountPrice || item.product.price
-      return sum + price * item.quantity
-    }, 0)
-  }
+      return sum + item.product.price * item.quantity;
+    }, 0);
+  };
 
   const getItemCount = () => {
     return cart.reduce((sum, item) => sum + item.quantity, 0)

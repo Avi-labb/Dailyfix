@@ -17,9 +17,6 @@ const productSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  discountPrice: {
-    type: Number,
-  },
   stock: {
     type: Number,
     default: 0,
@@ -30,38 +27,8 @@ const productSchema = new mongoose.Schema({
   brand: {
     type: String,
   },
-  category: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Category',
-    required: true,
-  },
-  subcategory: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Subcategory',
-  },
-  featured: {
-    type: Boolean,
-    default: false,
-  },
-  bestSeller: {
-    type: Boolean,
-    default: false,
-  },
-  newArrival: {
-    type: Boolean,
-    default: false,
-  },
-  flashSale: {
-    type: Boolean,
-    default: false,
-  },
-  rating: {
-    type: Number,
-    default: 0,
-  },
-  reviewsCount: {
-    type: Number,
-    default: 0,
+  image: {
+    type: String,
   },
 }, {
   timestamps: true,
