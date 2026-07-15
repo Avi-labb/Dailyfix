@@ -39,21 +39,26 @@ app.use(cors({ origin: (origin, callback) => {
     callback(new Error('Not allowed by CORS'));
   }
 }, credentials: true }));
-app.use(express.static(path.join(__dirname, "dist")));
-app.use(cookieParser());
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Parse cookies and JSON bodies
+app.use(cookieParser());
+app.use(express.json());
+
+// API routes first (so they don't get caught by the catch-all
 app.use('/api/admin', adminRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/orders', orderRoutes);
 
-app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "dist", "index.html"));
-});
+// Serve static uploads
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-app.get('/', (req, res) => {
-  res.json({ message: 'DailyFixCare API' });
+// Serve static client files
+app.use(express.static(path.join(__dirname, '..', 'client', 'dist')));
+
+// Catch-all route for client-side routing (must be last!)
+app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'client', 'dist', 'index.html'));
 });
 
 const PORT = process.env.PORT || 3000;
