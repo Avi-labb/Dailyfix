@@ -10,13 +10,16 @@ class DelhiveryService {
   // Create shipment
   async createShipment(orderData) {
     try {
+      // Format data as per Delhivery's requirement: format=json&data={json}
+      const postData = `format=json&data=${encodeURIComponent(JSON.stringify(orderData))}`;
+      
       const response = await axios.post(
-        `${this.shipmentUrl}/api/p/edit/`,
-        orderData,
+        `${this.baseUrl}/api/cmu/create.json`,
+        postData,
         {
           headers: {
             'Authorization': `Token ${this.apiKey}`,
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded',
             'Accept': 'application/json'
           }
         }
@@ -99,21 +102,9 @@ class DelhiveryService {
     }
   }
 
-  // Calculate shipping charges (mock for now, replace with real API if available)
-  calculateShipping(pincode, weight = 0.5) {
-    // Simple rate card for demo
-    const metroPincodes = ['110001', '110002', '110003', '110004', '110005', 
-                          '400001', '400002', '400003', '560001', '560002',
-                          '600001', '600002', '700001', '700002'];
-    
-    let rate = 0;
-    if (metroPincodes.includes(pincode)) {
-      rate = weight <= 0.5 ? 40 : 40 + Math.ceil((weight - 0.5) * 30);
-    } else {
-      rate = weight <= 0.5 ? 60 : 60 + Math.ceil((weight - 0.5) * 40);
-    }
-    
-    return rate;
+  // Calculate shipping charges - set to 0 now as per user request
+  calculateShipping() {
+    return 0;
   }
 }
 

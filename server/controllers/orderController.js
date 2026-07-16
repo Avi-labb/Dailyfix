@@ -12,7 +12,7 @@ const generateOrderId = () => {
 
 const createOrder = async (req, res) => {
   try {
-    const { customer, items, shippingAddress } = req.body;
+    const { customer, items, shippingAddress, paymentMethod = 'cod' } = req.body;
     
     // Validate required fields
     if (!customer.firstName || !customer.lastName || !customer.email || !customer.phone) {
@@ -53,9 +53,9 @@ const createOrder = async (req, res) => {
       });
     }
 
-    const tax = total * 0.05; // 5% GST
-    const shipping = total > 500 ? 0 : 50;
-    const grandTotal = total + tax + shipping;
+    const grandTotal = total;
+    const tax = 0;
+    const shipping = 0;
 
     const orderId = generateOrderId();
     const order = new Order({
@@ -69,7 +69,8 @@ const createOrder = async (req, res) => {
       total: grandTotal,
       tax,
       shipping,
-      paymentMethod: 'COD',
+      paymentMethod: paymentMethod === 'cod' ? 'COD' : 'Online',
+      paymentStatus: paymentMethod === 'cod' ? 'Pending (COD)' : 'Paid',
       shippingAddress: shippingAddress,
       items: orderItemsDb,
       status: 'Confirmed'
@@ -88,19 +89,20 @@ const createOrder = async (req, res) => {
     // ------------------------------
     try {
       // Prepare shipment data
+      const isCod = paymentMethod === 'cod';
       const shipmentData = {
         shipments: [{
           name: `${customer.firstName} ${customer.lastName}`,
-          add: `${shippingAddress.address}, ${shippingAddress.city}`,
+          add: shippingAddress.address,
           pin: shippingAddress.pincode,
           city: shippingAddress.city,
           state: shippingAddress.state,
           country: 'India',
           phone: customer.phone,
           order: orderId,
-          payment_mode: 'COD',
+          payment_mode: isCod ? 'COD' : 'Prepaid',
           shipping_mode: 'Surface',
-          cod_amount: grandTotal,
+          cod_amount: isCod ? grandTotal : 0,
           product_desc: orderItems.map(item => `${item.name} x${item.quantity}`).join(', ')
         }]
       };
@@ -154,11 +156,11 @@ const createOrder = async (req, res) => {
       orderDate: orderDate,
       items: orderItems,
       shippingAddress: shippingAddress,
-      paymentMethod: 'Cash on Delivery',
-      paymentStatus: 'Pending (COD)',
+      paymentMethod: paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment',
+      paymentStatus: paymentMethod === 'cod' ? 'Pending (COD)' : 'Paid',
       subtotal: total,
-      shipping: shipping,
-      gst: tax,
+      shipping: 0,
+      gst: 0,
       grandTotal: grandTotal,
       estimatedDelivery: estDeliveryDate,
     };
@@ -171,8 +173,8 @@ const createOrder = async (req, res) => {
       customerPhone: customer.phone,
       orderDate: orderDate,
       shippingAddress: shippingAddress,
-      paymentMethod: 'Cash on Delivery',
-      paymentStatus: 'Pending (COD)',
+      paymentMethod: paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment',
+      paymentStatus: paymentMethod === 'cod' ? 'Pending (COD)' : 'Paid',
       items: orderItems,
       grandTotal: grandTotal,
     };

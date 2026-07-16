@@ -106,26 +106,6 @@ const customerOrderTemplate = (data) => {
                   <h3 style="margin:0 0 16px;font-size:18px;color:#111827;font-weight:700;">Order Summary</h3>
                   <table width="100%" border="0" cellspacing="0" cellpadding="0">
                     <tr>
-                      <td style="padding:8px 0;color:#4b5563;font-size:16px;">Subtotal</td>
-                      <td style="padding:8px 0;text-align:right;color:#111827;font-size:16px;">₹${subtotal.toFixed(2)}</td>
-                    </tr>
-                    <tr>
-                      <td style="padding:8px 0;color:#4b5563;font-size:16px;">Shipping</td>
-                      <td style="padding:8px 0;text-align:right;color:${shipping === 0 ? '#059669' : '#111827'};font-weight:${shipping === 0 ? '700' : '400'};font-size:16px;">
-                        ${shipping === 0 ? 'FREE' : `₹${shipping.toFixed(2)}`}
-                      </td>
-                    </tr>
-                    ${discount > 0 ? `
-                      <tr>
-                        <td style="padding:8px 0;color:#dc2626;font-size:16px;">Discount</td>
-                        <td style="padding:8px 0;text-align:right;color:#dc2626;font-size:16px;">-₹${discount.toFixed(2)}</td>
-                      </tr>
-                    ` : ''}
-                    <tr>
-                      <td style="padding:8px 0;color:#4b5563;font-size:16px;">GST (5%)</td>
-                      <td style="padding:8px 0;text-align:right;color:#111827;font-size:16px;">₹${gst.toFixed(2)}</td>
-                    </tr>
-                    <tr>
                       <td style="padding:16px 0 0;border-top:2px solid #e5e7eb;color:#111827;font-weight:700;font-size:18px;">Grand Total</td>
                       <td style="padding:16px 0 0;border-top:2px solid #e5e7eb;text-align:right;color:#2563eb;font-weight:700;font-size:20px;">₹${grandTotal.toFixed(2)}</td>
                     </tr>

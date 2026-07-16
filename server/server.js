@@ -27,11 +27,12 @@ const limiter = rateLimit({
 app.use(limiter);
 app.use(helmet());
 const allowedOrigins = [
-    "http://localhost:5173",
-    "http://localhost:5174",
-    "https://dailyfixcare.com",
-    "https://www.dailyfixcare.com"
-];
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "http://localhost:5175",
+      "https://dailyfixcare.com",
+      "https://www.dailyfixcare.com"
+    ];
 app.use(cors({ origin: (origin, callback) => {
   if (!origin || allowedOrigins.includes(origin)) {
     callback(null, true);
@@ -61,7 +62,7 @@ app.get("*", (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'client', 'dist', 'index.html'));
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5001;
 
 const startServer = async () => {
   await connectDB();

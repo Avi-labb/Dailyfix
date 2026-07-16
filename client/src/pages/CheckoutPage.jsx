@@ -23,6 +23,11 @@ const pincodePattern = /^[1-9][0-9]{5}$/
 // Payment methods
 const paymentMethods = [
   {
+    id: 'online',
+    name: 'Online Payment',
+    description: 'Pay using UPI, Credit/Debit Card, or Net Banking'
+  },
+  {
     id: 'cod',
     name: 'Cash on Delivery',
     description: 'Pay when you receive your order'
@@ -30,7 +35,7 @@ const paymentMethods = [
 ]
 
 // Step 1: Shipping Address & Summary
-function Step1AddressSummary({ formData, setFormData, placeOrder, cart, getTotal, loading }) {
+function Step1AddressSummary({ formData, setFormData, placeOrder, cart, getTotal, loading, selectedPayment, setSelectedPayment }) {
   const { register, handleSubmit, formState: { errors, touchedFields }, watch, setFocus } = useForm({
     mode: 'onTouched',
     reValidateMode: 'onChange',
@@ -46,8 +51,8 @@ function Step1AddressSummary({ formData, setFormData, placeOrder, cart, getTotal
   }
 
   const subtotal = getTotal()
-  const shipping = subtotal > 500 ? 0 : 50
-  const total = subtotal + shipping
+  const shipping = 0
+  const total = subtotal
 
   return (
     <div className="space-y-6">
@@ -158,13 +163,38 @@ function Step1AddressSummary({ formData, setFormData, placeOrder, cart, getTotal
         <hr className="border-slate-200 mb-8" />
 
         <h2 className="text-2xl font-bold mb-6 text-slate-900 flex items-center gap-3">
-          <Package className="text-emerald-600" />
-          Order Summary
+          <CreditCard className="text-emerald-600" />
+          Payment Method
         </h2>
 
-        <div className="mb-8">
-          <h3 className="font-semibold text-slate-800 mb-3">Payment Method</h3>
-          <p className="text-slate-700">Cash on Delivery</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          {paymentMethods.map((method) => (
+            <div
+              key={method.id}
+              onClick={() => setSelectedPayment(method.id)}
+              className={`border-2 rounded-xl p-6 cursor-pointer transition-all ${
+                selectedPayment === method.id 
+                  ? 'border-emerald-500 bg-emerald-50' 
+                  : 'border-slate-200 hover:border-emerald-300'
+              }`}
+            >
+              <div className="flex items-start gap-4">
+                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center mt-1 ${
+                  selectedPayment === method.id 
+                    ? 'border-emerald-500' 
+                    : 'border-slate-300'
+                }`}>
+                  {selectedPayment === method.id && (
+                    <div className="w-3 h-3 rounded-full bg-emerald-500" />
+                  )}
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900">{method.name}</h3>
+                  <p className="text-sm text-slate-600">{method.description}</p>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
 
         <button
@@ -183,8 +213,8 @@ function Step1AddressSummary({ formData, setFormData, placeOrder, cart, getTotal
 // Right Side Order Summary (fixed)
 function FixedOrderSummary({ cart, getTotal }) {
   const subtotal = getTotal()
-  const shipping = subtotal > 500 ? 0 : 50
-  const total = subtotal + shipping
+  const shipping = 0
+  const total = subtotal
 
   return (
     <div className="bg-white p-6 rounded-2xl shadow-xl border border-slate-100 sticky top-24">
@@ -240,6 +270,7 @@ function CheckoutPage() {
     state: '',
     pincode: ''
   })
+  const [selectedPayment, setSelectedPayment] = useState('cod')
 
   // Load existing order data if available (for editing)
   useEffect(() => {
@@ -297,7 +328,7 @@ function CheckoutPage() {
           state: formData.state,
           pincode: formData.pincode
         },
-        paymentMethod: 'cod'
+        paymentMethod: selectedPayment
       })
 
       clearCart()
@@ -360,6 +391,8 @@ function CheckoutPage() {
               cart={cart}
               getTotal={getTotal}
               loading={loading}
+              selectedPayment={selectedPayment}
+              setSelectedPayment={setSelectedPayment}
             />
           </div>
 
