@@ -3,7 +3,7 @@ import axios from 'axios';
 dotenv.config();
 
 console.log('🚀 Dailyfix Debug Script');
-console.log('============================================================');
+console.log('==========================================================');
 
 // 1. Environment Variables Check
 console.log('\n📋 Environment Variables:');
