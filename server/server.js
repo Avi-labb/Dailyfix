@@ -6,7 +6,9 @@ import rateLimit from 'express-rate-limit';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
+
 import connectDB from './config/db.js';
+
 dotenv.config();
 
 import adminRoutes from './routes/adminRoutes.js';
@@ -19,56 +21,83 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// Important for Hostinger reverse proxy
+app.set('trust proxy', 1);
+
+// Rate limiter
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100
 });
 
 app.use(limiter);
-app.use(helmet());
-const allowedOrigins = [
-      "http://localhost:5173",
-      "http://localhost:5174",
-      "http://localhost:5175",
-      "https://dailyfixcare.com",
-      "https://www.dailyfixcare.com"
-    ];
-app.use(cors({ origin: (origin, callback) => {
-  if (!origin || allowedOrigins.includes(origin)) {
-    callback(null, true);
-  } else {
-    callback(new Error('Not allowed by CORS'));
-  }
-}, credentials: true }));
 
-// Parse cookies and JSON bodies
+app.use(helmet());
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "http://localhost:5175",
+  "https://dailyfixcare.com",
+  "https://www.dailyfixcare.com"
+];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
+
 app.use(cookieParser());
 app.use(express.json());
 
-// API routes first (so they don't get caught by the catch-all
+// API routes
 app.use('/api/admin', adminRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/orders', orderRoutes);
 
-// Serve static uploads
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Uploads
+app.use(
+  '/uploads',
+  express.static(path.join(__dirname, 'uploads'))
+);
 
-// Serve static client files
-app.use(express.static(path.join(__dirname, '..', 'client', 'dist')));
+// React frontend
+const frontendPath = path.join(
+  __dirname,
+  '..',
+  'client',
+  'dist'
+);
 
-// Catch-all route for client-side routing (must be last!)
-app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'client', 'dist', 'index.html'));
+app.use(express.static(frontendPath));
+
+// React routing
+app.get('*', (req, res) => {
+  res.sendFile(
+    path.join(frontendPath, 'index.html')
+  );
 });
 
-const PORT = process.env.PORT || 5001;
+// Hostinger provides the PORT
+const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
-  await connectDB();
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
+  try {
+    await connectDB();
+
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error('Server startup failed:', error);
+  }
 };
 
 startServer();
