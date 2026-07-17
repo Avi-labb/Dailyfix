@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 
@@ -76,19 +77,42 @@ const frontendPath = path.join(
   'dist'
 );
 
-app.use(express.static(frontendPath));
-
-// React routing
-app.get('*', (req, res) => {
-  res.sendFile(
-    path.join(frontendPath, 'index.html')
-  );
-});
+// Check if frontend dist exists
+const frontendExists = fs.existsSync(frontendPath);
+if (frontendExists) {
+  app.use(express.static(frontendPath));
+  
+  // React routing
+  app.get('*', (req, res) => {
+    res.sendFile(
+      path.join(frontendPath, 'index.html')
+    );
+  });
+} else {
+  // If frontend not built yet, just serve API
+  console.log('⚠️ Frontend dist folder not found. Only API routes are available.');
+  app.get('*', (req, res) => {
+    res.status(404).json({ 
+      message: 'API is running. Frontend not built yet.',
+      availableRoutes: [
+        '/api/products',
+        '/api/categories',
+        '/api/orders',
+        '/api/admin'
+      ]
+    });
+  });
+}
 
 // Hostinger provides the PORT
 const PORT = process.env.PORT || 5000;
 
-
-app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
+// Connect to MongoDB first
+connectDB().then(() => {
+  app.listen(PORT, () => {
+    console.log(`✅ Server running on port ${PORT}`);
+  });
+}).catch(err => {
+  console.error('❌ Failed to connect to MongoDB:', err);
+  process.exit(1);
 });
