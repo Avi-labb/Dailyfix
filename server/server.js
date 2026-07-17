@@ -2,7 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
@@ -21,9 +20,7 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// Important for Hostinger reverse proxy
 app.set('trust proxy', 1);
-
 // Rate limiter
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -31,7 +28,6 @@ const limiter = rateLimit({
 });
 
 app.use(limiter);
-
 app.use(helmet());
 
 const allowedOrigins = [
@@ -68,13 +64,6 @@ app.use(
   express.static(path.join(__dirname, 'uploads'))
 );
 
-// React frontend
-const frontendPath = path.join(
-  __dirname,
-  '..',
-  'client',
-  'dist'
-);
 
 app.use(express.static(frontendPath));
 
