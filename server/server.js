@@ -64,6 +64,13 @@ app.use(
   express.static(path.join(__dirname, 'uploads'))
 );
 
+// React frontend
+const frontendPath = path.join(
+  __dirname,
+  '..',
+  'client',
+  'dist'
+);
 
 app.use(express.static(frontendPath));
 
