@@ -107,12 +107,7 @@ app.use('/api/orders', orderRoutes);
 // ===============================
 // FRONTEND
 // ===============================
-const frontendPath = path.join(
-  __dirname,
-  '..',
-  'client',
-  'dist'
-);
+const frontendPath = path.join(__dirname,'dist');
 
 const frontendExists = fs.existsSync(frontendPath);
 
