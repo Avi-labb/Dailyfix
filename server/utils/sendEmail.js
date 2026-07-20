@@ -22,4 +22,24 @@ transporter.verify((error, success) => {
   }
 });
 
-export default transporter;
+const sendEmail = async ({ to, subject, html, text }) => {
+  try {
+    const mailOptions = {
+      from: process.env.SMTP_FROM || '"DailyFixCare" <noreply@dailyfixcare.com>',
+      to,
+      subject,
+      html,
+      text
+    };
+
+    console.log(`📧 Sending email to: ${to} with subject: ${subject}`);
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`✅ Email sent successfully! Message ID: ${info.messageId}`);
+    return info;
+  } catch (error) {
+    console.error(`❌ Failed to send email to ${to}:`, error);
+    throw error;
+  }
+};
+
+export default sendEmail;
