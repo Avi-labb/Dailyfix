@@ -1,4 +1,5 @@
-﻿import nodemailer from "nodemailer";
+﻿
+import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -15,8 +16,8 @@ console.log("SMTP_USER:", process.env.SMTP_USER);
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
-  port: parseInt(process.env.SMTP_PORT, 10),
-  secure: false, // true for 465, false for other ports
+  port: parseInt(process.env.SMTP_PORT, 10) || 465,
+  secure: (parseInt(process.env.SMTP_PORT, 10) === 465),
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS
@@ -26,10 +27,9 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// Verify connection on startup
 transporter.verify((error, success) => {
   if (error) {
-    console.error("❌ SMTP Connection Error:", error);
+    console.error("❌ SMTP Connection Error (email may not work):", error.message);
   } else {
     console.log("✅ SMTP Server is ready to send emails!");
   }
@@ -50,8 +50,8 @@ const sendEmail = async ({ to, subject, html, text }) => {
     console.log(`✅ Email sent successfully! Message ID: ${info.messageId}`);
     return info;
   } catch (error) {
-    console.error(`❌ Failed to send email to ${to}:`, error);
-    throw error;
+    console.error(`❌ Failed to send email to ${to}:`, error.message);
+    return null;
   }
 };
 
