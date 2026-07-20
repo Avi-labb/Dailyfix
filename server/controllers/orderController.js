@@ -258,21 +258,29 @@ const createOrder = async (req, res) => {
     // Send emails (don't wait for them to complete)
     (async () => {
       try {
+        console.log('📧 Preparing to send customer email to:', customer.email);
+        console.log('📧 Customer email data:', JSON.stringify(customerEmailData, null, 2));
+        
         await sendEmail({
           to: customer.email,
           subject: `Order Confirmation - ${orderId} | DailyFixCare`,
           html: customerOrderTemplate(customerEmailData)
         });
         
+        console.log('✅ Customer email sent successfully!');
+        
         if (process.env.ADMIN_EMAIL) {
+          console.log('📧 Preparing to send admin email to:', process.env.ADMIN_EMAIL);
           await sendEmail({
             to: process.env.ADMIN_EMAIL,
             subject: `New Order Received - ${orderId}`,
             html: adminOrderTemplate(adminEmailData)
           });
+          console.log('✅ Admin email sent successfully!');
         }
       } catch (emailError) {
-        console.error('❌ Error sending emails:', emailError.message);
+        console.error('❌ Error sending emails:', emailError);
+        console.error('❌ Error stack:', emailError.stack);
       }
     })();
 
