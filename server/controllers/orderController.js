@@ -12,6 +12,7 @@ const generateOrderId = () => {
 
 const createOrder = async (req, res) => {
   try {
+    console.log('📦 Received order request:', JSON.stringify(req.body, null, 2));
     const { customer, items, shippingAddress, shipping_address, paymentMethod, payment_method = 'cod' } = req.body;
     
     // Normalize the keys (handle both snake_case and camelCase)
@@ -20,10 +21,16 @@ const createOrder = async (req, res) => {
     
     // Validate required fields
     if (!customer.firstName || !customer.lastName || !customer.email || !customer.phone) {
+      console.error('❌ Missing customer details');
       return res.status(400).json({ message: 'Please provide all customer details' });
     }
     if (!shippingAddressData || !shippingAddressData.address || !shippingAddressData.city || !shippingAddressData.state || !shippingAddressData.pincode) {
+      console.error('❌ Missing shipping details');
       return res.status(400).json({ message: 'Please provide complete shipping address' });
+    }
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      console.error('❌ No items in order');
+      return res.status(400).json({ message: 'Please add items to your order' });
     }
 
     let total = 0;
@@ -31,8 +38,10 @@ const createOrder = async (req, res) => {
     const orderItemsDb = []; // Items for DB
     
     for (let item of items) {
+      console.log('🔍 Finding product with ID:', item.productId);
       const product = await Product.findById(item.productId);
       if (!product) {
+        console.error('❌ Product not found:', item.productId);
         return res.status(404).json({ message: `Product with ID ${item.productId} not found` });
       }
       
@@ -49,7 +58,7 @@ const createOrder = async (req, res) => {
         price: itemPrice,
         total: itemTotal
       });
-      console.log("product",prouct.name)
+      console.log("✅ Found product:", product.name)
       orderItemsDb.push({
         product: product._id,
         quantity: item.quantity,

@@ -47,6 +47,7 @@ const ProductPage = () => {
   const [addedToCart, setAddedToCart] = useState(false);
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [howToUseOpen, setHowToUseOpen] = useState(false);
   const imageRef = useRef(null);
   const { addToCart } = useCart();
 
@@ -137,7 +138,7 @@ const ProductPage = () => {
   }
 
   return (
-    <div className="min-h-screen pt-28 pb-20 bg-stone-50">
+    <div className="min-h-screen pt-10 pb-20 bg-stone-50">
       <div className="max-w-9xl mx-auto px-6 sm:px-8 lg:px-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
           {/* LEFT: Image gallery */}
@@ -324,6 +325,25 @@ const ProductPage = () => {
                 Buy Now
               </button>
             </div>
+            <div className="pt-6 border-t border-stone-200">
+                    <button onClick={() => setHowToUseOpen(!howToUseOpen)} className="w-full flex items-center justify-between text-left">
+                        <h3 className="text-lg font-bold text-stone-900">How to Use</h3>
+                        <svg className={`w-6 h-6 text-stone-600 transition-transform duration-300 ${howToUseOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    
+                    {howToUseOpen && (
+                        <div className="mt-4">
+                            <div className="space-y-3 text-stone-700 text-sm">
+                                <p><strong>1.</strong> Mix equal parts of color cream and developer in a non-metallic bowl.</p>
+                                <p><strong>2.</strong> Do a patch test 24 hours before use.</p>
+                                <p><strong>3.</strong> Apply evenly to clean, dry beard and leave for 10-15 minutes.</p>
+                                <p><strong>4.</strong> Rinse thoroughly with warm water until water runs clear.</p>
+                            </div>
+                        </div>
+                    )}
+                </div>
           </motion.div>
         </div>
       </div>
