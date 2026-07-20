@@ -5,6 +5,10 @@ class DelhiveryService {
     this.apiKey = process.env.DELHIVERY_API_KEY;
     this.baseUrl = process.env.DELHIVERY_BASE_URL || 'https://track.delhivery.com';
     this.shipmentUrl = process.env.DELHIVERY_SHIPMENT_URL || 'https://bharatapi.delhivery.com';
+    
+    if (!this.apiKey) {
+      console.warn('⚠️  DELHIVERY_API_KEY is not set in environment variables! Delhivery integration will not work.');
+    }
   }
 
   // Create shipment

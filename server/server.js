@@ -8,68 +8,105 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 
+// Load environment variables first
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config({
+  path: path.join(__dirname, '.env')
+});
+
+// Database
 import connectDB from './config/db.js';
 
-dotenv.config();
-
+// Routes
 import adminRoutes from './routes/adminRoutes.js';
 import productRoutes from './routes/productRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const app = express();
 
 // Important for Hostinger reverse proxy
 app.set('trust proxy', 1);
 
-// Rate limiter
+// ===============================
+// RATE LIMITER
+// ===============================
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false
 });
 
 app.use(limiter);
 
+// ===============================
+// SECURITY
+// ===============================
 app.use(helmet());
 
+// ===============================
+// CORS
+// ===============================
 const allowedOrigins = [
-  "http://localhost:5173",
-  "http://localhost:5174",
-  "http://localhost:5175",
-  "https://dailyfixcare.com",
-  "https://www.dailyfixcare.com"
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:5175',
+  'https://dailyfixcare.com',
+  'https://www.dailyfixcare.com'
 ];
 
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow requests without origin
+      // Example: Postman, server-to-server requests
+      if (!origin) {
+        return callback(null, true);
+      }
 
-app.use(cookieParser());
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error('Not allowed by CORS'));
+    },
+    credentials: true
+  })
+);
+
+// ===============================
+// BODY PARSER
+// ===============================
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// API routes
-app.use('/api/admin', adminRoutes);
-app.use('/api/products', productRoutes);
-app.use('/api/categories', categoryRoutes);
-app.use('/api/orders', orderRoutes);
+// ===============================
+// COOKIES
+// ===============================
+app.use(cookieParser());
 
-// Uploads
+// ===============================
+// UPLOADS
+// ===============================
 app.use(
   '/uploads',
   express.static(path.join(__dirname, 'uploads'))
 );
 
-// React frontend
+// ===============================
+// API ROUTES
+// ===============================
+app.use('/api/admin', adminRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/orders', orderRoutes);
+
+// ===============================
+// FRONTEND
+// ===============================
 const frontendPath = path.join(
   __dirname,
   '..',
@@ -77,22 +114,25 @@ const frontendPath = path.join(
   'dist'
 );
 
-// Check if frontend dist exists
 const frontendExists = fs.existsSync(frontendPath);
+
 if (frontendExists) {
   app.use(express.static(frontendPath));
-  
-  // React routing
+
   app.get('*', (req, res) => {
     res.sendFile(
       path.join(frontendPath, 'index.html')
     );
   });
+
+  console.log('✅ Frontend dist folder found');
 } else {
-  // If frontend not built yet, just serve API
-  console.log('⚠️ Frontend dist folder not found. Only API routes are available.');
+  console.log(
+    '⚠️ Frontend dist folder not found. Only API routes are available.'
+  );
+
   app.get('*', (req, res) => {
-    res.status(404).json({ 
+    res.status(404).json({
       message: 'API is running. Frontend not built yet.',
       availableRoutes: [
         '/api/products',
@@ -104,15 +144,41 @@ if (frontendExists) {
   });
 }
 
-// Hostinger provides the PORT
+// ===============================
+// START SERVER FIRST
+// ===============================
 const PORT = process.env.PORT || 5000;
 
-// Connect to MongoDB first
-connectDB().then(() => {
-  app.listen(PORT, () => {
+const server = app.listen(
+  PORT,
+  '0.0.0.0',
+  () => {
     console.log(`✅ Server running on port ${PORT}`);
+    console.log(`🌐 Port: ${PORT}`);
+  }
+);
+
+// ===============================
+// CONNECT DATABASE AFTER SERVER STARTS
+// ===============================
+connectDB()
+  .then(() => {
+    console.log('✅ Database connected successfully');
+  })
+  .catch((error) => {
+    console.error(
+      '❌ Database connection failed:',
+      error.message
+    );
   });
-}).catch(err => {
-  console.error('❌ Failed to connect to MongoDB:', err);
-  process.exit(1);
+
+// ===============================
+// ERROR HANDLING
+// ===============================
+process.on('uncaughtException', (error) => {
+  console.error('❌ Uncaught Exception:', error);
+});
+
+process.on('unhandledRejection', (error) => {
+  console.error('❌ Unhandled Promise Rejection:', error);
 });

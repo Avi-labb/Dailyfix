@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Minus, Plus, ShoppingBag, Zap, Leaf, ShieldCheck, Truck, X } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { useCart } from '../context/CartContext';
 import api from '../services/api';
 
@@ -78,15 +79,13 @@ const ProductPage = () => {
   }, [id]);
 
   const nextImage = () => {
-    setCurrentImageIndex((prev) =>
-      prev === product.images.length - 1 ? 0 : prev + 1
-    );
+    if (!product) return;
+    setCurrentImageIndex((prev) => (prev === product.images.length - 1 ? 0 : prev + 1));
   };
 
   const prevImage = () => {
-    setCurrentImageIndex((prev) =>
-      prev === 0 ? product.images.length - 1 : prev - 1
-    );
+    if (!product) return;
+    setCurrentImageIndex((prev) => (prev === 0 ? product.images.length - 1 : prev - 1));
   };
 
   const handleMouseMove = (e) => {
@@ -98,9 +97,13 @@ const ProductPage = () => {
   };
 
   const decrement = () => setQuantity((q) => Math.max(1, q - 1));
-  const increment = () => setQuantity((q) => Math.min(product.stock, q + 1));
+  const increment = () => {
+    if (!product) return;
+    setQuantity((q) => Math.min(product.stock, q + 1));
+  };
 
   const handleAddToCart = () => {
+    if (!product) return;
     addToCart(product, quantity);
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 1800);
@@ -108,53 +111,48 @@ const ProductPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f0fdf4' }}>
-        <div className="text-slate-600">Loading product...</div>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#ecfdf5' }}>
+        <div className="text-center">
+          <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-emerald-100 border-t-emerald-500 mb-4"></div>
+          <p className="text-stone-600 text-lg">Loading product...</p>
+        </div>
       </div>
     );
   }
 
   if (!product) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f0fdf4' }}>
-        <div className="text-slate-600">Product not found</div>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#ecfdf5' }}>
+        <div className="text-center">
+          <p className="text-2xl font-bold text-stone-800 mb-4">Product not found</p>
+          <button
+            onClick={() => navigate('/shop')}
+            className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 px-8 rounded-full transition-colors"
+          >
+            Back to Shop
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen -mt-10" style={{ backgroundColor: '#f0fdf4' }}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Inter:wght@400;500;600;700&display=swap');
-        .pp-display { font-family: 'Bricolage Grotesque', 'Helvetica Neue', sans-serif; }
-        .pp-body { font-family: 'Inter', -apple-system, sans-serif; }
-        .pp-zoom-cursor { cursor: zoom-in; }
-        @media (prefers-reduced-motion: reduce) {
-          .pp-transition { transition: none !important; }
-        }
-      `}</style>
-
-      <div className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-20 py-10 lg:py-10">
-        {/* Breadcrumb-ish eyebrow */}
-        <div className="pp-body text-xs tracking-widest uppercase mb-8 flex items-center gap-2" style={{ color: '#64748b' }}>
-          <span>{product.brand}</span>
-          <span>/</span>
-          <span style={{ color: '#065f46' }}>{product.desc}</span>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
+    <div className="min-h-screen pt-28 pb-20 bg-stone-50">
+      <div className="max-w-9xl mx-auto px-6 sm:px-8 lg:px-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
           {/* LEFT: Image gallery */}
-          <div className="flex flex-col-reverse sm:flex-row gap-4 lg:sticky lg:top-10 lg:self-start">
+          <div className="flex flex-col-reverse sm:flex-row gap-6 lg:gap-8 lg:sticky lg:top-28 lg:self-start">
             {/* Thumbnails */}
-            <div className="flex sm:flex-col gap-3 overflow-x-auto sm:overflow-visible sm:w-20">
+            <div className="flex sm:flex-col gap-4 overflow-x-auto sm:overflow-visible sm:w-24">
               {product.images.map((image, index) => (
                 <button
                   key={index}
                   onClick={() => setCurrentImageIndex(index)}
-                  className=" w-16 h-16 sm:w-20 sm:h-20 p-1 rounded-lg overflow-hidden border-2 transition-all"
+                  className="flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 p-3 rounded-2xl overflow-hidden transition-all duration-300"
                   style={{
+                    borderWidth: '2px',
                     borderColor: index === currentImageIndex ? '#10b981' : 'transparent',
-                    backgroundColor: '#ecfdf5'
+                    backgroundColor: index === currentImageIndex ? '#ecfdf5' : '#f5f5f4'
                   }}
                   aria-label={`View image ${index + 1}`}
                 >
@@ -171,8 +169,8 @@ const ProductPage = () => {
             <div className="flex-1 relative">
               <div
                 ref={imageRef}
-                className="pp-zoom-cursor aspect-square rounded-2xl overflow-hidden relative border p-3"
-                style={{ backgroundColor: '#ecfdf5', borderColor: '#a7f3d0' }}
+                className="aspect-square rounded-3xl overflow-hidden relative border cursor-zoom-in group"
+                style={{ backgroundColor: '#ecfdf5', borderColor: '#d1fae5' }}
                 onMouseEnter={() => setShowZoom(true)}
                 onMouseLeave={() => setShowZoom(false)}
                 onMouseMove={handleMouseMove}
@@ -181,175 +179,199 @@ const ProductPage = () => {
                 <img
                   src={product.images[currentImageIndex]}
                   alt={product.name}
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-contain p-8"
                   draggable={false}
                 />
 
                 {/* Zoom lens preview */}
                 {showZoom && (
                   <div
-                    className="hidden lg:block absolute inset-0 pointer-events-none"
+                    className="hidden lg:block absolute inset-0 pointer-events-none rounded-3xl"
                     style={{
                       backgroundImage: `url(${product.images[currentImageIndex]})`,
                       backgroundSize: '220%',
                       backgroundPosition: `${zoomPos.x}% ${zoomPos.y}%`,
-                      backgroundRepeat: 'no-repeat',
+                      backgroundRepeat: 'no-repeat'
                     }}
                   />
                 )}
 
                 {/* Expand hint */}
-                <div
-                  className="pp-body absolute bottom-3 right-3 px-3 py-1.5 rounded-full text-xs font-medium pointer-events-none"
-                  style={{ backgroundColor: 'rgba(35,31,28,0.75)', color: '#FAF7F2' }}
-                >
-                  Click to expand
+                <div className="absolute bottom-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="px-4 py-2 rounded-full text-sm font-semibold" style={{ backgroundColor: 'rgba(35, 31, 28, 0.8)', color: '#FAF7F2' }}>
+                    Click to expand
+                  </div>
                 </div>
-
               </div>
-
-
             </div>
           </div>
 
           {/* RIGHT: Product details */}
-          <div className="flex flex-col gap-7">
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.7 }}
+            className="flex flex-col gap-8"
+          >
             <div>
-              <h1 className="pp-display text-3xl md:text-[2.75rem] leading-[1.05] font-bold" style={{ color: '#0f172a' }}>
+              <p className="text-xs tracking-widest uppercase font-semibold text-emerald-600 mb-4 flex items-center gap-2">
+                {product.brand}
+                <span className="w-1 h-1 bg-emerald-600 rounded-full"></span>
+                {product.desc}
+              </p>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-stone-900 leading-tight">
                 {product.name}
               </h1>
-              <p className="pp-body mt-2 text-sm" style={{ color: '#64748b' }}>
-                SKU {product.sku} &middot; by {product.brand}
-              </p>
+              <p className="text-stone-500 mt-4 text-lg">SKU: {product.sku}</p>
             </div>
 
             {/* Price */}
-            <div className="flex items-baseline gap-3 flex-wrap">
-              <span className="pp-display text-4xl font-extrabold" style={{ color: '#065f46' }}>
+            <div className="flex items-baseline gap-4">
+              <span className="text-5xl font-extrabold text-emerald-600">
                 ₹{product.price}
               </span>
+              {product.stock > 0 && (
+                <span className="px-4 py-2 rounded-full bg-emerald-100 text-emerald-700 text-sm font-semibold">
+                  In Stock
+                </span>
+              )}
             </div>
 
             {/* Description */}
-            <p className="pp-body text-base leading-relaxed" style={{ color: '#475569' }}>
-              {product.description}
-            </p>
+            <div className="space-y-4">
+              <p className="text-stone-600 text-lg leading-relaxed">
+                {product.description}
+              </p>
+              <p className="text-stone-500 leading-relaxed">
+                Premium grooming product designed specifically for men. Easy to use and long-lasting results.
+              </p>
+            </div>
 
             {/* Trust strip */}
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {[
-                { icon: Leaf, label: 'Ammonia-free' },
-                { icon: ShieldCheck, label: 'Dermatologist tested' },
-                { icon: Truck, label: 'Fast delivery' },
-              ].map(({ icon: Icon, label }) => (
+                { icon: Leaf, label: 'Ammonia-free', desc: 'Gentle formula' },
+                { icon: ShieldCheck, label: 'Dermatologist tested', desc: 'Safe for skin' },
+                { icon: Truck, label: 'Fast delivery', desc: 'Discreet packaging' },
+              ].map(({ icon: Icon, label, desc }, idx) => (
                 <div
-                  key={label}
-                  className="pp-body flex flex-col items-center gap-1.5 text-center text-xs font-medium rounded-xl py-3 px-2"
-                  style={{ backgroundColor: '#ecfdf5', color: '#065f46' }}
+                  key={idx}
+                  className="flex flex-col items-center gap-2 text-center py-6 px-4 rounded-2xl border border-emerald-100 bg-emerald-50"
                 >
-                  <Icon size={18} strokeWidth={2} />
-                  {label}
+                  <Icon size={24} className="text-emerald-600" />
+                  <p className="font-semibold text-stone-900 text-sm">{label}</p>
+                  <p className="text-xs text-stone-500">{desc}</p>
                 </div>
               ))}
             </div>
 
             {/* Quantity selector */}
-            <div className="flex items-center gap-4">
-              <span className="pp-body text-sm font-semibold" style={{ color: '#0f172a' }}>Quantity</span>
-              <div
-                className="flex items-center rounded-full border overflow-hidden"
-                style={{ borderColor: '#a7f3d0' }}
-              >
-                <button
-                  onClick={decrement}
-                  className="pp-transition w-10 h-10 flex items-center justify-center hover:bg-[#ecfdf5]"
-                  style={{ color: '#065f46' }}
-                  aria-label="Decrease quantity"
-                >
-                  <Minus size={16} />
-                </button>
-                <span className="pp-body w-10 text-center font-semibold" style={{ color: '#0f172a' }}>
-                  {quantity}
-                </span>
-                <button
-                  onClick={increment}
-                  className="pp-transition w-10 h-10 flex items-center justify-center hover:bg-[#ecfdf5]"
-                  style={{ color: '#065f46' }}
-                  aria-label="Increase quantity"
-                >
-                  <Plus size={16} />
-                </button>
+            <div className="space-y-4">
+              <span className="text-sm font-semibold text-stone-900">Quantity</span>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center rounded-2xl border overflow-hidden" style={{ borderColor: '#a7f3d0' }}>
+                  <button
+                    onClick={decrement}
+                    className="w-14 h-14 flex items-center justify-center hover:bg-emerald-50 transition-colors text-emerald-700"
+                    aria-label="Decrease quantity"
+                  >
+                    <Minus size={20} strokeWidth={2.5} />
+                  </button>
+                  <span className="w-16 text-center font-bold text-xl text-stone-900">
+                    {quantity}
+                  </span>
+                  <button
+                    onClick={increment}
+                    className="w-14 h-14 flex items-center justify-center hover:bg-emerald-50 transition-colors text-emerald-700"
+                    aria-label="Increase quantity"
+                  >
+                    <Plus size={20} strokeWidth={2.5} />
+                  </button>
+                </div>
+                <p className="text-sm text-stone-500">{product.stock} available</p>
               </div>
             </div>
 
             {/* CTA buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 mt-1">
+            <div className="flex flex-col sm:flex-row gap-4 pt-2">
               <button
                 onClick={handleAddToCart}
                 disabled={product.stock === 0}
-                className="pp-body pp-transition flex-1 flex items-center justify-center gap-2 rounded-full font-semibold py-4 px-6 border-2 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#065f46] hover:text-white"
-                style={{ borderColor: '#10b981', color: '#065f46', backgroundColor: 'transparent' }}
+                className="flex-1 flex items-center justify-center gap-3 rounded-2xl font-bold py-5 px-6 border-2 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  borderColor: '#10b981',
+                  color: '#065f46',
+                  backgroundColor: 'transparent',
+                  ...(addedToCart ? { backgroundColor: '#10b981', color: 'white', borderColor: '#10b981' } : {})
+                }}
+                onMouseOver={(e) => !addedToCart && (e.currentTarget.style.backgroundColor = '#065f46', e.currentTarget.style.color = 'white')}
+                onMouseOut={(e) => !addedToCart && (e.currentTarget.style.backgroundColor = 'transparent', e.currentTarget.style.color = '#065f46')}
               >
-                <ShoppingBag size={18} />
+                <ShoppingBag size={20} />
                 {addedToCart ? 'Added!' : 'Add to Cart'}
               </button>
+
               <button
                 onClick={() => {
                   addToCart(product, quantity);
                   navigate('/checkout');
                 }}
                 disabled={product.stock === 0}
-                className="pp-body pp-transition flex-1 flex items-center justify-center gap-2 rounded-full font-semibold py-4 px-6 disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90"
+                className="flex-1 flex items-center justify-center gap-3 rounded-2xl font-bold py-5 px-6 transition-all duration-300 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed shadow-soft hover:shadow-medium"
                 style={{ backgroundColor: '#10b981', color: 'white' }}
               >
-                <Zap size={18} />
+                <Zap size={20} fill="currentColor" />
                 Buy Now
               </button>
             </div>
-
-          </div>
+          </motion.div>
         </div>
       </div>
 
       {/* Lightbox / click-to-expand modal */}
       {lightboxOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ backgroundColor: 'rgba(35,31,28,0.92)' }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-stone-900/95 backdrop-blur-sm"
           onClick={() => setLightboxOpen(false)}
         >
           <button
-              onClick={() => setLightboxOpen(false)}
-              className="absolute top-5 right-5 w-11 h-11 rounded-full flex items-center justify-center"
-              style={{ backgroundColor: '#ecfdf5', color: '#065f46' }}
-              aria-label="Close"
-            >
-              <X size={22} />
-            </button>
+            onClick={(e) => {
+              e.stopPropagation();
+              setLightboxOpen(false);
+            }}
+            className="absolute top-6 right-6 w-12 h-12 rounded-full flex items-center justify-center bg-white hover:bg-stone-100 transition-colors"
+            aria-label="Close"
+          >
+            <X size={24} className="text-stone-800" />
+          </button>
 
-            <button
-              onClick={(e) => { e.stopPropagation(); prevImage(); }}
-              className="absolute left-4 sm:left-8 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full flex items-center justify-center"
-              style={{ backgroundColor: '#ecfdf5', color: '#065f46' }}
-              aria-label="Previous image"
-            >
-              <ChevronLeft size={22} />
-            </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              prevImage();
+            }}
+            className="absolute left-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full flex items-center justify-center bg-white hover:bg-stone-100 transition-colors shadow-soft"
+            aria-label="Previous image"
+          >
+            <ChevronLeft size={24} className="text-stone-800" />
+          </button>
 
           <img
             src={product.images[currentImageIndex]}
             alt={product.name}
-            className="max-w-full max-h-[85vh] object-contain rounded-lg"
+            className="max-w-full max-h-[85vh] object-contain rounded-2xl"
             onClick={(e) => e.stopPropagation()}
           />
 
           <button
-              onClick={(e) => { e.stopPropagation(); nextImage(); }}
-              className="absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full flex items-center justify-center"
-              style={{ backgroundColor: '#ecfdf5', color: '#065f46' }}
-              aria-label="Next image"
-            >
-              <ChevronRight size={22} />
+            onClick={(e) => {
+              e.stopPropagation();
+              nextImage();
+            }}
+            className="absolute right-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full flex items-center justify-center bg-white hover:bg-stone-100 transition-colors shadow-soft"
+            aria-label="Next image"
+          >
+            <ChevronRight size={24} className="text-stone-800" />
           </button>
         </div>
       )}

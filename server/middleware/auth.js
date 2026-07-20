@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 const authMiddleware = (req, res, next) => {
   try {
     let token = req.cookies.adminToken;
-    // Also check Authorization header as fallback
+
     if (!token && req.headers.authorization) {
       token = req.headers.authorization.split(' ')[1];
     }

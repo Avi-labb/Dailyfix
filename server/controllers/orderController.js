@@ -12,13 +12,17 @@ const generateOrderId = () => {
 
 const createOrder = async (req, res) => {
   try {
-    const { customer, items, shippingAddress, paymentMethod = 'cod' } = req.body;
+    const { customer, items, shippingAddress, shipping_address, paymentMethod, payment_method = 'cod' } = req.body;
+    
+    // Normalize the keys (handle both snake_case and camelCase)
+    const shippingAddressData = shippingAddress || shipping_address;
+    const payment = paymentMethod || payment_method;
     
     // Validate required fields
     if (!customer.firstName || !customer.lastName || !customer.email || !customer.phone) {
       return res.status(400).json({ message: 'Please provide all customer details' });
     }
-    if (!shippingAddress.address || !shippingAddress.city || !shippingAddress.state || !shippingAddress.pincode) {
+    if (!shippingAddressData || !shippingAddressData.address || !shippingAddressData.city || !shippingAddressData.state || !shippingAddressData.pincode) {
       return res.status(400).json({ message: 'Please provide complete shipping address' });
     }
 
@@ -45,7 +49,7 @@ const createOrder = async (req, res) => {
         price: itemPrice,
         total: itemTotal
       });
-      
+      console.log("product",prouct.name)
       orderItemsDb.push({
         product: product._id,
         quantity: item.quantity,
@@ -68,10 +72,10 @@ const createOrder = async (req, res) => {
       },
       total: grandTotal,
       tax,
-      shipping,
-      paymentMethod: paymentMethod === 'cod' ? 'COD' : 'Online',
-      paymentStatus: paymentMethod === 'cod' ? 'Pending (COD)' : 'Paid',
-      shippingAddress: shippingAddress,
+      shipping: 0,
+      paymentMethod: payment === 'cod' ? 'COD' : 'Online',
+      paymentStatus: payment === 'cod' ? 'Pending (COD)' : 'Paid',
+      shippingAddress: shippingAddressData,
       items: orderItemsDb,
       status: 'Confirmed'
     });
@@ -87,24 +91,81 @@ const createOrder = async (req, res) => {
     // ------------------------------
     // Automatically create Delhivery shipment
     // ------------------------------
+    let shipmentData;
     try {
       // Prepare shipment data
-      const isCod = paymentMethod === 'cod';
-      const shipmentData = {
-        shipments: [{
-          name: `${customer.firstName} ${customer.lastName}`,
-          add: shippingAddress.address,
-          pin: shippingAddress.pincode,
-          city: shippingAddress.city,
-          state: shippingAddress.state,
-          country: 'India',
-          phone: customer.phone,
-          order: orderId,
-          payment_mode: isCod ? 'COD' : 'Prepaid',
-          shipping_mode: 'Surface',
-          cod_amount: isCod ? grandTotal : 0,
-          product_desc: orderItems.map(item => `${item.name} x${item.quantity}`).join(', ')
-        }]
+      const isCod = payment === 'cod';
+      
+      // Prepare customer object
+      const customerData = {
+        name: `${customer.firstName} ${customer.lastName}`,
+        address: shippingAddressData.address,
+        pin: shippingAddressData.pincode,
+        city: shippingAddressData.city,
+        state: shippingAddressData.state,
+        country: 'India',
+        phone: customer.phone
+      };
+      
+      // Prepare shipment object
+      const shipment = {
+        // Customer / Consignee
+        name: customerData.name,
+        add: customerData.address,
+        pin: String(customerData.pin),
+        city: customerData.city,
+        state: customerData.state,
+        country: customerData.country,
+        phone: String(customerData.phone),
+        
+        // Order
+        order: String(orderId),
+        payment_mode: isCod ? 'COD' : 'Pre-paid',
+        shipping_mode: 'Surface',
+        cod_amount: isCod ? Number(grandTotal) : 0,
+        products_desc: orderItems.map(item => `${item.name} x${item.quantity}`).join(', '),
+        
+        // Package details (default values)
+        weight: 500, // grams
+        shipment_length: 20, // cm
+        shipment_width: 15, // cm
+        shipment_height: 10, // cm
+        
+        // Pickup location
+        pickup_location: process.env.DELHIVERY_PICKUP_NAME,
+        
+        // Seller details
+        seller_name: process.env.DELHIVERY_PICKUP_NAME,
+        seller_address: process.env.DELHIVERY_PICKUP_ADDRESS,
+        seller_city: process.env.DELHIVERY_PICKUP_CITY,
+        seller_state: process.env.DELHIVERY_PICKUP_STATE,
+        seller_pin: process.env.DELHIVERY_PICKUP_PIN,
+        seller_country: process.env.DELHIVERY_PICKUP_COUNTRY || 'India',
+        seller_phone: process.env.DELHIVERY_PICKUP_PHONE,
+        seller_gstin: process.env.DELHIVERY_GST_NUMBER,
+        
+        // Consignee details
+        name_consignee: customerData.name,
+        address_consignee: customerData.address,
+        city_consignee: customerData.city,
+        state_consignee: customerData.state,
+        pin_consignee: String(customerData.pin),
+        phone_consignee: String(customerData.phone),
+        country_consignee: customerData.country,
+        
+        // Individual product fields (for compatibility)
+        ...orderItems.reduce((acc, item, index) => {
+          acc[`name${index + 1}`] = item.name;
+          acc[`qty${index + 1}`] = item.quantity;
+          acc[`price${index + 1}`] = item.price;
+          return acc;
+        }, {})
+      };
+      
+      // Final payload
+      shipmentData = {
+        shipments: [shipment],
+        client: process.env.DELHIVERY_CLIENT_NAME // Important: add client field!
       };
 
       // Create shipment with Delhivery
@@ -125,7 +186,13 @@ const createOrder = async (req, res) => {
         await order.save();
       }
     } catch (shipmentError) {
-      console.error('❌ Error creating Delhivery shipment:', shipmentError);
+      console.error('❌ Error creating Delhivery shipment:');
+      console.error('  - Error message:', shipmentError.message);
+      if (shipmentError.response) {
+        console.error('  - Response status:', shipmentError.response.status);
+        console.error('  - Response data:', JSON.stringify(shipmentError.response.data, null, 2));
+      }
+      console.error('  - Shipment data sent:', JSON.stringify(shipmentData, null, 2));
       // Don't fail the order if shipment creation fails
     }
     

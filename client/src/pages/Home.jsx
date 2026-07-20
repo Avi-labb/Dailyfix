@@ -57,9 +57,9 @@ const Home = () => {
   ];
 
   return (
-    <div className="min-h-screen -mt-20 sm:-mt-15 bg-white">
+    <div className="min-h-screen bg-white">
       {/* Hero Section with Banner */}
-      <section className="min-h-screen pt-20 relative overflow-hidden">
+      <section className="min-h-screen -mt-20 -sm:mt-10 pt-10 relative overflow-hidden">
         {/* Background Banner Image */}
         <div className="absolute inset-0 z-0">
           {/* Mobile Banner */}
@@ -90,7 +90,7 @@ const Home = () => {
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 <p className="text-white font-bold text-xs tracking-widest uppercase">Dailyfix Grooming</p>
               </div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl  mb-60 sm:mb-0  font-semibold text-white tracking-tight leading-[1.1]">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl mb-6 font-semibold text-white tracking-tight leading-[1.1]">
                 Premium Men's <br />
                 <span className="text-emerald-500">Beard Colour</span> <br />
                 for a Perfect Look
@@ -118,7 +118,7 @@ const Home = () => {
             {/* Left - Dynamic Image Layout */}
             <div className="lg:col-span-6 relative hidden sm:flex justify-center lg:justify-start">
               {/* Decorative background shape */}
-              <div className="absolute -bottom-6 -right-6 w-72 h-82 bg-emerald-50 rounded-full filter blur-3xl opacity-70"></div>
+              <div className="absolute -bottom-6 -right-6 w-72 h-80 bg-emerald-50 rounded-full blur-3xl opacity-70"></div>
 
               <div className="relative group">
                 <div className="absolute inset-0 bg-stone-900/10 rounded-2xl blur-xl transform translate-x-4 translate-y-4 transition-transform duration-500 group-hover:translate-x-2 group-hover:translate-y-2"></div>
@@ -229,8 +229,8 @@ const Home = () => {
                 src="https://player.cloudinary.com/embed/?cloud_name=dpc9o6z8n&public_id=Untitled_design_3_b4ii2s&autoplay=true&muted=true&loop=true&logo=false" 
                 title="Dailyfix Beard Colour Video"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                allowfullscreen
-                frameborder="0">
+                allowFullScreen
+                frameBorder="0">
             </iframe>
         </div>
     </div>

@@ -1,208 +1,726 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingCart, Menu, X, CheckCircle, Package } from 'lucide-react';
+import {
+  ShoppingBag,
+  Menu,
+  X,
+  CheckCircle,
+  ArrowUpRight,
+} from 'lucide-react';
+
 import { useCart } from '../context/CartContext';
 import logo from '../assets/images/dailyfix new logo.png';
 
 const Navbar = () => {
   const location = useLocation();
-  const { cart, getItemCount, lastAddedProduct, setLastAddedProduct } = useCart();
+
+  const {
+    getItemCount,
+    lastAddedProduct,
+    setLastAddedProduct,
+  } = useCart();
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showCartPopup, setShowCartPopup] = useState(false);
 
+  /* Close mobile menu when route changes */
   useEffect(() => {
-    if (lastAddedProduct) {
-      setShowCartPopup(true);
-      const timer = setTimeout(() => {
-        setShowCartPopup(false);
-        setLastAddedProduct(null);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
+
+  /* Cart popup */
+  useEffect(() => {
+    if (!lastAddedProduct) return;
+
+    setShowCartPopup(true);
+
+    const timer = setTimeout(() => {
+      setShowCartPopup(false);
+      setLastAddedProduct(null);
+    }, 4000);
+
+    return () => clearTimeout(timer);
   }, [lastAddedProduct, setLastAddedProduct]);
 
   const navItems = [
-    { label: 'Home', path: '/' },
-    { label: 'Beard Colour', path: '/shop' },
-    { label: 'About Us', path: '/about' },
-    { label: 'Blog', path: '/blog' }
+    {
+      label: 'HOME',
+      path: '/',
+    },
+    {
+      label: 'BEARD COLOUR',
+      path: '/shop',
+    },
+    {
+      label: 'ABOUT US',
+      path: '/about',
+    },
+    {
+      label: 'BLOG',
+      path: '/blog',
+    },
   ];
 
-  const getActiveClass = (path) => {
-    return location.pathname === path 
-      ? 'text-emerald-600' 
-      : 'text-white hover:text-emerald-400';
+  const isActive = (path) => {
+    if (path === '/') {
+      return location.pathname === '/';
+    }
+
+    return location.pathname.startsWith(path);
   };
 
-  
+  const productImage =
+    lastAddedProduct?.product?.images?.[0] ||
+    lastAddedProduct?.product?.image;
+
+  const productPrice =
+    lastAddedProduct?.product?.discount_price ||
+    lastAddedProduct?.product?.price ||
+    0;
+
   return (
     <>
-    <header className="fixed top-0 left-0 right-0 z-[9999] py-3 sm:py-4 px-8 md:px-16 bg-black/70 backdrop-blur-lg shadow-sm">
-        <div className="max-w-9xl mx-auto flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3">
-            <img
-              src={logo}
-              alt="Dailyfix"
-              className="h-8 md:h-10 w-auto"
-            />
-          </Link>
-          
-          {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center space-x-10">
-            {navItems.map((item, index) => (
+      {/* =====================================================
+          NAVBAR
+      ====================================================== */}
+
+      <header className="fixed top-0 left-0 right-0 z-[9999] ">
+
+        {/* Background */}
+        <div className="bg-black/90 backdrop-blur-2xl border-b border-white/10">
+
+          <div className="max-w-[1500px] mx-auto px-5  sm:px-8 lg:px-12">
+
+            <div className="h-[76px] lg:h-[84px] flex items-center justify-between">
+
+              {/* =================================================
+                  LOGO
+              ================================================== */}
+
               <Link
-                key={index}
-                to={item.path}
-                className={`text-base font-semibold uppercase ${getActiveClass(item.path)} transition-colors`}
+                to="/"
+                className="flex-shrink-0 group"
               >
-                {item.label}
+                <img
+                  src={logo}
+                  alt="Dailyfix"
+                  className="
+                    h-9
+                    sm:h-10
+                    lg:h-11
+                    w-auto
+                    object-contain
+                    transition-transform
+                    duration-300
+                    group-hover:scale-105
+                  "
+                />
               </Link>
-            ))}
-          </nav>
-          
-          {/* Desktop Right Side */}
-          <div className="hidden md:flex items-center gap-6">
-            <Link to="/cart" className="relative text-white hover:text-emerald-400 transition-colors">
-              <ShoppingCart className="w-7 h-7" />
-              <AnimatePresence>
-                {getItemCount() > 0 && (
-                  <motion.span
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="absolute -top-2 -right-2 bg-emerald-500 text-white text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full"
-                  >
-                    {getItemCount()}
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </Link>
-            <Link 
-              to="/contact" 
-              className="bg-gradient-to-r from-emerald-500 to-emerald-700 text-white font-bold px-8 py-3 rounded-full hover:from-emerald-600 hover:to-emerald-800 transition-all transform hover:scale-105 shadow-lg"
-            >
-              Contact Us
-            </Link>
-          </div>
-          
-          {/* Mobile Right Side */}
-          <div className="md:hidden flex items-center gap-4">
-            <Link to="/cart" className="relative text-white">
-              <ShoppingCart className="w-7 h-7" />
-              <AnimatePresence>
-                {getItemCount() > 0 && (
-                  <motion.span
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="absolute -top-2 -right-2 bg-emerald-500 text-white text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full"
-                  >
-                    {getItemCount()}
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </Link>
-            <button 
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="text-white"
-            >
-              {mobileMenuOpen ? <X className="w-8 h-8" /> : <Menu className="w-8 h-8" />}
-            </button>
-          </div>
-        </div>
-        
-        {/* Mobile Menu */}
-        <AnimatePresence>
-          {mobileMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="md:hidden bg-slate-900/98 backdrop-blur-xl absolute top-full left-0 right-0 py-10 px-8 shadow-2xl"
-            >
-              <nav className="flex flex-col space-y-6">
-                {navItems.map((item, index) => (
-                  <Link
-                    key={index}
-                    to={item.path}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="text-xl font-semibold text-white hover:text-emerald-400 transition-colors"
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-                <Link 
-                  to="/cart" 
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="text-xl font-semibold text-white hover:text-emerald-400 transition-colors flex items-center gap-3"
+
+
+              {/* =================================================
+                  DESKTOP NAVIGATION
+              ================================================== */}
+
+              <nav className="hidden lg:flex items-center gap-9 xl:gap-12">
+
+                {navItems.map((item) => {
+
+                  const active = isActive(item.path);
+
+                  return (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      className={`
+                        relative
+                        py-3
+                        text-[14px]
+                        xl:text-[15px]
+                        font-medium
+                        tracking-wide
+                        transition-all
+                        duration-300
+                        ${
+                          active
+                            ? 'text-emerald-400'
+                            : 'text-white/80 hover:text-white'
+                        }
+                      `}
+                    >
+
+                      {item.label}
+
+                      {/* Active Indicator */}
+
+                      {active && (
+                        <motion.span
+                          layoutId="activeNavbar"
+                          className="
+                            absolute
+                            left-0
+                            right-0
+                            -bottom-1
+                            h-[2px]
+                            rounded-full
+                            bg-emerald-400
+                          "
+                        />
+                      )}
+
+                    </Link>
+                  );
+                })}
+
+              </nav>
+
+
+              {/* =================================================
+                  RIGHT ACTIONS
+              ================================================== */}
+
+              <div className="hidden lg:flex items-center gap-5">
+
+                {/* Cart */}
+
+                <Link
+                  to="/cart"
+                  className="
+                    relative
+                    group
+                    flex
+                    items-center
+                    justify-center
+                    w-11
+                    h-11
+                    rounded-full
+                    border
+                    border-white/10
+                    hover:border-emerald-400/50
+                    hover:bg-emerald-400/10
+                    transition-all
+                    duration-300
+                  "
                 >
-                  Cart
+
+                  <ShoppingBag
+                    className="
+                      w-[19px]
+                      h-[19px]
+                      text-white/80
+                      group-hover:text-emerald-400
+                      transition-colors
+                    "
+                  />
+
                   {getItemCount() > 0 && (
-                    <span className="bg-emerald-500 text-white text-sm font-bold px-3 py-1 rounded-full">
+                    <motion.span
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="
+                        absolute
+                        -top-1
+                        -right-1
+                        flex
+                        items-center
+                        justify-center
+                        min-w-[19px]
+                        h-[19px]
+                        px-1
+                        rounded-full
+                        bg-emerald-400
+                        text-black
+                        text-[10px]
+                        font-bold
+                        border-2
+                        border-black
+                      "
+                    >
+                      {getItemCount()}
+                    </motion.span>
+                  )}
+
+                </Link>
+
+
+                {/* Contact Button */}
+
+                <Link
+                  to="/contact"
+                  className="
+                    group
+                    flex
+                    items-center
+                    gap-3
+                    px-5
+                    py-3
+                    rounded-full
+                    bg-emerald-400
+                    hover:bg-emerald-300
+                    text-black
+                    text-sm
+                    font-semibold
+                    transition-all
+                    duration-300
+                    hover:shadow-[0_0_25px_rgba(52,211,153,0.25)]
+                  "
+                >
+
+                  Contact Us
+
+                  <ArrowUpRight
+                    className="
+                      w-4
+                      h-4
+                      transition-transform
+                      duration-300
+                      group-hover:translate-x-0.5
+                      group-hover:-translate-y-0.5
+                    "
+                  />
+
+                </Link>
+
+              </div>
+
+
+              {/* =================================================
+                  MOBILE ACTIONS
+              ================================================== */}
+
+              <div className="lg:hidden flex items-center gap-3">
+
+                {/* Mobile Cart */}
+
+                <Link
+                  to="/cart"
+                  className="
+                    relative
+                    flex
+                    items-center
+                    justify-center
+                    w-10
+                    h-10
+                    rounded-full
+                    border
+                    border-white/10
+                  "
+                >
+
+                  <ShoppingBag className="w-5 h-5 text-white" />
+
+                  {getItemCount() > 0 && (
+                    <span
+                      className="
+                        absolute
+                        -top-1
+                        -right-1
+                        flex
+                        items-center
+                        justify-center
+                        min-w-[18px]
+                        h-[18px]
+                        rounded-full
+                        bg-emerald-400
+                        text-black
+                        text-[10px]
+                        font-bold
+                      "
+                    >
                       {getItemCount()}
                     </span>
                   )}
+
                 </Link>
-                <Link 
-                  to="/contact" 
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="text-xl font-semibold text-white hover:text-emerald-400 transition-colors"
+
+
+                {/* Menu Button */}
+
+                <button
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  className="
+                    flex
+                    items-center
+                    justify-center
+                    w-10
+                    h-10
+                    rounded-full
+                    border
+                    border-white/10
+                    text-white
+                    hover:text-emerald-400
+                    transition-colors
+                  "
+                  aria-label="Toggle menu"
                 >
-                  Contact
-                </Link>
-              </nav>
-            </motion.div>
+
+                  {mobileMenuOpen ? (
+                    <X className="w-5 h-5" />
+                  ) : (
+                    <Menu className="w-5 h-5" />
+                  )}
+
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        {/* =====================================================
+            MOBILE MENU
+        ====================================================== */}
+
+        <AnimatePresence>
+
+          {mobileMenuOpen && (
+
+            <>
+
+              {/* Overlay */}
+
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setMobileMenuOpen(false)}
+                className="
+                  fixed
+                  inset-0
+                  bg-black/70
+                  backdrop-blur-sm
+                  lg:hidden
+                "
+              />
+
+
+              {/* Mobile Panel */}
+
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.25 }}
+                className="
+                  relative
+                  z-10
+                  lg:hidden
+                  bg-[#07110D]
+                  border-b
+                  border-white/10
+                  shadow-2xl
+                "
+              >
+
+                <nav className="max-w-[1500px] mx-auto px-5 py-6">
+
+                  <div className="flex flex-col gap-2">
+
+                    {navItems.map((item) => {
+
+                      const active = isActive(item.path);
+
+                      return (
+                        <Link
+                          key={item.path}
+                          to={item.path}
+                          className={`
+                            flex
+                            items-center
+                            justify-between
+                            px-5
+                            py-4
+                            rounded-xl
+                            text-base
+                            font-medium
+                            transition-all
+                            ${
+                              active
+                                ? 'bg-emerald-400/10 text-emerald-400'
+                                : 'text-white hover:bg-white/5'
+                            }
+                          `}
+                        >
+
+                          {item.label}
+
+                          {active && (
+                            <span
+                              className="
+                                w-2
+                                h-2
+                                rounded-full
+                                bg-emerald-400
+                              "
+                            />
+                          )}
+
+                        </Link>
+                      );
+                    })}
+
+
+                    {/* Cart */}
+
+                    <Link
+                      to="/cart"
+                      className="
+                        flex
+                        items-center
+                        justify-between
+                        px-5
+                        py-4
+                        rounded-xl
+                        text-base
+                        font-medium
+                        text-white
+                        hover:bg-white/5
+                        transition-all
+                      "
+                    >
+
+                      <span>Shopping Cart</span>
+
+                      {getItemCount() > 0 && (
+                        <span
+                          className="
+                            px-3
+                            py-1
+                            rounded-full
+                            bg-emerald-400
+                            text-black
+                            text-xs
+                            font-bold
+                          "
+                        >
+                          {getItemCount()} Items
+                        </span>
+                      )}
+
+                    </Link>
+
+
+                    {/* Contact */}
+
+                    <Link
+                      to="/contact"
+                      className="
+                        mt-4
+                        flex
+                        items-center
+                        justify-center
+                        gap-2
+                        px-6
+                        py-4
+                        rounded-xl
+                        bg-emerald-400
+                        text-black
+                        font-semibold
+                        hover:bg-emerald-300
+                        transition-colors
+                      "
+                    >
+
+                      Contact Us
+
+                      <ArrowUpRight className="w-5 h-5" />
+
+                    </Link>
+
+                  </div>
+
+                </nav>
+
+              </motion.div>
+
+            </>
+
           )}
+
         </AnimatePresence>
+
       </header>
 
-      {/* Spacer so content doesn't go under navbar */}
-      <div className="h-24"></div>
-      
-      {/* Cart Popup / Add to Cart Notification */}
+
+      {/* =====================================================
+          NAVBAR SPACER
+      ====================================================== */}
+
+      <div className="h-[76px] lg:h-[84px]" />
+
+
+      {/* =====================================================
+          ADD TO CART POPUP
+      ====================================================== */}
+
       <AnimatePresence>
+
         {showCartPopup && lastAddedProduct && (
+
           <motion.div
-            initial={{ opacity: 0, x: 300, y: 0 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 300 }}
-            className="fixed top-28 right-4 z-[10000] max-w-md w-full bg-white rounded-2xl shadow-2xl p-6 border border-gray-100"
+            initial={{ opacity: 0, y: -20, x: 30 }}
+            animate={{ opacity: 1, y: 0, x: 0 }}
+            exit={{ opacity: 0, y: -20, x: 30 }}
+            transition={{ duration: 0.3 }}
+            className="
+              fixed
+              top-24
+              right-4
+              sm:right-6
+              z-[10000]
+              w-[calc(100%-2rem)]
+              sm:w-[390px]
+            "
           >
-            <div className="flex items-start gap-4">
-              <div className="w-16 h-16 rounded-xl overflow-hidden bg-gray-50 flex-shrink-0">
-                <img
-                  src={lastAddedProduct.product.images ? lastAddedProduct.product.images[0] : lastAddedProduct.product.image}
-                  alt={lastAddedProduct.product.name}
-                  className="w-full h-full object-contain"
-                />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <CheckCircle className="w-5 h-5 text-emerald-500" />
-                  <span className="font-semibold text-gray-800">Item Added</span>
+
+            <div
+              className="
+                overflow-hidden
+                rounded-2xl
+                bg-white
+                shadow-2xl
+                border
+                border-gray-100
+              "
+            >
+
+              {/* Top Accent */}
+
+              <div className="h-1 bg-emerald-400" />
+
+
+              <div className="p-5">
+
+                <div className="flex items-start gap-4">
+
+                  {/* Product Image */}
+
+                  <div
+                    className="
+                      w-16
+                      h-16
+                      rounded-xl
+                      bg-gray-50
+                      flex-shrink-0
+                      overflow-hidden
+                      border
+                      border-gray-100
+                    "
+                  >
+
+                    <img
+                      src={productImage}
+                      alt={lastAddedProduct.product.name}
+                      className="w-full h-full object-contain"
+                    />
+
+                  </div>
+
+
+                  {/* Product Info */}
+
+                  <div className="flex-1 min-w-0">
+
+                    <div className="flex items-center gap-2 mb-1">
+
+                      <CheckCircle className="w-5 h-5 text-emerald-500" />
+
+                      <span className="text-sm font-bold text-gray-900">
+                        Added to Cart
+                      </span>
+
+                    </div>
+
+
+                    <p className="text-sm text-gray-700 truncate">
+                      {lastAddedProduct.product.name}
+                    </p>
+
+
+                    <div className="flex items-center justify-between mt-2">
+
+                      <span className="text-xs text-gray-500">
+                        Qty: {lastAddedProduct.quantity}
+                      </span>
+
+                      <span className="text-base font-bold text-emerald-600">
+                        ₹
+                        {productPrice *
+                          lastAddedProduct.quantity}
+                      </span>
+
+                    </div>
+
+                  </div>
+
+
+                  {/* Close */}
+
+                  <button
+                    onClick={() => {
+                      setShowCartPopup(false);
+                      setLastAddedProduct(null);
+                    }}
+                    className="
+                      text-gray-400
+                      hover:text-gray-900
+                      transition-colors
+                    "
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+
                 </div>
-                <p className="text-sm text-gray-600 mb-1">
-                  {lastAddedProduct.product.name}
-                </p>
-                <p className="text-xs text-gray-500">
-                  Quantity: {lastAddedProduct.quantity}
-                </p>
-                <p className="text-sm font-bold text-emerald-600 mt-1">
-                  ₹{(lastAddedProduct.product.discount_price || lastAddedProduct.product.price) * lastAddedProduct.quantity}
-                </p>
+
+
+                {/* View Cart */}
+
+                <Link
+                  to="/cart"
+                  onClick={() => {
+                    setShowCartPopup(false);
+                    setLastAddedProduct(null);
+                  }}
+                  className="
+                    mt-4
+                    w-full
+                    flex
+                    items-center
+                    justify-center
+                    gap-2
+                    py-3
+                    rounded-xl
+                    bg-gray-900
+                    text-white
+                    text-sm
+                    font-bold
+                    hover:bg-emerald-500
+                    hover:text-black
+                    transition-all
+                  "
+                >
+
+                  View Cart
+
+                  <ArrowUpRight className="w-4 h-4" />
+
+                </Link>
+
               </div>
-              <button
-                onClick={() => {
-                  setShowCartPopup(false)
-                  setLastAddedProduct(null)
-                }}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
+
             </div>
+
           </motion.div>
+
         )}
+
       </AnimatePresence>
+
     </>
   );
 };
