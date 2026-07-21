@@ -1,115 +1,365 @@
-import axios from 'axios';
+import axios from "axios";
 
 class DelhiveryService {
   constructor() {
     this.apiKey = process.env.DELHIVERY_API_KEY;
-    this.baseUrl = process.env.DELHIVERY_BASE_URL || 'https://track.delhivery.com';
-    this.shipmentUrl = process.env.DELHIVERY_SHIPMENT_URL || 'https://bharatapi.delhivery.com';
-    
+
+    // Tracking API
+    this.baseUrl =
+      process.env.DELHIVERY_BASE_URL ||
+      "https://track.delhivery.com";
+
+    // Shipment API
+    this.shipmentUrl =
+      process.env.DELHIVERY_SHIPMENT_URL ||
+      "https://bharatapi.delhivery.com";
+
     if (!this.apiKey) {
-      console.warn('⚠️  DELHIVERY_API_KEY is not set in environment variables! Delhivery integration will not work.');
+      console.warn(
+        "⚠️ DELHIVERY_API_KEY is not set in environment variables!"
+      );
     }
   }
 
-  // Create shipment
+  /*
+  ==========================================
+  COMMON HEADERS
+  ==========================================
+  */
+
+  getHeaders() {
+    return {
+      Authorization: `Token ${this.apiKey}`,
+      Accept: "application/json",
+    };
+  }
+
+
+  /*
+  ==========================================
+  CREATE SHIPMENT
+  ==========================================
+  */
+
   async createShipment(orderData) {
     try {
-      // Format data as per Delhivery's requirement: format=json&data={json}
-      const postData = `format=json&data=${encodeURIComponent(JSON.stringify(orderData))}`;
-      
+      if (!this.apiKey) {
+        throw new Error(
+          "DELHIVERY_API_KEY is missing"
+        );
+      }
+
+      const postData =
+        `format=json&data=${encodeURIComponent(
+          JSON.stringify(orderData)
+        )}`;
+
+
+      console.log(
+        "📦 Creating Delhivery shipment..."
+      );
+
+      console.log(
+        "📦 Shipment URL:",
+        `${this.shipmentUrl}/api/cmu/create.json`
+      );
+
+
       const response = await axios.post(
-        `${this.baseUrl}/api/cmu/create.json`,
+        `${this.shipmentUrl}/api/cmu/create.json`,
+
         postData,
+
         {
           headers: {
-            'Authorization': `Token ${this.apiKey}`,
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Accept': 'application/json'
-          }
+            ...this.getHeaders(),
+
+            "Content-Type":
+              "application/x-www-form-urlencoded",
+          },
+
+          timeout: 30000,
         }
       );
+
+
+      console.log(
+        "✅ FULL DELHIVERY RESPONSE:",
+        JSON.stringify(
+          response.data,
+          null,
+          2
+        )
+      );
+
+
       return response.data;
+
+
     } catch (error) {
-      console.error('Delhivery create shipment error:', error.response?.data || error.message);
-      throw new Error('Failed to create Delhivery shipment');
+
+      console.error(
+        "❌ DELHIVERY CREATE SHIPMENT ERROR:",
+        error.response?.data ||
+        error.message
+      );
+
+
+      throw new Error(
+        error.response?.data?.error ||
+        error.response?.data?.message ||
+        "Failed to create Delhivery shipment"
+      );
     }
   }
 
-  // Track shipment by waybill number
+
+  /*
+  ==========================================
+  EXTRACT AWB / WAYBILL
+  ==========================================
+  */
+
+  extractAWB(response) {
+
+    console.log(
+      "🔍 Searching AWB in response:",
+      JSON.stringify(
+        response,
+        null,
+        2
+      )
+    );
+
+
+    const awb =
+      response?.packages?.[0]?.waybill ||
+
+      response?.packages?.[0]?.awb ||
+
+      response?.waybill ||
+
+      response?.awb ||
+
+      response?.data?.packages?.[0]?.waybill ||
+
+      response?.data?.waybill ||
+
+      response?.data?.awb;
+
+
+    if (!awb) {
+
+      throw new Error(
+        "Delhivery did not return AWB / Waybill"
+      );
+    }
+
+
+    return String(awb);
+  }
+
+
+  /*
+  ==========================================
+  TRACK SHIPMENT
+  ==========================================
+  */
+
   async trackShipment(waybill) {
+
     try {
+
+      if (!waybill) {
+        throw new Error(
+          "Waybill / AWB is required"
+        );
+      }
+
+
       const response = await axios.get(
+
         `${this.baseUrl}/api/v1/packages/json/`,
+
         {
           params: {
-            waybill: waybill
+            waybill: String(waybill),
           },
+
           headers: {
-            'Authorization': `Token ${this.apiKey}`,
-            'Content-Type': 'application/json'
-          }
+            ...this.getHeaders(),
+
+            "Content-Type":
+              "application/json",
+          },
+
+          timeout: 15000,
         }
       );
+
+
       return response.data;
+
+
     } catch (error) {
-      console.error('Delhivery track shipment error:', error.response?.data || error.message);
-      throw new Error('Failed to track shipment');
+
+      console.error(
+        "❌ DELHIVERY TRACKING ERROR:",
+
+        error.response?.data ||
+        error.message
+      );
+
+
+      throw new Error(
+        error.response?.data?.message ||
+        "Failed to track shipment"
+      );
     }
   }
 
-  // Generate shipping label
+
+  /*
+  ==========================================
+  GENERATE SHIPPING LABEL
+  ==========================================
+  */
+
   async generateLabel(waybills) {
+
     try {
+
+      if (
+        !Array.isArray(waybills) ||
+        waybills.length === 0
+      ) {
+
+        throw new Error(
+          "At least one waybill is required"
+        );
+      }
+
+
       const response = await axios.get(
+
         `${this.baseUrl}/api/p/packing_slip/`,
+
         {
           params: {
-            waybills: waybills.join(',')
+            waybills:
+              waybills.join(","),
           },
+
           headers: {
-            'Authorization': `Token ${this.apiKey}`,
-            'Content-Type': 'application/json'
+            ...this.getHeaders(),
+
+            "Content-Type":
+              "application/json",
           },
-          responseType: 'arraybuffer'
+
+          responseType:
+            "arraybuffer",
+
+          timeout: 30000,
         }
       );
+
+
       return response.data;
+
+
     } catch (error) {
-      console.error('Delhivery generate label error:', error.response?.data || error.message);
-      throw new Error('Failed to generate shipping label');
+
+      console.error(
+        "❌ DELHIVERY LABEL ERROR:",
+
+        error.response?.data ||
+        error.message
+      );
+
+
+      throw new Error(
+        "Failed to generate shipping label"
+      );
     }
   }
 
-  // Cancel shipment
-  async cancelShipment(waybill, reason = 'Order cancelled') {
+
+  /*
+  ==========================================
+  CANCEL SHIPMENT
+  ==========================================
+  */
+
+  async cancelShipment(
+    waybill,
+    reason = "Order cancelled"
+  ) {
+
     try {
+
+      if (!waybill) {
+
+        throw new Error(
+          "Waybill / AWB is required"
+        );
+      }
+
+
       const response = await axios.post(
+
         `${this.shipmentUrl}/api/p/edit/`,
+
         {
-          shipments: [{
-            waybill: waybill,
-            status: 'Cancelled',
-            cancellation_reason: reason
-          }]
+          shipments: [
+            {
+              waybill: String(waybill),
+
+              status: "Cancelled",
+
+              cancellation_reason:
+                reason,
+            },
+          ],
         },
+
         {
           headers: {
-            'Authorization': `Token ${this.apiKey}`,
-            'Content-Type': 'application/json'
-          }
+            ...this.getHeaders(),
+
+            "Content-Type":
+              "application/json",
+          },
+
+          timeout: 15000,
         }
       );
+
+
       return response.data;
+
+
     } catch (error) {
-      console.error('Delhivery cancel shipment error:', error.response?.data || error.message);
-      throw new Error('Failed to cancel shipment');
+
+      console.error(
+        "❌ DELHIVERY CANCEL ERROR:",
+
+        error.response?.data ||
+        error.message
+      );
+
+
+      throw new Error(
+        "Failed to cancel shipment"
+      );
     }
   }
 
-  // Calculate shipping charges - set to 0 now as per user request
   calculateShipping() {
+
     return 0;
   }
 }
+
 
 export default new DelhiveryService();

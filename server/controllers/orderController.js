@@ -14,11 +14,13 @@ const createOrder = async (req, res) => {
   try {
     console.log('📦 Received order request:', JSON.stringify(req.body, null, 2));
     const { customer, items, shippingAddress, shipping_address, paymentMethod, payment_method = 'cod' } = req.body;
-    
+
     // Normalize the keys (handle both snake_case and camelCase)
     const shippingAddressData = shippingAddress || shipping_address;
+    // Add customer phone to shipping address for email template
+    shippingAddressData.phone = customer.phone;
     const payment = paymentMethod || payment_method;
-    
+
     // Validate required fields
     if (!customer.firstName || !customer.lastName || !customer.email || !customer.phone) {
       console.error('❌ Missing customer details');
@@ -36,7 +38,7 @@ const createOrder = async (req, res) => {
     let total = 0;
     const orderItems = []; // Store items for email
     const orderItemsDb = []; // Items for DB
-    
+
     for (let item of items) {
       console.log('🔍 Finding product with ID:', item.productId);
       const product = await Product.findById(item.productId);
@@ -44,11 +46,11 @@ const createOrder = async (req, res) => {
         console.error('❌ Product not found:', item.productId);
         return res.status(404).json({ message: `Product with ID ${item.productId} not found` });
       }
-      
+
       const itemPrice = product.price;
       const itemTotal = itemPrice * item.quantity;
       total += itemTotal;
-      
+
       // Collect item details for email
       orderItems.push({
         id: product._id,
@@ -96,7 +98,7 @@ const createOrder = async (req, res) => {
         $inc: { stock: -item.quantity }
       });
     }
-    
+
     // ------------------------------
     // Automatically create Delhivery shipment
     // ------------------------------
@@ -104,7 +106,7 @@ const createOrder = async (req, res) => {
     try {
       // Prepare shipment data
       const isCod = payment === 'cod';
-      
+
       // Prepare customer object
       const customerData = {
         name: `${customer.firstName} ${customer.lastName}`,
@@ -115,34 +117,45 @@ const createOrder = async (req, res) => {
         country: 'India',
         phone: customer.phone
       };
-      
+
       // Prepare shipment object
       const shipment = {
         // Customer / Consignee
-        name: customerData.name,
-        add: customerData.address,
-        pin: String(customerData.pin),
-        city: customerData.city,
-        state: customerData.state,
-        country: customerData.country,
-        phone: String(customerData.phone),
-        
+        name: `${customer.firstName} ${customer.lastName}`,
+        add: shippingAddressData.address,
+
+        pin: String(shippingAddressData.pincode),
+        city: shippingAddressData.city,
+        state: shippingAddressData.state,
+        country: 'India',
+        phone: String(
+          shippingAddressData.phone
+        ),
+
         // Order
         order: String(orderId),
         payment_mode: isCod ? 'COD' : 'Pre-paid',
         shipping_mode: 'Surface',
         cod_amount: isCod ? Number(grandTotal) : 0,
         products_desc: orderItems.map(item => `${item.name} x${item.quantity}`).join(', '),
-        
+        total_amount:
+          Number(grandTotal),
+
+        quantity:
+          items.reduce(
+            (total, item) =>
+              total + Number(item.quantity),
+            0
+          ),
         // Package details (default values)
         weight: 500, // grams
         shipment_length: 20, // cm
         shipment_width: 15, // cm
         shipment_height: 10, // cm
-        
+
         // Pickup location
         pickup_location: process.env.DELHIVERY_PICKUP_NAME,
-        
+
         // Seller details
         seller_name: process.env.DELHIVERY_PICKUP_NAME,
         seller_address: process.env.DELHIVERY_PICKUP_ADDRESS,
@@ -152,7 +165,7 @@ const createOrder = async (req, res) => {
         seller_country: process.env.DELHIVERY_PICKUP_COUNTRY || 'India',
         seller_phone: process.env.DELHIVERY_PICKUP_PHONE,
         seller_gstin: process.env.DELHIVERY_GST_NUMBER,
-        
+
         // Consignee details
         name_consignee: customerData.name,
         address_consignee: customerData.address,
@@ -161,7 +174,7 @@ const createOrder = async (req, res) => {
         pin_consignee: String(customerData.pin),
         phone_consignee: String(customerData.phone),
         country_consignee: customerData.country,
-        
+
         // Individual product fields (for compatibility)
         ...orderItems.reduce((acc, item, index) => {
           acc[`name${index + 1}`] = item.name;
@@ -170,7 +183,7 @@ const createOrder = async (req, res) => {
           return acc;
         }, {})
       };
-      
+
       // Final payload
       shipmentData = {
         shipments: [shipment],
@@ -179,11 +192,14 @@ const createOrder = async (req, res) => {
 
       // Create shipment with Delhivery
       const delhiveryResponse = await delhiveryService.createShipment(shipmentData);
-      
+      const awb = delhiveryService.extractAWB(delhiveryResponse);
+      console.log("✅ AWB:", awb);
+
       if (delhiveryResponse && delhiveryResponse.shipments && delhiveryResponse.shipments.length > 0) {
         const waybill = delhiveryResponse.shipments[0].waybill;
-        
+
         // Update order
+        order.delhiveryAWB = awb;
         order.delhiveryWaybill = waybill;
         order.delhiveryStatus = 'Manifested';
         order.shipmentCreatedAt = new Date();
@@ -204,34 +220,34 @@ const createOrder = async (req, res) => {
       console.error('  - Shipment data sent:', JSON.stringify(shipmentData, null, 2));
       // Don't fail the order if shipment creation fails
     }
-    
+
     // ------------------------------
     // Send emails asynchronously
     // ------------------------------
-    
+
     // Format date for email
-    const orderDate = new Date().toLocaleDateString('en-IN', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
+    const orderDate = new Date().toLocaleDateString('en-IN', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
     });
-    
+
     // Calculate estimated delivery date (5-7 days from now)
     const estimatedDelivery = new Date();
     estimatedDelivery.setDate(estimatedDelivery.getDate() + 7);
-    const estDeliveryDate = estimatedDelivery.toLocaleDateString('en-IN', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
+    const estDeliveryDate = estimatedDelivery.toLocaleDateString('en-IN', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
     });
-    
+
     // 1. Send Customer Confirmation Email
     const customerEmailData = {
       orderId: orderId,
       customerName: `${customer.firstName} ${customer.lastName}`,
       orderDate: orderDate,
       items: orderItems,
-      shippingAddress: shippingAddress,
+      shippingAddress: shippingAddressData,
       paymentMethod: paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment',
       paymentStatus: paymentMethod === 'cod' ? 'Pending (COD)' : 'Paid',
       subtotal: total,
@@ -240,7 +256,7 @@ const createOrder = async (req, res) => {
       grandTotal: grandTotal,
       estimatedDelivery: estDeliveryDate,
     };
-    
+
     // 2. Send Admin Notification
     const adminEmailData = {
       orderId: orderId,
@@ -248,7 +264,7 @@ const createOrder = async (req, res) => {
       customerEmail: customer.email,
       customerPhone: customer.phone,
       orderDate: orderDate,
-      shippingAddress: shippingAddress,
+      shippingAddress: shippingAddressData,
       paymentMethod: paymentMethod === 'cod' ? 'Cash on Delivery' : 'Online Payment',
       paymentStatus: paymentMethod === 'cod' ? 'Pending (COD)' : 'Paid',
       items: orderItems,
@@ -260,15 +276,15 @@ const createOrder = async (req, res) => {
       try {
         console.log('📧 Preparing to send customer email to:', customer.email);
         console.log('📧 Customer email data:', JSON.stringify(customerEmailData, null, 2));
-        
+
         await sendEmail({
           to: customer.email,
           subject: `Order Confirmation - ${orderId} | DailyFixCare`,
           html: customerOrderTemplate(customerEmailData)
         });
-        
+
         console.log('✅ Customer email sent successfully!');
-        
+
         if (process.env.ADMIN_EMAIL) {
           console.log('📧 Preparing to send admin email to:', process.env.ADMIN_EMAIL);
           await sendEmail({
@@ -307,7 +323,7 @@ const getAllOrders = async (req, res) => {
   try {
     const { status, page = 1, limit = 20 } = req.query;
     const skip = (page - 1) * limit;
-    
+
     const filter = {};
     if (status) filter.status = status;
 
@@ -315,7 +331,7 @@ const getAllOrders = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
-    
+
     res.json(orders);
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -336,7 +352,7 @@ const trackDelhiveryOrder = async (req, res) => {
   try {
     const { orderId } = req.params;
     const order = await Order.findOne({ orderId });
-    
+
     if (!order) {
       return res.status(404).json({ message: 'Order not found' });
     }
@@ -347,26 +363,26 @@ const trackDelhiveryOrder = async (req, res) => {
 
     // Track shipment with Delhivery
     const trackingData = await delhiveryService.trackShipment(order.delhiveryWaybill);
-    
+
     // Update order with latest tracking data
     order.delhiveryTrackingData = trackingData;
     if (trackingData && trackingData.ShipmentData && trackingData.ShipmentData.length > 0) {
       const latestStatus = trackingData.ShipmentData[0].Shipment;
       order.delhiveryStatus = latestStatus.Status?.status || 'In Transit';
-      
+
       if (order.delhiveryStatus === 'Delivered') {
         order.status = 'Delivered';
         order.paymentStatus = 'Paid'; // Mark as paid when delivered for COD
       }
     }
     await order.save();
-    
-    res.json({ 
-      message: 'Tracking data retrieved successfully', 
+
+    res.json({
+      message: 'Tracking data retrieved successfully',
       order,
-      trackingData 
+      trackingData
     });
-    
+
   } catch (error) {
     console.error('Track Delhivery order error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
