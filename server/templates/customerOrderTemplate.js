@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Customer Order Confirmation Email Template
  */
 const customerOrderTemplate = (data) => {
@@ -21,13 +21,16 @@ const customerOrderTemplate = (data) => {
         padding: 10px 0;
         color: #333333;
         font-size: 14px;
+        width: 60%;
+        vertical-align: top;
       ">
         ${item.name}
       </td>
-      <td align="right" style="
+      <td align="center" style="
         padding: 10px 0;
         color: #666666;
         font-size: 14px;
+        width: 20%;
       ">
         x${item.quantity}
       </td>
@@ -36,6 +39,7 @@ const customerOrderTemplate = (data) => {
         color: #111827;
         font-weight: bold;
         font-size: 14px;
+        width: 20%;
       ">
         ₹${(item.total || 0).toFixed(2)}
       </td>
@@ -86,18 +90,15 @@ const customerOrderTemplate = (data) => {
               text-align: center;
             ">
               <!-- Logo -->
-              <img 
-                src="https://coresg-normal.trae.ai/api/ide/v1/text_to_image?prompt=Dailyfix%20logo%2C%20simple%20modern%20design%2C%20white%20on%20dark%20background&image_size=square" 
-                alt="Dailyfix Logo" 
-                style="
-                  max-width: 150px;
-                  height: auto;
-                  margin-bottom: 10px;
-                  display: block;
-                  margin-left: auto;
-                  margin-right: auto;
-                "
-              />
+              <h1 style="
+                margin:0;
+                color:#ffffff;
+                font-size:28px;
+                font-weight:bold;
+                letter-spacing:1px;
+              ">
+                DailyFixCare
+              </h1>
 
               <p style="
                 margin: 8px 0 0;
@@ -151,6 +152,42 @@ const customerOrderTemplate = (data) => {
               </h3>
 
               <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <!-- Table Headers -->
+                <tr>
+                  <td style="
+                    padding: 10px 0;
+                    color: #666666;
+                    font-size: 13px;
+                    font-weight: bold;
+                    width: 60%;
+                    border-bottom: 1px solid #e5e7eb;
+                    padding-bottom: 8px;
+                  ">
+                    Product
+                  </td>
+                  <td align="center" style="
+                    padding: 10px 0;
+                    color: #666666;
+                    font-size: 13px;
+                    font-weight: bold;
+                    width: 20%;
+                    border-bottom: 1px solid #e5e7eb;
+                    padding-bottom: 8px;
+                  ">
+                    Quantity
+                  </td>
+                  <td align="right" style="
+                    padding: 10px 0;
+                    color: #666666;
+                    font-size: 13px;
+                    font-weight: bold;
+                    width: 20%;
+                    border-bottom: 1px solid #e5e7eb;
+                    padding-bottom: 8px;
+                  ">
+                    Price
+                  </td>
+                </tr>
 
                 <tr>
                   <td style="
@@ -166,7 +203,7 @@ const customerOrderTemplate = (data) => {
                     color: #111827;
                     font-weight: bold;
                     font-size: 14px;
-                  ">
+                  " colspan="2">
                     #${orderId}
                   </td>
                 </tr>
@@ -191,7 +228,7 @@ const customerOrderTemplate = (data) => {
                     font-size: 20px;
                     font-weight: bold;
                     border-top: 1px solid #e5e7eb;
-                  ">
+                  " colspan="2">
                     ₹${(grandTotal || 0).toFixed(2)}
                   </td>
                 </tr>

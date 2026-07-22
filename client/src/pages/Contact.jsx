@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   MapPin,
-  Phone,
   Mail,
   Clock,
   CheckCircle2,
@@ -65,13 +64,7 @@ const Contact = () => {
     {
       icon: MapPin,
       title: 'Our Address',
-      content: '123 Grooming Street, Suite 100, Fashion City, FC 12345',
-      color: 'emerald'
-    },
-    {
-      icon: Phone,
-      title: 'Phone Number',
-      content: '+1 (555) 123-4567',
+      content: 'Lightbridge, 6th Floor, Hiranandani Business Park, Saki Vihar Road, Tunga Village, Chandivali, Powai, Mumbai, Maharashtra 400072',
       color: 'emerald'
     },
     {
