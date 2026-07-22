@@ -12,7 +12,7 @@ class DelhiveryService {
     // Shipment API
     this.shipmentUrl =
       process.env.DELHIVERY_SHIPMENT_URL ||
-      "https://bharatapi.delhivery.com";
+      "https://one.delhivery.com";
 
     if (!this.apiKey) {
       console.warn(
@@ -21,11 +21,6 @@ class DelhiveryService {
     }
   }
 
-  /*
-  ==========================================
-  COMMON HEADERS
-  ==========================================
-  */
 
   getHeaders() {
     return {
@@ -61,12 +56,12 @@ class DelhiveryService {
 
       console.log(
         "📦 Shipment URL:",
-        `${this.shipmentUrl}/api/cmu/create.json`
+        `${this.baseUrl}/api/cmu/create.json`
       );
 
 
       const response = await axios.post(
-        `${this.shipmentUrl}/api/cmu/create.json`,
+        `${this.baseUrl}/api/cmu/create.json`,
 
         postData,
 
@@ -91,8 +86,6 @@ class DelhiveryService {
           2
         )
       );
-
-
       return response.data;
 
 
@@ -112,7 +105,6 @@ class DelhiveryService {
       );
     }
   }
-
 
   /*
   ==========================================
@@ -308,7 +300,7 @@ class DelhiveryService {
 
       const response = await axios.post(
 
-        `${this.shipmentUrl}/api/p/edit/`,
+        `${this.baseUrl}/api/p/edit/`,
 
         {
           shipments: [
@@ -355,10 +347,32 @@ class DelhiveryService {
     }
   }
 
-  calculateShipping() {
+async calculateShipping({ originPin, destinationPin, weightGrams, mode = "S" }) {
+    try {
+      const response = await axios.get(
+        `${this.baseUrl}/api/kcs/v1/summary/get`,
+        {
+          params: {
+            md: mode, // "S" for Surface, "E" for Express
+            cgm: weightGrams, // Weight in grams
+            o_pin: originPin,
+            d_pin: destinationPin,
+          },
+          headers: this.getHeaders(),
+          timeout: 15000,
+        }
+      );
 
-    return 0;
+      return response.data;
+    } catch (error) {
+      console.error(
+        "❌ DELHIVERY RATE CALCULATION ERROR:",
+        error.response?.data || error.message
+      );
+      throw new Error("Failed to calculate shipping cost");
+    }
   }
+
 }
 
 
