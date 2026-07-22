@@ -70,7 +70,7 @@ const About = () => {
       icon: Heart,
       title: 'Safety & Transparency',
       description:
-        'We believe in full transparency. All our ingredients are clearly listed, and our formulas are designed to be safe and gentle.'
+        'We believe in full transparency. All Our ingredients are clearly listed, and our formulas are designed to be safe and gentle.'
     },
     {
       icon: Users,
