@@ -47,6 +47,7 @@ const Contact = () => {
     e.preventDefault();
     if (!validateForm()) return;
 
+    
     setIsSubmitting(true);
     setSubmitError('');
 
