@@ -14,6 +14,7 @@ import Home from './pages/Home'
 import About from './pages/About'
 import Shop from './pages/Shop'
 import Blog from './pages/Blog'
+import BlogDetail from './pages/BlogDetail'
 import Contact from './pages/Contact'
 import StoreLocator from './pages/StoreLocator'
 import BeardOil from './pages/BeardOil'
@@ -46,6 +47,7 @@ function App() {
               <Route path="/about" element={<About />} />
               <Route path="/shop" element={<Shop />} />
               <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/:id" element={<BlogDetail />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/store-locator" element={<StoreLocator />} />
               <Route path="/beard-oil" element={<BeardOil />} />

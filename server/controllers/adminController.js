@@ -4,7 +4,7 @@ import Admin from '../models/Admin.js';
 import Order from '../models/Order.js';
 import Product from '../models/Product.js';
 import Customer from '../models/Customer.js';
-import transporter from '../utils/sendEmail.js';
+import sendEmail from '../utils/sendEmail.js';
 import generateToken from '../utils/generateToken.js';
 
 export const login = async (req, res) => {
@@ -86,8 +86,7 @@ export const sendOtp = async (req, res) => {
 
     await admin.save();
 
-    await transporter.sendMail({
-      from: process.env.SMTP_USER,
+    await sendEmail({
       to: email,
       subject: "Password Reset OTP",
       html: `

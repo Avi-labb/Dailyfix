@@ -1,75 +1,15 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import img1 from '../assets/images/1.jpg.jpeg';
-import poster from '../assets/images/poster.png';
-import naturalBlack from '../assets/images/NATURAL BLACK/01.png';
+import { blogPosts } from '../data/blogData.js';
 
 const Blog = () => {
-  // Sample blog posts data
-  const blogPosts = [
-    {
-      id: 1,
-      title: 'How to Choose the Right Beard Colour Shade for Your Skin Tone',
-      excerpt: 'Discover the perfect beard colour shade that complements your skin tone and natural hair colour for a seamless, natural look.',
-      date: 'May 30, 2026',
-      category: 'Grooming Tips',
-      image: img1,
-      readTime: '5 min read'
-    },
-    {
-      id: 2,
-      title: '10 Beard Grooming Mistakes to Avoid in 2026',
-      excerpt: 'Learn from the most common beard grooming mistakes and how to fix them for a perfectly groomed beard that stands out.',
-      date: 'May 28, 2026',
-      category: 'Tips & Tricks',
-      image: poster,
-      readTime: '8 min read'
-    },
-    {
-      id: 3,
-      title: 'Natural vs. Synthetic Beard Colour: Which is Better?',
-      excerpt: 'Compare natural and synthetic beard colour formulas to make an informed decision about what’s best for your beard and skin.',
-      date: 'May 25, 2026',
-      category: 'Product Guide',
-      image: naturalBlack,
-      readTime: '6 min read'
-    },
-    {
-      id: 4,
-      title: 'How Often Should You Colour Your Beard?',
-      excerpt: 'Find out the ideal frequency for beard colour touch-ups to maintain a fresh, natural look without over-processing.',
-      date: 'May 22, 2026',
-      category: 'Grooming Tips',
-      image: img1,
-      readTime: '4 min read'
-    },
-    {
-      id: 5,
-      title: 'The Ultimate Guide to Beard Care After Colouring',
-      excerpt: 'Essential tips for maintaining healthy, vibrant beard colour while keeping your skin and beard nourished.',
-      date: 'May 20, 2026',
-      category: 'Care Guide',
-      image: poster,
-      readTime: '7 min read'
-    },
-    {
-      id: 6,
-      title: 'Ammonia-Free Beard Colour: The Benefits Explained',
-      excerpt: 'Learn why ammonia-free beard colour is the safest choice for sensitive skin and long-term beard health.',
-      date: 'May 18, 2026',
-      category: 'Product Guide',
-      image: naturalBlack,
-      readTime: '5 min read'
-    }
-  ];
-
   const featuredPost = blogPosts[0];
   const otherPosts = blogPosts.slice(1);
 
   return (
     <div className="min-h-screen">
       {/* Page Header */}
-      <section className="bg-gradient-to-br from-gray-900 via-gray-800 to-black pt-40 pb-20 px-8 md:px-16">
+      <section className="bg-gray-900 pt-40 pb-20 px-8 md:px-16">
         <div className="max-w-9xl mx-auto text-center">
           <p className="text-emerald-500 font-semibold text-sm tracking-widest uppercase mb-6">
             Our Blog
@@ -88,7 +28,7 @@ const Blog = () => {
         <div className="max-w-9xl mx-auto">
           <div className="flex flex-col lg:flex-row gap-12 items-center">
             <div className="lg:w-1/2">
-              <div className="relative rounded-3xl overflow-hidden shadow-2xl">
+              <div className="relative rounded-3xl overflow-hidden shadow-lg">
                 <img 
                   src={featuredPost.image} 
                   alt={featuredPost.title} 
@@ -107,7 +47,7 @@ const Blog = () => {
             </div>
 
             <div className="lg:w-1/2">
-              <span className="inline-block bg-emerald-500/10 text-emerald-600 text-xs font-semibold px-4 py-1.5 rounded-full mb-4">
+              <span className="inline-block bg-emerald-50 text-emerald-600 text-xs font-semibold px-4 py-1.5 rounded-full mb-4">
                 {featuredPost.category}
               </span>
               <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4 leading-tight">
@@ -117,8 +57,8 @@ const Blog = () => {
                 {featuredPost.excerpt}
               </p>
               <Link 
-                to="#" 
-                className="inline-flex items-center gap-2 text-emerald-600 font-semibold text-lg hover:gap-4 transition-all"
+                to={`/blog/${featuredPost.id}`} 
+                className="inline-flex items-center gap-2 text-emerald-600 font-semibold text-lg"
               >
                 Read Article
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -131,7 +71,7 @@ const Blog = () => {
       </section>
 
       {/* Blog Grid */}
-      <section className="py-20 px-8 md:px-16 bg-gradient-to-br from-stone-50 to-white">
+      <section className="py-20 px-8 md:px-16 bg-stone-50">
         <div className="max-w-9xl mx-auto">
           <div className="flex flex-wrap justify-between items-center mb-12 gap-4">
             <h2 className="text-3xl font-bold text-slate-900">
@@ -139,8 +79,8 @@ const Blog = () => {
             </h2>
             <div className="flex gap-3">
               <button className="px-5 py-2 bg-emerald-500 text-white rounded-full text-sm font-semibold">All</button>
-              <button className="px-5 py-2 bg-white text-slate-600 hover:bg-emerald-500/10 rounded-full text-sm font-semibold transition-colors">Grooming Tips</button>
-              <button className="px-5 py-2 bg-white text-slate-600 hover:bg-emerald-500/10 rounded-full text-sm font-semibold transition-colors hidden md:block">Product Guide</button>
+              <button className="px-5 py-2 bg-white text-slate-600 rounded-full text-sm font-semibold border border-stone-200">Grooming Tips</button>
+              <button className="px-5 py-2 bg-white text-slate-600 rounded-full text-sm font-semibold border border-stone-200 hidden md:block">Product Guide</button>
             </div>
           </div>
 
@@ -148,14 +88,14 @@ const Blog = () => {
             {otherPosts.map((post) => (
               <Link 
                 key={post.id}
-                to="#" 
-                className="group bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all hover:-translate-y-2"
+                to={`/blog/${post.id}`} 
+                className="bg-white rounded-3xl overflow-hidden shadow-lg border border-stone-100"
               >
                 <div className="relative overflow-hidden">
                   <img 
                     src={post.image} 
                     alt={post.title} 
-                    className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-500"
+                    className="w-full h-80 object-cover"
                   />
                   <span className="absolute top-4 left-4 bg-white text-slate-800 text-xs font-semibold px-3 py-1.5 rounded-full shadow">
                     {post.category}
@@ -168,7 +108,7 @@ const Blog = () => {
                     <span>·</span>
                     <span>{post.readTime}</span>
                   </div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-3 group-hover:text-emerald-600 transition-colors">
+                  <h3 className="text-xl font-bold text-slate-900 mb-3">
                     {post.title}
                   </h3>
                   <p className="text-slate-600 text-sm line-clamp-2">
@@ -181,7 +121,7 @@ const Blog = () => {
 
           {/* Load More Button */}
           <div className="text-center mt-16">
-            <button className="bg-white border-2 border-stone-300 text-slate-800 font-semibold py-3 px-8 rounded-full hover:border-emerald-500 hover:text-emerald-600 transition-colors">
+            <button className="bg-white border-2 border-stone-300 text-slate-800 font-semibold py-3 px-8 rounded-full">
               Load More Articles
             </button>
           </div>
@@ -190,7 +130,7 @@ const Blog = () => {
 
       {/* Newsletter Section */}
       <section className="py-20 px-8 md:px-16 bg-emerald-500">
-        <div className="max-w-4xl mx-auto text-center">
+        <div className="max-w-9xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
             Get Grooming Tips Delivered to Your Inbox
           </h2>
@@ -205,7 +145,7 @@ const Blog = () => {
             />
             <button 
               type="submit" 
-              className="bg-slate-900 text-white font-semibold py-4 px-8 rounded-xl hover:bg-slate-800 transition-colors"
+              className="bg-slate-900 text-white font-semibold py-4 px-8 rounded-xl"
             >
               Subscribe
             </button>

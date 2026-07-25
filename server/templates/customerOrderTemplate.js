@@ -1,50 +1,51 @@
 /**
  * Customer Order Confirmation Email Template
  */
-const customerOrderTemplate = (data) => {
-  const {
-    orderId = "N/A",
-    customerName = "Valued Customer",
-    orderDate = new Date().toLocaleDateString(),
-    items = [],
-    shippingAddress = { address: "", city: "", state: "", pincode: "", phone: "" },
-    paymentMethod = "N/A",
-    paymentStatus = "N/A",
-    grandTotal = 0,
-    estimatedDelivery = "N/A",
-  } = data || {};
+const customerOrderTemplate = (order) => {
+  const orderId = order.orderId || "N/A";
+  const customerName = `${order.customer?.firstName || ''} ${order.customer?.lastName || ''}`.trim() || "Valued Customer";
+  const orderDate = order.createdAt ? new Date(order.createdAt).toLocaleDateString() : new Date().toLocaleDateString();
+  const items = order.items || [];
+  const shippingAddress = order.shippingAddress || { address: "", city: "", state: "", pincode: "", phone: "" };
+  const paymentMethod = order.paymentMethod || "N/A";
+  const paymentStatus = order.paymentStatus || "N/A";
+  const grandTotal = order.total || 0;
+  const estimatedDelivery = order.delhivery?.estimatedDelivery || "N/A";
 
   // Extract first item or build items list
-  const itemsList = items.map(item => `
-    <tr>
-      <td style="
-        padding: 10px 0;
-        color: #333333;
-        font-size: 14px;
-        width: 60%;
-        vertical-align: top;
-      ">
-        ${item.name}
-      </td>
-      <td align="center" style="
-        padding: 10px 0;
-        color: #666666;
-        font-size: 14px;
-        width: 20%;
-      ">
-        x${item.quantity}
-      </td>
-      <td align="right" style="
-        padding: 10px 0;
-        color: #111827;
-        font-weight: bold;
-        font-size: 14px;
-        width: 20%;
-      ">
-        ₹${(item.total || 0).toFixed(2)}
-      </td>
-    </tr>
-  `).join('');
+  const itemsList = items.map(item => {
+    const itemTotal = (item.price || 0) * (item.quantity || 0);
+    return `
+      <tr>
+        <td style="
+          padding: 10px 0;
+          color: #333333;
+          font-size: 14px;
+          width: 60%;
+          vertical-align: top;
+        ">
+          ${item.name}
+        </td>
+        <td align="center" style="
+          padding: 10px 0;
+          color: #666666;
+          font-size: 14px;
+          width: 20%;
+        ">
+          x${item.quantity}
+        </td>
+        <td align="right" style="
+          padding: 10px 0;
+          color: #111827;
+          font-weight: bold;
+          font-size: 14px;
+          width: 20%;
+        ">
+          ₹${itemTotal.toFixed(2)}
+        </td>
+      </tr>
+    `;
+  }).join('');
 
   return `
    <!DOCTYPE html>

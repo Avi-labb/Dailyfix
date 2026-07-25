@@ -1,27 +1,18 @@
 /**
  * Admin New Order Notification Email Template
  */
-const adminOrderTemplate = (data) => {
-  const {
-    orderId,
-    customerName,
-    customerEmail,
-    customerPhone,
-    orderDate,
-    shippingAddress,
-    paymentMethod,
-    paymentStatus,
-    items,
-    grandTotal,
-  } = data;
-
+const adminOrderTemplate = (order) => {
+  const customerName = `${order.customer?.firstName || ''} ${order.customer?.lastName || ''}`.trim() || 'Valued Customer';
+  const orderDate = order.createdAt ? new Date(order.createdAt).toLocaleDateString() : new Date().toLocaleDateString();
+  const grandTotal = order.total || 0;
+  
   return `
     <!DOCTYPE html>
     <html lang="en">
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>New Order Received: ${orderId}</title>
+      <title>New Order Received: ${order.orderId}</title>
     </head>
     <body style="margin:0;padding:0;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background-color:#f3f4f6;">
       <!-- Email Container -->
@@ -41,7 +32,7 @@ const adminOrderTemplate = (data) => {
               <!-- Order Info -->
               <tr>
                 <td style="padding:40px 32px 24px;">
-                  <h2 style="margin:0 0 16px;font-size:20px;color:#111827;">Order #${orderId}</h2>
+                  <h2 style="margin:0 0 16px;font-size:20px;color:#111827;">Order #${order.orderId}</h2>
                   
                   <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom:24px;">
                     <tr>
@@ -60,10 +51,10 @@ const adminOrderTemplate = (data) => {
                       <td style="padding:6px 0;color:#111827;font-weight:600;font-size:15px;">${customerName}</td>
                     </tr>
                     <tr>
-                      <td style="padding:6px 0;color:#4b5563;font-size:14px;">📧 ${customerEmail}</td>
+                      <td style="padding:6px 0;color:#4b5563;font-size:14px;">📧 ${order.customer?.email || ''}</td>
                     </tr>
                     <tr>
-                      <td style="padding:6px 0;color:#4b5563;font-size:14px;">📱 ${customerPhone}</td>
+                      <td style="padding:6px 0;color:#4b5563;font-size:14px;">📱 ${order.customer?.phone || ''}</td>
                     </tr>
                   </table>
                   
@@ -71,8 +62,8 @@ const adminOrderTemplate = (data) => {
                   <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color:#f9fafb;border-radius:12px;padding:16px;margin-bottom:24px;">
                     <tr>
                       <td style="padding:0;color:#111827;font-size:15px;line-height:1.6;">
-                        ${shippingAddress.address}<br>
-                        ${shippingAddress.city}, ${shippingAddress.state} - ${shippingAddress.pincode}
+                        ${order.shippingAddress?.address || ''}<br>
+                        ${order.shippingAddress?.city || ''}, ${order.shippingAddress?.state || ''} - ${order.shippingAddress?.pincode || ''}
                       </td>
                     </tr>
                   </table>
@@ -81,11 +72,11 @@ const adminOrderTemplate = (data) => {
                   <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom:24px;">
                     <tr>
                       <td style="padding:6px 0;color:#4b5563;font-size:14px;">Payment Method</td>
-                      <td style="padding:6px 0;text-align:right;color:#111827;font-size:14px;font-weight:600;">${paymentMethod}</td>
+                      <td style="padding:6px 0;text-align:right;color:#111827;font-size:14px;font-weight:600;">${order.paymentMethod || ''}</td>
                     </tr>
                     <tr>
                       <td style="padding:6px 0;color:#4b5563;font-size:14px;">Payment Status</td>
-                      <td style="padding:6px 0;text-align:right;color:${paymentStatus === 'Paid' ? '#059669' : '#f59e0b'};font-weight:700;font-size:14px;">${paymentStatus}</td>
+                      <td style="padding:6px 0;text-align:right;color:${order.paymentStatus === 'Paid' ? '#059669' : '#f59e0b'};font-weight:700;font-size:14px;">${order.paymentStatus || ''}</td>
                     </tr>
                   </table>
 
@@ -96,13 +87,16 @@ const adminOrderTemplate = (data) => {
                       <th style="text-align:center;padding:12px 8px;color:#374151;font-weight:700;font-size:13px;">Qty</th>
                       <th style="text-align:right;padding:12px 16px;color:#374151;font-weight:700;font-size:13px;">Price</th>
                     </tr>
-                    ${items.map(item => `
-                      <tr style="border-bottom:1px solid #e5e7eb;">
-                        <td style="padding:12px 16px;color:#111827;font-size:14px;">${item.name}</td>
-                        <td style="padding:12px 8px;text-align:center;color:#4b5563;font-size:14px;">${item.quantity}</td>
-                        <td style="padding:12px 16px;text-align:right;color:#111827;font-weight:600;font-size:14px;">₹${item.total.toFixed(2)}</td>
-                      </tr>
-                    `).join('')}
+                    ${(order.items || []).map(item => {
+                      const itemTotal = (item.price || 0) * (item.quantity || 0);
+                      return `
+                        <tr style="border-bottom:1px solid #e5e7eb;">
+                          <td style="padding:12px 16px;color:#111827;font-size:14px;">${item.name || ''}</td>
+                          <td style="padding:12px 8px;text-align:center;color:#4b5563;font-size:14px;">${item.quantity || 0}</td>
+                          <td style="padding:12px 16px;text-align:right;color:#111827;font-weight:600;font-size:14px;">₹${itemTotal.toFixed(2)}</td>
+                        </tr>
+                      `;
+                    }).join('')}
                   </table>
 
                   <!-- View Order Button -->

@@ -1,39 +1,61 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Minus, Plus, ShoppingBag, Zap, Leaf, ShieldCheck, Truck, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Minus, Plus, ShoppingBag, Zap, Leaf, ShieldCheck, Truck, X, Play } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useCart } from '../context/CartContext';
 import api from '../services/api';
 
-// Import all product images
+// Import all product media
 // Natural Black
 import nb1 from '../assets/images/NATURAL BLACK/01.png';
 import nb2 from '../assets/images/NATURAL BLACK/02.png';
 import nb3 from '../assets/images/NATURAL BLACK/03.png';
 import nb4 from '../assets/images/NATURAL BLACK/04.png';
-import nb5 from '../assets/images/NATURAL BLACK/05.jpg';
-import nb6 from '../assets/images/NATURAL BLACK/06.jpg';
+import nb5 from '../assets/images/NATURAL BLACK/05.webp';
+import nb6 from '../assets/Untitled design (3).mp4';
 
 // Black Brown
 import bb1 from '../assets/images/02 BLACK BROWN/01.png';
 import bb2 from '../assets/images/02 BLACK BROWN/02.png';
 import bb3 from '../assets/images/02 BLACK BROWN/03.png';
 import bb4 from '../assets/images/02 BLACK BROWN/04.png';
-import bb5 from '../assets/images/02 BLACK BROWN/05.jpg';
-import bb6 from '../assets/images/02 BLACK BROWN/06.jpg';
+import bb5 from '../assets/images/02 BLACK BROWN/05.webp';
+import bb6 from '../assets/Untitled design (3).mp4';
 
 // Dark Brown
 import db1 from '../assets/images/DARK BROWN/01.png';
 import db2 from '../assets/images/DARK BROWN/02.png';
 import db3 from '../assets/images/DARK BROWN/03.png';
 import db4 from '../assets/images/DARK BROWN/04.png';
-import db5 from '../assets/images/DARK BROWN/05.jpg';
-import db6 from '../assets/images/DARK BROWN/06.jpg';
+import db5 from '../assets/images/DARK BROWN/05.webp';
+import db6 from '../assets/Untitled design (3).mp4';
+
 
 const productImageMap = {
-  'natural-black': [nb1, nb2, nb3, nb4, nb5, nb6],
-  'black-brown': [bb1, bb2, bb3, bb4, bb5, bb6],
-  'dark-brown': [db1, db2, db3, db4, db5, db6]
+  'natural-black': [
+    { type: 'image', src: nb1 },
+    { type: 'image', src: nb2 },
+    { type: 'image', src: nb3 },
+    { type: 'image', src: nb4 },
+    { type: 'image', src: nb5 },
+    { type: 'video', src: nb6 }
+  ],
+  'black-brown': [
+    { type: 'image', src: bb1 },
+    { type: 'image', src: bb2 },
+    { type: 'image', src: bb3 },
+    { type: 'image', src: bb4 },
+    { type: 'image', src: bb5 },
+    { type: 'video', src: bb6 }
+  ],
+  'dark-brown': [
+    { type: 'image', src: db1 },
+    { type: 'image', src: db2 },
+    { type: 'image', src: db3 },
+    { type: 'image', src: db4 },
+    { type: 'image', src: db5 },
+    { type: 'video', src: db6 }
+  ]
 };
 
 const ProductPage = () => {
@@ -145,51 +167,78 @@ const ProductPage = () => {
           <div className="flex flex-col-reverse sm:flex-row gap-6 lg:gap-8 lg:sticky lg:top-28 lg:self-start">
             {/* Thumbnails */}
             <div className="flex sm:flex-col gap-4 overflow-x-auto sm:overflow-visible sm:w-24">
-              {product.images.map((image, index) => (
+              {product.images.map((media, index) => (
                 <button
                   key={index}
                   onClick={() => setCurrentImageIndex(index)}
-                  className="flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 p-3 rounded-2xl overflow-hidden transition-all duration-300"
+                  className="flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 p-3 rounded-2xl overflow-hidden transition-all duration-300 relative"
                   style={{
                     borderWidth: '2px',
                     borderColor: index === currentImageIndex ? '#10b981' : 'transparent',
                     backgroundColor: index === currentImageIndex ? '#ecfdf5' : '#f5f5f4'
                   }}
-                  aria-label={`View image ${index + 1}`}
+                  aria-label={`View media ${index + 1}`}
                 >
-                  <img
-                    src={image}
-                    alt={`${product.name} thumbnail ${index + 1}`}
-                    className="w-full h-full object-contain"
-                  />
+                  {media.type === 'image' ? (
+                    <img
+                      src={media.src}
+                      alt={`${product.name} thumbnail ${index + 1}`}
+                      className="w-full h-full object-contain"
+                    />
+                  ) : (
+                    <div className="w-full h-full relative">
+                      <video
+                        src={media.src}
+                        className="w-full h-full object-contain"
+                        muted
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-xl">
+                        <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center">
+                          <Play size={14} fill="white" className="text-white ml-0.5" />
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </button>
               ))}
             </div>
 
-            {/* Main image with hover-zoom + click-to-expand */}
+            {/* Main media area */}
             <div className="flex-1 relative">
               <div
                 ref={imageRef}
-                className="aspect-square rounded-3xl overflow-hidden relative border cursor-zoom-in group"
-                style={{ backgroundColor: '#ecfdf5', borderColor: '#d1fae5' }}
-                onMouseEnter={() => setShowZoom(true)}
+                className="aspect-square rounded-3xl overflow-hidden relative border group"
+                style={{ backgroundColor: '#ecfdf5', borderColor: '#d1fae5', cursor: product.images[currentImageIndex].type === 'image' ? 'zoom-in' : 'default' }}
+                onMouseEnter={() => product.images[currentImageIndex].type === 'image' && setShowZoom(true)}
                 onMouseLeave={() => setShowZoom(false)}
-                onMouseMove={handleMouseMove}
-                onClick={() => setLightboxOpen(true)}
+                onMouseMove={product.images[currentImageIndex].type === 'image' ? handleMouseMove : undefined}
+                onClick={() => product.images[currentImageIndex].type === 'image' && setLightboxOpen(true)}
               >
-                <img
-                  src={product.images[currentImageIndex]}
-                  alt={product.name}
-                  className="w-full h-full object-contain p-8"
-                  draggable={false}
-                />
+                {product.images[currentImageIndex].type === 'image' ? (
+                  <img
+                    src={product.images[currentImageIndex].src}
+                    alt={product.name}
+                    className="w-full h-full object-contain p-8"
+                    draggable={false}
+                  />
+                ) : (
+                  <video
+                    src={product.images[currentImageIndex].src}
+                    className="w-full h-full object-contain p-4"
+                    controls
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                  />
+                )}
 
                 {/* Zoom lens preview */}
-                {showZoom && (
+                {showZoom && product.images[currentImageIndex].type === 'image' && (
                   <div
                     className="hidden lg:block absolute inset-0 pointer-events-none rounded-3xl"
                     style={{
-                      backgroundImage: `url(${product.images[currentImageIndex]})`,
+                      backgroundImage: `url(${product.images[currentImageIndex].src})`,
                       backgroundSize: '220%',
                       backgroundPosition: `${zoomPos.x}% ${zoomPos.y}%`,
                       backgroundRepeat: 'no-repeat'
@@ -197,12 +246,14 @@ const ProductPage = () => {
                   />
                 )}
 
-                {/* Expand hint */}
-                <div className="absolute bottom-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div className="px-4 py-2 rounded-full text-sm font-semibold" style={{ backgroundColor: 'rgba(35, 31, 28, 0.8)', color: '#FAF7F2' }}>
-                    Click to expand
+                {/* Expand hint (images only) */}
+                {product.images[currentImageIndex].type === 'image' && (
+                  <div className="absolute bottom-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="px-4 py-2 rounded-full text-sm font-semibold" style={{ backgroundColor: 'rgba(35, 31, 28, 0.8)', color: '#FAF7F2' }}>
+                      Click to expand
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           </div>
@@ -289,7 +340,6 @@ const ProductPage = () => {
                     <Plus size={20} strokeWidth={2.5} />
                   </button>
                 </div>
-                <p className="text-sm text-stone-500">{product.stock} available</p>
               </div>
             </div>
 
@@ -371,17 +421,28 @@ const ProductPage = () => {
               prevImage();
             }}
             className="absolute left-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full flex items-center justify-center bg-white hover:bg-stone-100 transition-colors shadow-soft"
-            aria-label="Previous image"
+            aria-label="Previous media"
           >
             <ChevronLeft size={24} className="text-stone-800" />
           </button>
 
-          <img
-            src={product.images[currentImageIndex]}
-            alt={product.name}
-            className="max-w-full max-h-[85vh] object-contain rounded-2xl"
-            onClick={(e) => e.stopPropagation()}
-          />
+          {product.images[currentImageIndex].type === 'image' ? (
+            <img
+              src={product.images[currentImageIndex].src}
+              alt={product.name}
+              className="max-w-full max-h-[85vh] object-contain rounded-2xl"
+              onClick={(e) => e.stopPropagation()}
+            />
+          ) : (
+            <video
+              src={product.images[currentImageIndex].src}
+              className="max-w-full max-h-[85vh] object-contain rounded-2xl"
+              controls
+              autoPlay
+              playsInline
+              onClick={(e) => e.stopPropagation()}
+            />
+          )}
 
           <button
             onClick={(e) => {
@@ -389,7 +450,7 @@ const ProductPage = () => {
               nextImage();
             }}
             className="absolute right-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full flex items-center justify-center bg-white hover:bg-stone-100 transition-colors shadow-soft"
-            aria-label="Next image"
+            aria-label="Next media"
           >
             <ChevronRight size={24} className="text-stone-800" />
           </button>

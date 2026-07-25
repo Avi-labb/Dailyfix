@@ -537,7 +537,7 @@ function CheckoutPage() {
 
       clearCart();
       sessionStorage.removeItem('pendingOrder');
-      navigate(`/order-success/${res.data.orderId}`);
+      navigate(`/order-success/${res.data.order.orderId}`);
     } catch (error) {
       toast.error('Failed to place order');
     } finally {

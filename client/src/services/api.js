@@ -120,4 +120,16 @@ export const orderAPI = {
   }
 }
 
+// Contact API functions
+export const contactAPI = {
+  sendContactForm: async (data) => {
+    try {
+      const res = await api.post('/contact', data)
+      return { ok: true, data: res.data }
+    } catch (err) {
+      return { ok: false, data: err.response?.data || { message: 'Failed to send message' } }
+    }
+  }
+}
+
 export default api

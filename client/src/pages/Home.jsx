@@ -10,6 +10,7 @@ import product1 from '../assets/images/001 Natural black1.png';
 import product2 from '../assets/images/002 Brown black2.png';
 import product3 from '../assets/images/003 Drak brown3.png';
 import banners from '../assets/images/2.jpg.jpeg';
+import beardVideo from '../assets/Untitled design (3).mp4';
 import api from '../services/api';
 
 const productImageMap = {
@@ -221,22 +222,26 @@ const Home = () => {
       </section>
 
 
-<section className="min-h-screen flex flex-col lg:flex-row">
-    <div className="lg:w-1/2 bg-black">
-        <div className="w-full h-full min-h-[400px] lg:min-h-screen flex items-center justify-center">
-            <iframe 
-                className="w-full h-full min-h-[400px] lg:min-h-screen object-cover" 
-                src="https://player.cloudinary.com/embed/?cloud_name=dpc9o6z8n&public_id=Untitled_design_3_b4ii2s&autoplay=true&muted=true&loop=true&logo=false" 
-                title="Dailyfix Beard Colour Video"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                allowFullScreen
-                frameBorder="0">
-            </iframe>
+<section className="h-[450px] lg:h-[550px] max-h-[600px] flex flex-col lg:flex-row">
+    <div className="lg:w-1/2 bg-black h-full">
+        <div className="w-full h-full flex items-center justify-center">
+            <video
+                className="w-full h-full object-contain bg-black"
+                src={beardVideo}
+                autoPlay
+                muted
+                loop
+                playsInline
+                controls
+                poster={poster}
+            >
+                Your browser does not support the video tag.
+            </video>
         </div>
     </div>
     
     
-    <div className="lg:w-1/2 bg-black flex items-center p-8 lg:p-16">
+    <div className="lg:w-1/2 bg-black flex items-center p-8 lg:p-16 h-full">
         <div className="max-w-lg">
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
                 TRANSFORM YOUR LOOK WITH DAILYFIX
