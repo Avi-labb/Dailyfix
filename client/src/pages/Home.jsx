@@ -86,7 +86,7 @@ const Home = () => {
             className="space-y-8 text-left max-w-xl"
           >
             {/* Brand Badge */}
-            <div className='px-10 sm:px-20'>
+            <div className='px-5 sm:px-20 mb-40 sm:mb-0'>
               <div className="inline-flex items-center gap-2 mb-5 bg-white/10 border border-white/20 px-4 py-1.5 rounded-full backdrop-blur-md">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 <p className="text-white font-bold text-xs tracking-widest uppercase">Dailyfix Grooming</p>
@@ -99,10 +99,10 @@ const Home = () => {
             </div>
 
             {/* Call To Actions */}
-            <div className="flex flex-wrap gap-4 px-10 sm:px-20">
+            <div className="flex flex-wrap gap-4 px-10 sm:px-20 ">
               <Link
                 to="/shop"
-                className="group bg-emerald-500 text-white font-bold py-4 px-10 rounded-full hover:bg-emerald-400 transition-all duration-300 shadow-xl hover:shadow-2xl hover:-translate-y-0.5 inline-flex items-center gap-2"
+                className="group -mb-20 bg-emerald-500 text-white font-bold py-4 px-10 rounded-full hover:bg-emerald-400 transition-all duration-300 shadow-xl hover:shadow-2xl hover:-translate-y-0.5 inline-flex items-center gap-2"
               >
                 Shop Now
                 <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
@@ -176,7 +176,6 @@ const Home = () => {
         </div>
       </section>
 
-
       {/* Product Showcase Section */}
       <section className="py-24 px-4 sm:px-6 lg:px-8 bg-stone-100">
         <div className="max-w-9xl mx-auto">
@@ -221,52 +220,51 @@ const Home = () => {
         </div>
       </section>
 
-
-<section className="h-[450px] lg:h-[550px] max-h-[600px] flex flex-col lg:flex-row">
-    <div className="lg:w-1/2 bg-black h-full">
-        <div className="w-full h-full flex items-center justify-center">
+      {/* Video & Highlight Section (Third Last) */}
+      <section className="min-h-fit lg:h-[550px] max-h-none lg:max-h-[600px] flex flex-col lg:flex-row bg-black">
+        <div className="w-full lg:w-1/2 bg-black flex items-center justify-center">
+          <div className="w-full h-full flex items-center justify-center">
             <video
-                className="w-full h-full object-contain bg-black"
-                src={beardVideo}
-                autoPlay
-                muted
-                loop
-                playsInline
-                controls
-                poster={poster}
+              className="w-full h-auto aspect-video lg:aspect-auto lg:h-full object-contain bg-black"
+              src={beardVideo}
+              autoPlay
+              muted
+              loop
+              playsInline
+              controls
+              poster={poster}
             >
-                Your browser does not support the video tag.
+              Your browser does not support the video tag.
             </video>
+          </div>
         </div>
-    </div>
-    
-    
-    <div className="lg:w-1/2 bg-black flex items-center p-8 lg:p-16 h-full">
-        <div className="max-w-lg">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
-                TRANSFORM YOUR LOOK WITH DAILYFIX
+        
+        <div className="w-full lg:w-1/2 bg-black flex items-center p-6 sm:p-10 lg:p-16">
+          <div className="max-w-lg">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+              TRANSFORM YOUR LOOK WITH DAILYFIX
             </h2>
-            <p className="text-white/70 text-lg mb-8">
-                Premium beard colour made with natural ingredients for a perfect, natural-looking coverage. Ammonia-free formula designed specifically for men's grooming needs.
+            <p className="text-white/70 text-base sm:text-lg mb-8">
+              Premium beard colour made with natural ingredients for a perfect, natural-looking coverage. Ammonia-free formula designed specifically for men's grooming needs.
             </p>
             <Link to="/shop" className="inline-flex items-center gap-3 text-white font-semibold border-2 border-white px-6 py-3 rounded-full hover:bg-white hover:text-black transition-all">
-                Shop Now
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-                </svg>
+              Shop Now
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+              </svg>
             </Link>
+          </div>
         </div>
-    </div>
-</section>
+      </section>
 
-      {/* Benefits Section */}
-      <section className="py-20 px-4 sm:px-8 md:px-16">
+      {/* Benefits Section (Second Last) */}
+      <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-8 md:px-16 bg-white">
         <div className="max-w-9xl mx-auto">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            className="text-center mb-10 sm:mb-16"
           >
             <p className="text-emerald-500 font-semibold text-sm tracking-widest uppercase mb-4 flex items-center justify-center gap-2">
               <span className="w-2 h-2 bg-emerald-500 rounded-full"></span>
@@ -277,7 +275,7 @@ const Home = () => {
             </h2>
           </motion.div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 sm:gap-12 items-center">
             <div className="space-y-6">
               {benefits.slice(0, 3).map((benefit, index) => (
                 <motion.div 
@@ -292,16 +290,16 @@ const Home = () => {
                     {benefit.icon}
                   </div>
                   <div>
-                    <h4 className="text-lg font-semibold text-black mb-2">{benefit.title}</h4>
+                    <h4 className="text-lg font-semibold text-black mb-1 sm:mb-2">{benefit.title}</h4>
                     <p className="text-black/80 font-medium text-sm">{benefit.desc}</p>
                   </div>
                 </motion.div>
               ))}
             </div>
 
-            <div className="hidden lg:block">
-              <div className="bg-gradient-to-br from-gray-200 to-gray-300 rounded-3xl overflow-hidden shadow-2xl">
-                <img src={banners} alt="Dailyfix Product" className="w-full h-[450px] object-cover" />
+            <div className="my-6 lg:my-0 flex justify-center">
+              <div className="w-full max-w-md lg:max-w-none bg-gradient-to-br from-gray-200 to-gray-300 rounded-3xl overflow-hidden shadow-2xl">
+                <img src={banners} alt="Dailyfix Product" className="w-full h-[400px] sm:h-[400px] lg:h-[500px] object-cover" />
               </div>
             </div>
 
@@ -319,7 +317,7 @@ const Home = () => {
                     {benefit.icon}
                   </div>
                   <div>
-                    <h4 className="text-lg font-semibold text-black mb-2">{benefit.title}</h4>
+                    <h4 className="text-lg font-semibold text-black mb-1 sm:mb-2">{benefit.title}</h4>
                     <p className="text-black/80 font-medium text-sm">{benefit.desc}</p>
                   </div>
                 </motion.div>
