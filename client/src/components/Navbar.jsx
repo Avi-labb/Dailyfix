@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 
 import { useCart } from '../context/CartContext';
+import { getProductImageSrc } from '../utils/productImages';
 import logo from '../assets/images/dailyfix new logo.png';
 
 const Navbar = () => {
@@ -70,9 +71,7 @@ const Navbar = () => {
     return location.pathname.startsWith(path);
   };
 
-  const productImage =
-    lastAddedProduct?.product?.images?.[0] ||
-    lastAddedProduct?.product?.image;
+  const productImage = getProductImageSrc(lastAddedProduct?.product);
 
   const productPrice =
     lastAddedProduct?.product?.discount_price ||

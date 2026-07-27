@@ -2,22 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Leaf, ShieldCheck, Truck } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
-import product1 from '../assets/images/001 Natural black1.png';
-import product2 from '../assets/images/002 Brown black2.png';
-import product3 from '../assets/images/003 Drak brown3.png';
 import api from '../services/api';
+import { getListingImage } from '../utils/productImages';
 
 const TRUST_POINTS = [
   { icon: Leaf, label: 'Ammonia-Free Formula' },
   { icon: ShieldCheck, label: 'Dermatologically Tested' },
   { icon: Truck, label: 'Fast, Discreet Shipping' },
 ];
-
-const productImageMap = {
-  'natural-black': product1,
-  'black-brown': product2,
-  'dark-brown': product3
-};
 
 const Shop = () => {
   const [products, setProducts] = useState([]);
@@ -32,7 +24,7 @@ const Shop = () => {
           name: product.name,
           desc: 'Ammonia-Free Formula',
           price: product.price,
-          image: productImageMap[product.slug] || product1,
+          image: getListingImage(product.slug),
           slug: product.slug,
           sku: product.sku,
           brand: product.brand,

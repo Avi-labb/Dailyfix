@@ -4,59 +4,7 @@ import { ChevronLeft, ChevronRight, Minus, Plus, ShoppingBag, Zap, Leaf, ShieldC
 import { motion } from 'framer-motion';
 import { useCart } from '../context/CartContext';
 import api from '../services/api';
-
-// Import all product media
-// Natural Black
-import nb1 from '../assets/images/NATURAL BLACK/01.png';
-import nb2 from '../assets/images/NATURAL BLACK/02.png';
-import nb3 from '../assets/images/NATURAL BLACK/03.png';
-import nb4 from '../assets/images/NATURAL BLACK/04.png';
-import nb5 from '../assets/images/NATURAL BLACK/05.webp';
-import nb6 from '../assets/Untitled design (3).mp4';
-
-// Black Brown
-import bb1 from '../assets/images/02 BLACK BROWN/01.png';
-import bb2 from '../assets/images/02 BLACK BROWN/02.png';
-import bb3 from '../assets/images/02 BLACK BROWN/03.png';
-import bb4 from '../assets/images/02 BLACK BROWN/04.png';
-import bb5 from '../assets/images/02 BLACK BROWN/05.webp';
-import bb6 from '../assets/Untitled design (3).mp4';
-
-// Dark Brown
-import db1 from '../assets/images/DARK BROWN/01.png';
-import db2 from '../assets/images/DARK BROWN/02.png';
-import db3 from '../assets/images/DARK BROWN/03.png';
-import db4 from '../assets/images/DARK BROWN/04.png';
-import db5 from '../assets/images/DARK BROWN/05.webp';
-import db6 from '../assets/Untitled design (3).mp4';
-
-
-const productImageMap = {
-  'natural-black': [
-    { type: 'image', src: nb1 },
-    { type: 'image', src: nb2 },
-    { type: 'image', src: nb3 },
-    { type: 'image', src: nb4 },
-    { type: 'image', src: nb5 },
-    { type: 'video', src: nb6 }
-  ],
-  'black-brown': [
-    { type: 'image', src: bb1 },
-    { type: 'image', src: bb2 },
-    { type: 'image', src: bb3 },
-    { type: 'image', src: bb4 },
-    { type: 'image', src: bb5 },
-    { type: 'video', src: bb6 }
-  ],
-  'dark-brown': [
-    { type: 'image', src: db1 },
-    { type: 'image', src: db2 },
-    { type: 'image', src: db3 },
-    { type: 'image', src: db4 },
-    { type: 'image', src: db5 },
-    { type: 'video', src: db6 }
-  ]
-};
+import { getProductGallery, getListingImage } from '../utils/productImages';
 
 const ProductPage = () => {
   const { id } = useParams();
@@ -83,7 +31,8 @@ const ProductPage = () => {
           name: apiProduct.name,
           desc: 'Ammonia-Free Formula',
           price: apiProduct.price,
-          images: productImageMap[apiProduct.slug] || productImageMap['natural-black'],
+          image: getListingImage(apiProduct.slug),
+          images: getProductGallery(apiProduct.slug),
           slug: apiProduct.slug,
           sku: apiProduct.sku,
           brand: apiProduct.brand,

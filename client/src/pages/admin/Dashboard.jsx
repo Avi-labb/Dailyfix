@@ -1,46 +1,61 @@
-import { useState, useEffect } from "react";
-import api from "../../services/api";
-
+import { useEffect, useMemo, useState } from "react";
 import {
   DollarSign,
   ShoppingCart,
-  Package,
   Users,
-  Truck,
-  Clock3,
-  CheckCircle2,
-  XCircle,
-  TrendingUp,
-  RefreshCw,
+  Package,
 } from "lucide-react";
 
-import { motion } from "framer-motion";
+import api from "../../services/api";
 
-import {
-  ResponsiveContainer,
-  AreaChart,
-  Area,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-  Tooltip,
-} from "recharts";
+import StatsCard from "./Dashboard/StatsCard";
+import RevenueChart from "./Dashboard/RevenueChart";
+import StatusCards from "./Dashboard/StatusCards";
+import RecentOrders from "./Dashboard/RecentOrders";
+import TopProducts from "./Dashboard/TopProduct";
+import QuickActions from "./Dashboard/QuickAction";
+export default function Dashboard() {
 
-function AdminDashboard() {
-
-  const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const [orders, setOrders] = useState([]);
+
+  const [products, setProducts] = useState([]);
+
+  const [customers, setCustomers] = useState([]);
+
   useEffect(() => {
+
     fetchDashboard();
+
   }, []);
 
   const fetchDashboard = async () => {
+
     try {
 
-      const res = await api.get("/admin/dashboard");
+      setLoading(true);
 
-      setStats(res.data.data || res.data);
+      const [ordersRes, productsRes, customersRes] =
+        await Promise.all([
+
+          api.get("/orders"),
+
+          api.get("/products"),
+
+          api.get("/users"),
+
+        ]);
+
+      setOrders(ordersRes.data || []);
+
+      setProducts(
+        productsRes.data.products ||
+          productsRes.data ||
+          []
+      );
+
+      setCustomers(customersRes.data || []);
 
     } catch (err) {
 
@@ -51,859 +66,227 @@ function AdminDashboard() {
       setLoading(false);
 
     }
+
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <RefreshCw className="animate-spin w-10 h-10 text-emerald-600" />
-      </div>
+  const totalRevenue = useMemo(() => {
+
+    return orders.reduce(
+
+      (sum, item) => sum + Number(item.total || 0),
+
+      0
+
     );
-  }
 
-  const cards = [
+  }, [orders]);
 
-    {
-      title: "Revenue",
-      value: `₹${stats.totalRevenue}`,
-      icon: DollarSign,
-      color: "bg-emerald-500",
-    },
+  const pendingOrders = orders.filter(
+    (o) => o.status === "Pending"
+  ).length;
 
-    {
-      title: "Orders",
-      value: stats.totalOrders,
-      icon: ShoppingCart,
-      color: "bg-blue-500",
-    },
+  const processingOrders = orders.filter(
+    (o) => o.status === "Processing"
+  ).length;
 
-    {
-      title: "Products",
-      value: stats.totalProducts,
-      icon: Package,
-      color: "bg-purple-500",
-    },
+  const shippedOrders = orders.filter(
+    (o) => o.status === "Shipped"
+  ).length;
 
-    {
-      title: "Customers",
-      value: stats.totalCustomers,
-      icon: Users,
-      color: "bg-orange-500",
-    },
+  const deliveredOrders = orders.filter(
+    (o) => o.status === "Delivered"
+  ).length;
 
-    {
-      title: "Pending",
-      value: stats.pendingOrders || 0,
-      icon: Clock3,
-      color: "bg-yellow-500",
-    },
+  const monthlyRevenue = [
 
-    {
-      title: "Shipped",
-      value: stats.shippedOrders || 0,
-      icon: Truck,
-      color: "bg-indigo-500",
-    },
+    { month: "Jan", sales: 12000 },
 
-    {
-      title: "Delivered",
-      value: stats.deliveredOrders || 0,
-      icon: CheckCircle2,
-      color: "bg-green-600",
-    },
+    { month: "Feb", sales: 18000 },
 
-    {
-      title: "Cancelled",
-      value: stats.cancelledOrders || 0,
-      icon: XCircle,
-      color: "bg-red-500",
-    },
+    { month: "Mar", sales: 24000 },
+
+    { month: "Apr", sales: 28000 },
+
+    { month: "May", sales: 33000 },
+
+    { month: "Jun", sales: 42000 },
+
+    { month: "Jul", sales: totalRevenue },
 
   ];
 
   return (
 
-    <div className="space-y-8">
+    <div className="space-y-6">
 
-      {/* HEADER */}
+      {/* Heading */}
 
       <div className="flex justify-between items-center">
 
         <div>
 
           <h1 className="text-3xl font-bold">
+
             Dashboard
+
           </h1>
 
-          <p className="text-gray-500 mt-2">
-            Welcome Back 👋
+          <p className="text-slate-500">
+
+            Welcome back, Admin 👋
+
           </p>
 
         </div>
 
-        <button
-          onClick={fetchDashboard}
-          className="flex items-center gap-2 px-5 py-3 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 transition"
-        >
+      </div>
 
-          <RefreshCw size={18} />
+      {/* Stats */}
 
-          Refresh
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
 
-        </button>
+        <StatsCard
+          title="Revenue"
+          value={`₹${totalRevenue.toLocaleString()}`}
+          icon={DollarSign}
+          color="emerald"
+          change="+12.5%"
+        />
+
+        <StatsCard
+          title="Orders"
+          value={orders.length}
+          icon={ShoppingCart}
+          color="blue"
+          change="+8%"
+        />
+
+        <StatsCard
+          title="Customers"
+          value={customers.length}
+          icon={Users}
+          color="purple"
+          change="+15%"
+        />
+
+        <StatsCard
+          title="Products"
+          value={products.length}
+          icon={Package}
+          color="orange"
+          change="+5%"
+        />
 
       </div>
 
-      {/* CARDS */}
+      {/* Revenue + Status */}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="gap-6 space-y-6">
 
-        {
+        <div className="xl:col-span-2">
 
-          cards.map((card, index) => {
+          <RevenueChart
 
-            const Icon = card.icon;
+            data={monthlyRevenue}
 
-            return (
+          />
 
-              <motion.div
+        </div>
 
-                key={card.title}
+        <StatusCards
 
-                initial={{ opacity: 0, y: 20 }}
+          pending={pendingOrders}
 
-                animate={{ opacity: 1, y: 0 }}
+          processing={processingOrders}
 
-                transition={{ delay: index * 0.08 }}
+          shipped={shippedOrders}
 
-                className="bg-white rounded-2xl shadow-md hover:shadow-xl transition p-6"
+          delivered={deliveredOrders}
 
-              >
+          total={orders.length || 1}
 
-                <div className="flex justify-between">
-
-                  <div>
-
-                    <p className="text-gray-500">
-
-                      {card.title}
-
-                    </p>
-
-                    <h2 className="text-3xl font-bold mt-3">
-
-                      {card.value}
-
-                    </h2>
-
-                  </div>
-
-                  <div
-
-                    className={`${card.color} w-14 h-14 rounded-xl flex items-center justify-center text-white`}
-
-                  >
-
-                    <Icon size={28} />
-
-                  </div>
-
-                </div>
-
-                <div className="mt-6 flex items-center gap-2 text-green-600">
-
-                  <TrendingUp size={18} />
-
-                  <span className="text-sm">
-
-                    Updated Today
-
-                  </span>
-
-                </div>
-
-              </motion.div>
-
-            )
-
-          })
-
-        }
+        />
 
       </div>
-      {/* Charts Section */}
+            {/* Bottom Section */}
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-
-        {/* Revenue Chart */}
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="xl:col-span-2 bg-white rounded-2xl shadow-lg p-6"
-        >
-
-          <div className="flex justify-between items-center mb-6">
-
-            <div>
-
-              <h2 className="text-xl font-bold">
-                Monthly Revenue
-              </h2>
-
-              <p className="text-gray-500 text-sm">
-                Revenue generated this year
-              </p>
-
-            </div>
-
-            <div className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-sm">
-              Live
-            </div>
-
-          </div>
-
-          <ResponsiveContainer width="100%" height={320}>
-
-            <AreaChart data={stats.monthlySales}>
-
-              <defs>
-
-                <linearGradient id="sales" x1="0" y1="0" x2="0" y2="1">
-
-                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.8} />
-
-                  <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-
-                </linearGradient>
-
-              </defs>
-
-              <CartesianGrid strokeDasharray="3 3" />
-
-              <XAxis dataKey="month" />
-
-              <YAxis />
-
-              <Tooltip />
-
-              <Area
-                type="monotone"
-                dataKey="sales"
-                stroke="#10b981"
-                strokeWidth={3}
-                fill="url(#sales)"
-              />
-
-            </AreaChart>
-
-          </ResponsiveContainer>
-
-        </motion.div>
-
-        {/* Order Status */}
-
-        <motion.div
-          initial={{ opacity: 0, x: 30 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="bg-white rounded-2xl shadow-lg p-6"
-        >
-
-          <h2 className="text-xl font-bold mb-6">
-            Order Status
-          </h2>
-
-          <div className="space-y-5">
-
-            <div className="flex justify-between">
-
-              <span className="text-yellow-600 font-medium">
-                Pending
-              </span>
-
-              <span className="font-bold">
-                {stats.pendingOrders || 0}
-              </span>
-
-            </div>
-
-            <div className="w-full bg-gray-200 rounded-full h-2">
-
-              <div
-                className="bg-yellow-500 h-2 rounded-full"
-                style={{
-                  width: `${(stats.pendingOrders / stats.totalOrders) * 100 || 0}%`,
-                }}
-              />
-
-            </div>
-
-            <div className="flex justify-between">
-
-              <span className="text-blue-600 font-medium">
-                Processing
-              </span>
-
-              <span className="font-bold">
-                {stats.processingOrders || 0}
-              </span>
-
-            </div>
-
-            <div className="w-full bg-gray-200 rounded-full h-2">
-
-              <div
-                className="bg-blue-500 h-2 rounded-full"
-                style={{
-                  width: `${(stats.processingOrders / stats.totalOrders) * 100 || 0}%`,
-                }}
-              />
-
-            </div>
-
-            <div className="flex justify-between">
-
-              <span className="text-indigo-600 font-medium">
-                Shipped
-              </span>
-
-              <span className="font-bold">
-                {stats.shippedOrders || 0}
-              </span>
-
-            </div>
-
-            <div className="w-full bg-gray-200 rounded-full h-2">
-
-              <div
-                className="bg-indigo-500 h-2 rounded-full"
-                style={{
-                  width: `${(stats.shippedOrders / stats.totalOrders) * 100 || 0}%`,
-                }}
-              />
-
-            </div>
-
-            <div className="flex justify-between">
-
-              <span className="text-green-600 font-medium">
-                Delivered
-              </span>
-
-              <span className="font-bold">
-                {stats.deliveredOrders || 0}
-              </span>
-
-            </div>
-
-            <div className="w-full bg-gray-200 rounded-full h-2">
-
-              <div
-                className="bg-green-600 h-2 rounded-full"
-                style={{
-                  width: `${(stats.deliveredOrders / stats.totalOrders) * 100 || 0}%`,
-                }}
-              />
-
-            </div>
-
-            <div className="flex justify-between">
-
-              <span className="text-red-600 font-medium">
-                Cancelled
-              </span>
-
-              <span className="font-bold">
-                {stats.cancelledOrders || 0}
-              </span>
-
-            </div>
-
-            <div className="w-full bg-gray-200 rounded-full h-2">
-
-              <div
-                className="bg-red-500 h-2 rounded-full"
-                style={{
-                  width: `${(stats.cancelledOrders / stats.totalOrders) * 100 || 0}%`,
-                }}
-              />
-
-            </div>
-
-          </div>
-
-        </motion.div>
-
-      </div>
-      {/* Recent Orders & Top Products */}
-
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      <div className=" gap-6 space-y-7">
 
         {/* Recent Orders */}
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="xl:col-span-2 bg-white rounded-2xl shadow-lg p-6"
-        >
-
-          <div className="flex justify-between items-center mb-6">
-
-            <h2 className="text-xl font-bold">
-              Recent Orders
-            </h2>
-
-            <button className="text-emerald-600 font-semibold hover:underline">
-              View All
-            </button>
-
-          </div>
-
-          <div className="overflow-x-auto">
-
-            <table className="w-full">
-
-              <thead>
-
-                <tr className="border-b">
-
-                  <th className="py-3 text-left">Order</th>
-                  <th className="py-3 text-left">Customer</th>
-                  <th className="py-3 text-left">Amount</th>
-                  <th className="py-3 text-left">Payment</th>
-                  <th className="py-3 text-left">Status</th>
-
-                </tr>
-
-              </thead>
-
-              <tbody>
-
-                {(stats.recentOrders || []).map((order) => (
-
-                  <tr
-                    key={order.orderId}
-                    className="border-b hover:bg-gray-50"
-                  >
-
-                    <td className="py-4 font-semibold">
-                      {order.orderId}
-                    </td>
-
-                    <td>
-                      {order.customer?.firstName}{" "}
-                      {order.customer?.lastName}
-                    </td>
-
-                    <td>
-                      ₹{order.total}
-                    </td>
-
-                    <td>
-
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-semibold
-                        ${order.paymentMethod === "COD"
-                            ? "bg-orange-100 text-orange-700"
-                            : "bg-green-100 text-green-700"
-                          }`}
-                      >
-
-                        {order.paymentMethod}
-
-                      </span>
-
-                    </td>
-
-                    <td>
-
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-semibold
-
-                        ${order.status === "Delivered"
-                            ? "bg-green-100 text-green-700"
-                            : order.status === "Pending"
-                              ? "bg-yellow-100 text-yellow-700"
-                              : order.status === "Processing"
-                                ? "bg-blue-100 text-blue-700"
-                                : order.status === "Cancelled"
-                                  ? "bg-red-100 text-red-700"
-                                  : "bg-purple-100 text-purple-700"
-                          }`}
-
-                      >
-
-                        {order.status}
-
-                      </span>
-
-                    </td>
-
-                  </tr>
-
-                ))}
-
-              </tbody>
-
-            </table>
-
-          </div>
-
-        </motion.div>
-
-        {/* Top Products */}
-
-        <motion.div
-
-          initial={{ opacity: 0, x: 20 }}
-
-          animate={{ opacity: 1, x: 0 }}
-
-          className="bg-white rounded-2xl shadow-lg p-6"
-
-        >
-
-          <h2 className="text-xl font-bold mb-6">
-
-            Top Selling Products
-
-          </h2>
-
-          <div className="space-y-5">
-
-            {(stats.topProducts || []).map((product, index) => (
-
-              <div
-                key={product._id}
-                className="flex justify-between items-center"
-              >
-
-                <div className="flex items-center gap-4">
-
-                  <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center font-bold text-emerald-700">
-
-                    {index + 1}
-
-                  </div>
-
-                  <div>
-
-                    <p className="font-semibold">
-
-                      {product.name}
-
-                    </p>
-
-                    <p className="text-sm text-gray-500">
-
-                      SKU : {product.sku}
-
-                    </p>
-
-                  </div>
-
-                </div>
-
-                <div className="text-right">
-
-                  <p className="font-bold">
-
-                    {product.totalSold}
-
-                  </p>
-
-                  <p className="text-xs text-gray-500">
-
-                    Sold
-
-                  </p>
-
-                </div>
-
-              </div>
-
-            ))}
-
-          </div>
-
-        </motion.div>
-
-      </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="bg-white rounded-2xl shadow-lg p-6"
-        >
-
-          <h2 className="text-xl font-bold mb-6">
-
-            Low Stock Products
-
-          </h2>
-
-          <div className="space-y-4">
-
-            {(stats.lowStockProducts || []).map(product => (
-
-              <div
-                key={product._id}
-                className="flex justify-between border-b pb-3"
-              >
-
-                <div>
-
-                  <p className="font-semibold">
-
-                    {product.name}
-
-                  </p>
-
-                  <p className="text-gray-500 text-sm">
-
-                    SKU : {product.sku}
-
-                  </p>
-
-                </div>
-
-                <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full">
-
-                  {product.stock} Left
-
-                </span>
-
-              </div>
-
-            ))}
-
-          </div>
-
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-2xl shadow-xl p-6"
-        >
-
-          <h2 className="text-2xl font-bold">
-
-            Delhivery Shipment
-
-          </h2>
-
-          <div className="grid grid-cols-2 gap-5 mt-8">
-
-            <div>
-
-              <h3 className="text-3xl font-bold">
-
-                {stats.shippedOrders || 0}
-
-              </h3>
-
-              <p>
-
-                Shipped
-
-              </p>
-
-            </div>
-
-            <div>
-
-              <h3 className="text-3xl font-bold">
-
-                {stats.pendingPickup || 0}
-
-              </h3>
-
-              <p>
-
-                Pickup Pending
-
-              </p>
-
-            </div>
-
-            <div>
-
-              <h3 className="text-3xl font-bold">
-
-                {stats.deliveredOrders || 0}
-
-              </h3>
-
-              <p>
-
-                Delivered
-
-              </p>
-
-            </div>
-
-            <div>
-
-              <h3 className="text-3xl font-bold">
-
-                {stats.cancelledOrders || 0}
-
-              </h3>
-
-              <p>
-
-                Cancelled
-
-              </p>
-
-            </div>
-
-          </div>
-
-        </motion.div>
-
-      </div>
-      {/* Quick Actions & System Overview */}
-
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <div className="xl:col-span-2">
+
+          <RecentOrders
+            loading={loading}
+            orders={orders.slice(0, 5)}
+            onView={(order) => {
+              console.log(order);
+            }}
+          />
+
+        </div>
 
         {/* Quick Actions */}
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-2xl shadow-lg p-6"
-        >
-
-          <h2 className="text-xl font-bold mb-6">
-            Quick Actions
-          </h2>
-
-          <div className="grid grid-cols-2 gap-4">
-
-            <button
-              className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl p-5 transition"
-            >
-              <Package className="mx-auto mb-2" size={30} />
-              Add Product
-            </button>
-
-            <button
-              className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl p-5 transition"
-            >
-              <ShoppingCart className="mx-auto mb-2" size={30} />
-              View Orders
-            </button>
-
-            <button
-              className="bg-purple-600 hover:bg-purple-700 text-white rounded-xl p-5 transition"
-            >
-              <Truck className="mx-auto mb-2" size={30} />
-              Create Pickup
-            </button>
-
-            <button
-              onClick={fetchDashboard}
-              className="bg-orange-500 hover:bg-orange-600 text-white rounded-xl p-5 transition"
-            >
-              <RefreshCw className="mx-auto mb-2" size={30} />
-              Refresh
-            </button>
-
-          </div>
-
-        </motion.div>
-
-        {/* Store Overview */}
-
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="bg-gradient-to-r from-slate-800 to-slate-900 rounded-2xl shadow-xl text-white p-6"
-        >
-
-          <h2 className="text-2xl font-bold mb-6">
-
-            Store Overview
-
-          </h2>
-
-          <div className="space-y-5">
-
-            <div className="flex justify-between">
-
-              <span>Total Revenue</span>
-
-              <span className="font-bold">
-                ₹{stats.totalRevenue}
-              </span>
-
-            </div>
-
-            <div className="flex justify-between">
-
-              <span>Total Orders</span>
-
-              <span className="font-bold">
-                {stats.totalOrders}
-              </span>
-
-            </div>
-
-            <div className="flex justify-between">
-
-              <span>Total Customers</span>
-
-              <span className="font-bold">
-                {stats.totalCustomers}
-              </span>
-
-            </div>
-
-            <div className="flex justify-between">
-
-              <span>Total Products</span>
-
-              <span className="font-bold">
-                {stats.totalProducts}
-              </span>
-
-            </div>
-
-            <div className="flex justify-between">
-
-              <span>Delivered Orders</span>
-
-              <span className="text-green-400 font-bold">
-
-                {stats.deliveredOrders || 0}
-
-              </span>
-
-            </div>
-
-            <div className="flex justify-between">
-
-              <span>Pending Orders</span>
-
-              <span className="text-yellow-400 font-bold">
-
-                {stats.pendingOrders || 0}
-
-              </span>
-
-            </div>
-
-          </div>
-
-        </motion.div>
+        <QuickActions />
 
       </div>
+
+      {/* Products */}
+
+      <TopProducts
+        loading={loading}
+        products={products
+          .sort((a, b) => (b.sold || 0) - (a.sold || 0))
+          .slice(0, 5)}
+      />
+
+      {/* Loading Overlay */}
+
+      {loading && (
+        <div className="fixed inset-0 z-50 bg-white/80 backdrop-blur-sm flex items-center justify-center">
+
+          <div className="bg-white rounded-2xl shadow-xl p-10 flex flex-col items-center">
+
+            <div className="w-16 h-16 rounded-full border-4 border-slate-200 border-t-emerald-600 animate-spin"></div>
+
+            <h2 className="font-bold text-xl mt-6">
+              Loading Dashboard...
+            </h2>
+
+            <p className="text-slate-500 mt-2">
+              Please wait while we fetch the latest data.
+            </p>
+
+          </div>
+
+        </div>
+      )}
+
+      {/* Empty State */}
+
+      {!loading &&
+        orders.length === 0 &&
+        products.length === 0 && (
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-16 text-center">
+
+            <div className="w-24 h-24 rounded-full bg-slate-100 flex items-center justify-center mx-auto">
+
+              <Package size={40} className="text-slate-400" />
+
+            </div>
+
+            <h2 className="text-2xl font-bold mt-6">
+              No Data Available
+            </h2>
+
+            <p className="text-slate-500 mt-3">
+              Products and orders will appear here once they are created.
+            </p>
+
+          </div>
+        )}
 
     </div>
   );
 }
-
-export default AdminDashboard;

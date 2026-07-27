@@ -4,6 +4,7 @@ import { useCart } from '../context/CartContext'
 import api from '../services/api'
 import toast from 'react-hot-toast'
 import { ArrowLeft, ShoppingBag, MapPin, CreditCard, CheckCircle, Edit } from 'lucide-react'
+import { getProductImageSrc } from '../utils/productImages'
 
 function OrderSummaryPage() {
   const navigate = useNavigate()
@@ -190,13 +191,11 @@ function OrderSummaryPage() {
               <div className="space-y-4">
                 {orderData.items.map((item, index) => (
                   <div key={index} className="flex items-center gap-4 py-3 border-b border-slate-100 last:border-0">
-                    {item.product.image && (
-                      <img 
-                        src={item.product.image} 
+                    <img 
+                        src={getProductImageSrc(item.product)} 
                         alt={item.product.name}
                         className="w-16 h-16 object-cover rounded-lg"
                       />
-                    )}
                     <div className="flex-1">
                       <h3 className="font-medium text-slate-900">{item.product.name}</h3>
                       <p className="text-sm text-slate-500">Qty: {item.quantity}</p>

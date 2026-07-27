@@ -3,6 +3,7 @@ import { useCart } from '../context/CartContext';
 import { Trash2, ShoppingCart, Minus, Plus, X, Check, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
+import { getProductImageSrc } from '../utils/productImages';
 
 function CartPage() {
   const { cart, updateQuantity, removeFromCart, getTotal } = useCart();
@@ -74,7 +75,7 @@ function CartPage() {
                 >
                   <div className="w-36 h-36 bg-gradient-to-br from-emerald-50 to-stone-50 rounded-2xl overflow-hidden flex items-center justify-center flex-shrink-0 border border-stone-100">
                     <img
-                      src={item.product.images ? item.product.images[0] : item.product.image}
+                      src={getProductImageSrc(item.product)}
                       alt={item.product.name}
                       className="w-full h-full object-contain p-4"
                     />
@@ -136,7 +137,7 @@ function CartPage() {
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 bg-stone-50 rounded-xl overflow-hidden flex items-center justify-center">
                           <img
-                            src={item.product.images ? item.product.images[0] : item.product.image}
+                            src={getProductImageSrc(item.product)}
                             alt={item.product.name}
                             className="w-full h-full object-contain p-1"
                           />

@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
+import { normalizeProduct } from '../utils/productImages'
 
 const CartContext = createContext()
 
@@ -8,7 +9,9 @@ export const CartProvider = ({ children }) => {
       const saved = localStorage.getItem('cart')
       const parsed = saved ? JSON.parse(saved) : []
       // Clean up invalid items (items without productId or product)
-      const validItems = parsed.filter(item => item && item.productId && item.product)
+      const validItems = parsed
+        .filter(item => item && item.productId && item.product)
+        .map(item => ({ ...item, product: normalizeProduct(item.product) }))
       if (validItems.length !== parsed.length) {
         localStorage.setItem('cart', JSON.stringify(validItems))
       }
@@ -25,21 +28,19 @@ export const CartProvider = ({ children }) => {
   }, [cart])
 
   const addToCart = (product, quantity = 1) => {
-    console.log('Adding to cart:', product, 'Quantity:', quantity)
+    const normalizedProduct = normalizeProduct(product)
     setCart(prev => {
-      const existing = prev.find(item => item.productId === product.id)
+      const existing = prev.find(item => item.productId === normalizedProduct.id)
       if (existing) {
         return prev.map(item =>
-          item.productId === product.id
-            ? { ...item, quantity: item.quantity + quantity }
+          item.productId === normalizedProduct.id
+            ? { ...item, quantity: item.quantity + quantity, product: normalizedProduct }
             : item
         )
       }
-      const newItem = { productId: product.id, product, quantity }
-      console.log('New cart item:', newItem)
-      return [...prev, newItem]
+      return [...prev, { productId: normalizedProduct.id, product: normalizedProduct, quantity }]
     })
-    setLastAddedProduct({ product, quantity })
+    setLastAddedProduct({ product: normalizedProduct, quantity })
   }
 
   const updateQuantity = (productId, quantity) => {
@@ -55,13 +56,7 @@ export const CartProvider = ({ children }) => {
   }
 
   const removeFromCart = (productId) => {
-    console.log('Removing item with productId:', productId)
-    console.log('Current cart:', cart)
-    setCart(prev => {
-      const filtered = prev.filter(item => item.productId !== productId)
-      console.log('New cart after filter:', filtered)
-      return filtered
-    })
+    setCart(prev => prev.filter(item => item.productId !== productId))
   }
 
   const clearCart = () => {

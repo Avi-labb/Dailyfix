@@ -138,14 +138,14 @@ connectDB()
 
     // Seed default admin user if not exists
     try {
-      const existingAdmin = await Admin.findOne({ email: 'admin@dailyfixcare.com' });
+      const existingAdmin = await Admin.findOne({ email: 'avidevelop60@gmail.com' });
       if (!existingAdmin) {
         const hashedPassword = await bcrypt.hash('Admin@123', 10);
         await Admin.create({
-          email: 'admin@dailyfixcare.com',
+          email: 'avidevelop60@gmail.com',
           password: hashedPassword
         });
-        console.log('✅ Default admin created: admin@dailyfixcare.com / Admin@123');
+        console.log('✅ Default admin created: avidevelop60@gmail.com / Admin@123');
       } else {
         console.log('ℹ️  Default admin user already exists');
       }

@@ -6,18 +6,10 @@ import ProductCard from '../components/ProductCard';
 import banner from '../assets/images/webbanner3.png';
 import mobileBanner from '../assets/images/Dailyfix with Updated Box Design1.png';
 import poster from '../assets/images/poster.png';
-import product1 from '../assets/images/001 Natural black1.png';
-import product2 from '../assets/images/002 Brown black2.png';
-import product3 from '../assets/images/003 Drak brown3.png';
 import banners from '../assets/images/2.jpg.jpeg';
 import beardVideo from '../assets/Untitled design (3).mp4';
 import api from '../services/api';
-
-const productImageMap = {
-  'natural-black': product1,
-  'black-brown': product2,
-  'dark-brown': product3
-};
+import { getListingImage } from '../utils/productImages';
 
 const Home = () => {
   const [products, setProducts] = useState([]);
@@ -32,7 +24,7 @@ const Home = () => {
           name: product.name,
           desc: 'Ammonia-Free Formula',
           price: product.price,
-          image: productImageMap[product.slug] || product1,
+          image: getListingImage(product.slug),
           slug: product.slug,
           sku: product.sku,
           brand: product.brand,
@@ -102,7 +94,7 @@ const Home = () => {
             <div className="flex flex-wrap gap-4 px-10 sm:px-20 ">
               <Link
                 to="/shop"
-                className="group -mb-20 bg-emerald-500 text-white font-bold py-4 px-10 rounded-full hover:bg-emerald-400 transition-all duration-300 shadow-xl hover:shadow-2xl hover:-translate-y-0.5 inline-flex items-center gap-2"
+                className="group -mb-20 mt-20 bg-emerald-500 text-white font-bold py-4 px-10 rounded-full hover:bg-emerald-400 transition-all duration-300 shadow-xl hover:shadow-2xl hover:-translate-y-0.5 inline-flex items-center gap-2"
               >
                 Shop Now
                 <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />

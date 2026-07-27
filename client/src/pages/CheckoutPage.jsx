@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import api from '../services/api';
+import { getProductImageSrc } from '../utils/productImages';
 import toast from 'react-hot-toast';
 import { useForm } from 'react-hook-form';
 import {
@@ -389,7 +390,7 @@ function FixedOrderSummary({ cart, getTotal }) {
               <div className="flex items-center gap-4">
                 <div className="w-14 h-14 bg-stone-50 rounded-xl overflow-hidden flex items-center justify-center">
                   <img
-                    src={item.product.images ? item.product.images[0] : item.product.image}
+                    src={getProductImageSrc(item.product)}
                     alt={item.product.name}
                     className="w-full h-full object-contain p-2"
                   />

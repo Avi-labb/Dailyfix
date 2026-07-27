@@ -1,4 +1,4 @@
-ADMIN_EMAIL=orders@dailyfixcare.com
+ADMIN_EMAIL=avidevelop60@gmail.com
 ADMIN_PASSWORD=Admin@123
 JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
 MONGODB_URI=mongodb://localhost:27017/Daily
