@@ -92,10 +92,8 @@ export default function Sidebar() {
             <HeartPulse className="text-white" size={22} />
 
           </div>
-
           <div>
-
-            <h2 className="font-bold text-slate-900 text-lg">
+             <h2 className="font-bold text-slate-900 text-lg">
 
               DailyFix
 
@@ -200,7 +198,7 @@ export default function Sidebar() {
 
         {/* Logout */}
 
-        <button
+        <a href="/"
           className={`mt-5 w-full flex items-center ${
             collapsed ? "justify-center" : ""
           } gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-600 transition hover:bg-red-100`}
@@ -212,7 +210,7 @@ export default function Sidebar() {
               Logout
             </span>
           )}
-        </button>
+        </a>
 
         {/* Footer */}
 

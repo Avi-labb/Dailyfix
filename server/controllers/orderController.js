@@ -4,7 +4,7 @@ import Product from "../models/Product.js";
 import sendEmail from "../utils/sendEmail.js";
 import customerOrderTemplate from "../templates/customerOrderTemplate.js";
 import adminOrderTemplate from "../templates/adminOrderTemplate.js";
-import delhiveryService from "../utils/delhivery.js";
+import delhiveryService from "../utils/razorpay.js";
 
 const generateOrderId = () => {
   return (

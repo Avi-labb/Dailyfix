@@ -33,41 +33,28 @@ const statesOfIndia = [
 const phonePattern = /^[6-9]\d{9}$/;
 const pincodePattern = /^[1-9][0-9]{5}$/;
 
-// Payment methods
 const paymentMethods = [
   { id: 'online', name: 'Online Payment', description: 'Pay using UPI, Credit/Debit Card, or Net Banking', icon: CreditCard },
   { id: 'cod', name: 'Cash on Delivery', description: 'Pay when you receive your order', icon: Package }
 ];
 
-// Step 1: Shipping Address & Summary
-function Step1AddressSummary({ formData, setFormData, placeOrder, cart, getTotal, loading, selectedPayment, setSelectedPayment }) {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, touchedFields },
-    watch,
-    setFocus
-  } = useForm({
-    mode: 'onTouched',
-    reValidateMode: 'onChange',
-    defaultValues: formData
+const loadRazorpayScript = () => {
+  return new Promise((resolve) => {
+    if (window.Razorpay) {
+      resolve(true);
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
   });
+};
 
-  const watchedPhone = watch('phone', '');
-  const watchedPincode = watch('pincode', '');
-
-  const onSubmit = (data) => {
-    setFormData({ ...formData, ...data });
-    placeOrder(data);
-  };
-
-  const subtotal = getTotal();
-  const shipping = 0;
-  const total = subtotal;
-
+function Step1AddressSummary({ register, errors, touchedFields, watchedPhone, watchedPincode, selectedPayment, setSelectedPayment }) {
   return (
     <div className="space-y-8">
-      {/* Shipping Address */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -78,7 +65,9 @@ function Step1AddressSummary({ formData, setFormData, placeOrder, cart, getTotal
           <MapPin className="text-emerald-600" />
           Shipping Address
         </h2>
+        
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          {/* First Name */}
           <div className="space-y-2">
             <label className="block text-sm font-semibold text-stone-700">First Name</label>
             <input
@@ -99,6 +88,8 @@ function Step1AddressSummary({ formData, setFormData, placeOrder, cart, getTotal
               </span>
             )}
           </div>
+
+          {/* Last Name */}
           <div className="space-y-2">
             <label className="block text-sm font-semibold text-stone-700">Last Name</label>
             <input
@@ -119,6 +110,8 @@ function Step1AddressSummary({ formData, setFormData, placeOrder, cart, getTotal
               </span>
             )}
           </div>
+
+          {/* Email */}
           <div className="space-y-2">
             <label className="block text-sm font-semibold text-stone-700">Email</label>
             <input
@@ -143,6 +136,8 @@ function Step1AddressSummary({ formData, setFormData, placeOrder, cart, getTotal
               </span>
             )}
           </div>
+
+          {/* Phone */}
           <div className="space-y-2">
             <label className="block text-sm font-semibold text-stone-700">Phone Number</label>
             <div className="relative">
@@ -166,7 +161,7 @@ function Step1AddressSummary({ formData, setFormData, placeOrder, cart, getTotal
               />
               {touchedFields.phone && (
                 <div className="absolute right-5 top-1/2 -translate-y-1/2">
-                  {!errors.phone && watchedPhone.length === 10 && <CheckCircle size={20} className="text-emerald-500" />}
+                  {!errors.phone && watchedPhone?.length === 10 && <CheckCircle size={20} className="text-emerald-500" />}
                 </div>
               )}
             </div>
@@ -176,15 +171,10 @@ function Step1AddressSummary({ formData, setFormData, placeOrder, cart, getTotal
                 {errors.phone.message}
               </span>
             )}
-            {touchedFields.phone && !errors.phone && watchedPhone.length === 10 && (
-              <span className="text-emerald-500 text-sm flex items-center gap-1">
-                <CheckCircle size={14} />
-                Phone number looks good!
-              </span>
-            )}
           </div>
         </div>
 
+        {/* Address Details */}
         <div className="space-y-6 mb-10">
           <div className="space-y-2">
             <label className="block text-sm font-semibold text-stone-700">Complete Address</label>
@@ -207,6 +197,7 @@ function Step1AddressSummary({ formData, setFormData, placeOrder, cart, getTotal
               </span>
             )}
           </div>
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-stone-700">City</label>
@@ -228,6 +219,7 @@ function Step1AddressSummary({ formData, setFormData, placeOrder, cart, getTotal
                 </span>
               )}
             </div>
+
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-stone-700">State</label>
               <select
@@ -254,6 +246,7 @@ function Step1AddressSummary({ formData, setFormData, placeOrder, cart, getTotal
                 </span>
               )}
             </div>
+
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-stone-700">Pincode</label>
               <div className="relative">
@@ -276,7 +269,7 @@ function Step1AddressSummary({ formData, setFormData, placeOrder, cart, getTotal
                 />
                 {touchedFields.pincode && (
                   <div className="absolute right-5 top-1/2 -translate-y-1/2">
-                    {!errors.pincode && watchedPincode.length === 6 && <CheckCircle size={20} className="text-emerald-500" />}
+                    {!errors.pincode && watchedPincode?.length === 6 && <CheckCircle size={20} className="text-emerald-500" />}
                   </div>
                 )}
               </div>
@@ -286,18 +279,12 @@ function Step1AddressSummary({ formData, setFormData, placeOrder, cart, getTotal
                   {errors.pincode.message}
                 </span>
               )}
-              {touchedFields.pincode && !errors.pincode && watchedPincode.length === 6 && (
-                <span className="text-emerald-500 text-sm flex items-center gap-1">
-                  <CheckCircle size={14} />
-                  Pincode looks good!
-                </span>
-              )}
             </div>
           </div>
         </div>
 
         {/* Payment Method */}
-        <div className="mb-10">
+        <div>
           <h2 className="text-2xl font-bold text-stone-900 mb-8 flex items-center gap-3">
             <CreditCard className="text-emerald-600" />
             Payment Method
@@ -342,32 +329,11 @@ function Step1AddressSummary({ formData, setFormData, placeOrder, cart, getTotal
             })}
           </div>
         </div>
-
-        {/* Place Order Button */}
-        <button
-          type="button"
-          onClick={handleSubmit(onSubmit)}
-          disabled={loading}
-          className="w-full bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white py-5 px-8 rounded-2xl font-bold text-lg shadow-soft hover:shadow-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
-        >
-          {loading ? (
-            <>
-              <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              Placing Order...
-            </>
-          ) : (
-            <>
-              <ShoppingBag size={20} />
-              Place Order
-            </>
-          )}
-        </button>
       </motion.div>
     </div>
   );
 }
 
-// Right Side Order Summary (fixed)
 function FixedOrderSummary({ cart, getTotal }) {
   const subtotal = getTotal();
   const shipping = 0;
@@ -378,7 +344,7 @@ function FixedOrderSummary({ cart, getTotal }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.2 }}
-      className="bg-white p-8 rounded-3xl shadow-soft border border-stone-100 sticky top-28"
+      className="bg-white p-8 rounded-3xl shadow-soft border border-stone-100 lg:sticky lg:top-28"
     >
       <h2 className="text-2xl font-bold text-stone-900 mb-8">Order Summary</h2>
 
@@ -421,7 +387,6 @@ function FixedOrderSummary({ cart, getTotal }) {
         </div>
       </div>
 
-      {/* Trust Badges */}
       <div className="space-y-4 pt-6 border-t border-stone-100">
         <div className="flex items-center gap-3 text-stone-600">
           <ShieldCheck size={18} className="text-emerald-600 flex-shrink-0" />
@@ -440,7 +405,6 @@ function FixedOrderSummary({ cart, getTotal }) {
   );
 }
 
-// Main Checkout Component
 function CheckoutPage() {
   const { cart, getTotal, clearCart } = useCart();
   const navigate = useNavigate();
@@ -457,24 +421,40 @@ function CheckoutPage() {
   });
   const [selectedPayment, setSelectedPayment] = useState('cod');
 
-  // Load existing order data if available (for editing)
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, touchedFields },
+    watch,
+    reset
+  } = useForm({
+    mode: 'onTouched',
+    reValidateMode: 'onChange',
+    defaultValues: formData
+  });
+
+  const watchedPhone = watch('phone', '');
+  const watchedPincode = watch('pincode', '');
+
   useEffect(() => {
     const savedOrder = sessionStorage.getItem('pendingOrder');
     if (savedOrder) {
       const orderData = JSON.parse(savedOrder);
       const shippingData = orderData.shippingAddress || orderData.shipping_address;
-      setFormData({
-        firstName: orderData.customer.firstName,
-        lastName: orderData.customer.lastName,
-        email: orderData.customer.email,
-        phone: orderData.customer.phone,
+      const initialVals = {
+        firstName: orderData.customer?.firstName || '',
+        lastName: orderData.customer?.lastName || '',
+        email: orderData.customer?.email || '',
+        phone: orderData.customer?.phone || '',
         address: shippingData?.address || '',
         city: shippingData?.city || '',
         state: shippingData?.state || '',
         pincode: shippingData?.pincode || ''
-      });
+      };
+      setFormData(initialVals);
+      reset(initialVals);
     }
-  }, []);
+  }, [reset]);
 
   if (cart.length === 0) {
     navigate('/cart');
@@ -483,61 +463,128 @@ function CheckoutPage() {
 
   const goBack = () => {
     navigate('/cart');
-    // Smooth scroll to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const placeOrder = async (data) => {
-    await submitOrder(data);
+    const currentData = data || formData;
+    setFormData(currentData);
+
+    if (selectedPayment === 'online') {
+      await handleOnlinePayment(currentData);
+    } else {
+      await submitOrder(currentData);
+    }
   };
 
-  const submitOrder = async (data) => {
+  // Online Payment Flow (Razorpay)
+  const handleOnlinePayment = async (data) => {
     setLoading(true);
-    // Use the data passed from form, or formData as fallback
-    const currentData = data || formData;
     try {
-      console.log('Submitting order:', {
-        customer: {
-          firstName: currentData.firstName,
-          lastName: currentData.lastName,
-          email: currentData.email,
-          phone: currentData.phone
-        },
-        items: cart.map((item) => ({
-          productId: item.productId,
-          quantity: item.quantity
-        })),
-        shippingAddress: {
-          address: currentData.address,
-          city: currentData.city,
-          state: currentData.state,
-          pincode: currentData.pincode
-        },
-        paymentMethod: selectedPayment
+      const isLoaded = await loadRazorpayScript();
+      if (!isLoaded) {
+        toast.error('Failed to load payment gateway SDK. Please check your internet connection.');
+        setLoading(false);
+        return;
+      }
+
+      const { data: gatewayData } = await api.post('/create-razorpay-order', {
+        amount: getTotal(),
+        currency: 'INR'
       });
 
+      const options = {
+        key: gatewayData.keyId,
+        amount: gatewayData.amount,
+        currency: gatewayData.currency,
+        name: 'Your Store Name',
+        description: 'Purchase Payment',
+        order_id: gatewayData.razorpayOrderId,
+        handler: async function (response) {
+          try {
+            const res = await api.post('/orders', {
+              customer: {
+                firstName: data.firstName,
+                lastName: data.lastName,
+                email: data.email,
+                phone: data.phone
+              },
+              items: cart.map((item) => ({
+                productId: item.productId,
+                quantity: item.quantity
+              })),
+              shippingAddress: {
+                address: data.address,
+                city: data.city,
+                state: data.state,
+                pincode: data.pincode
+              },
+              paymentMethod: 'online',
+              paymentDetails: {
+                razorpayPaymentId: response.razorpay_payment_id,
+                razorpayOrderId: response.razorpay_order_id,
+                razorpaySignature: response.razorpay_signature
+              }
+            });
+
+            clearCart();
+            sessionStorage.removeItem('pendingOrder');
+            toast.success('Payment successful!');
+            navigate(`/order-success/${res.data.order.orderId}`);
+          } catch (err) {
+            toast.error('Payment verification failed. Please contact support if debited.');
+          }
+        },
+        prefill: {
+          name: `${data.firstName} ${data.lastName}`,
+          email: data.email,
+          contact: data.phone
+        },
+        theme: {
+          color: '#059669'
+        }
+      };
+
+      const razorpayInstance = new window.Razorpay(options);
+      razorpayInstance.on('payment.failed', function (response) {
+        toast.error(response.error?.description || 'Payment failed. Please try again.');
+      });
+      razorpayInstance.open();
+
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to initialize payment');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // COD Flow
+  const submitOrder = async (data) => {
+    setLoading(true);
+    try {
       const res = await api.post('/orders', {
         customer: {
-          firstName: currentData.firstName,
-          lastName: currentData.lastName,
-          email: currentData.email,
-          phone: currentData.phone
+          firstName: data.firstName,
+          lastName: data.lastName,
+          email: data.email,
+          phone: data.phone
         },
         items: cart.map((item) => ({
           productId: item.productId,
           quantity: item.quantity
         })),
         shippingAddress: {
-          address: currentData.address,
-          city: currentData.city,
-          state: currentData.state,
-          pincode: currentData.pincode
+          address: data.address,
+          city: data.city,
+          state: data.state,
+          pincode: data.pincode
         },
-        paymentMethod: selectedPayment
+        paymentMethod: 'cod'
       });
 
       clearCart();
       sessionStorage.removeItem('pendingOrder');
+      toast.success('Order placed successfully!');
       navigate(`/order-success/${res.data.order.orderId}`);
     } catch (error) {
       toast.error('Failed to place order');
@@ -545,9 +592,6 @@ function CheckoutPage() {
       setLoading(false);
     }
   };
-
-  // Step indicator
-  const steps = [{ id: 1, label: 'Checkout', icon: MapPin }];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-stone-50 to-emerald-50 pt-28 pb-20 px-6 md:px-12">
@@ -560,27 +604,69 @@ function CheckoutPage() {
           Back to Cart
         </button>
 
-        
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-          {/* Left Side: Steps */}
-          <div className="lg:col-span-2 space-y-8">
-            <Step1AddressSummary
-              formData={formData}
-              setFormData={setFormData}
-              placeOrder={placeOrder}
-              cart={cart}
-              getTotal={getTotal}
-              loading={loading}
-              selectedPayment={selectedPayment}
-              setSelectedPayment={setSelectedPayment}
-            />
-          </div>
+        <form onSubmit={handleSubmit(placeOrder)}>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+            {/* Left Column: Form & Address Details */}
+            <div className="lg:col-span-2 space-y-8">
+              <Step1AddressSummary
+                register={register}
+                errors={errors}
+                touchedFields={touchedFields}
+                watchedPhone={watchedPhone}
+                watchedPincode={watchedPincode}
+                selectedPayment={selectedPayment}
+                setSelectedPayment={setSelectedPayment}
+              />
 
-          {/* Right Side: Fixed Order Summary */}
-          <div>
-            <FixedOrderSummary cart={cart} getTotal={getTotal} />
+              {/* Desktop Place Order Button (hidden on mobile) */}
+              <div className="hidden lg:block">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white py-5 px-8 rounded-2xl font-bold text-lg shadow-soft hover:shadow-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+                >
+                  {loading ? (
+                    <>
+                      <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingBag size={20} />
+                      {selectedPayment === 'online' ? 'Proceed to Payment' : 'Place Order'}
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Right Column: Order Summary & Mobile Submit Button */}
+            <div className="space-y-8">
+              <FixedOrderSummary cart={cart} getTotal={getTotal} />
+
+              {/* Mobile Place Order Button (renders under Order Summary on mobile) */}
+              <div className="block lg:hidden">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white py-5 px-8 rounded-2xl font-bold text-lg shadow-soft hover:shadow-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+                >
+                  {loading ? (
+                    <>
+                      <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingBag size={20} />
+                      {selectedPayment === 'online' ? 'Proceed to Payment' : 'Place Order'}
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );
