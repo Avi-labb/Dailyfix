@@ -1,5 +1,5 @@
 import { Outlet, Link, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, Package, ShoppingCart, Tags, LogOut } from 'lucide-react'
+import { LayoutDashboard, Package, ShoppingCart, Users, LogOut } from 'lucide-react'
 import api from '../services/api'
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
@@ -71,9 +71,9 @@ function AdminLayout() {
               </Link>
             </li>
             <li>
-              <Link to="/admin/categories" className="flex items-center gap-3 p-3 rounded hover:bg-gray-800">
-                <Tags size={20} />
-                Categories
+              <Link to="/admin/customers" className="flex items-center gap-3 p-3 rounded hover:bg-gray-800">
+                <Users size={20} />
+                Customers
               </Link>
             </li>
 

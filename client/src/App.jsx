@@ -24,12 +24,14 @@ import ProductPage from './pages/ProductPage'
 import CartPage from './pages/CartPage'
 import CheckoutPage from './pages/CheckoutPage'
 import OrderSuccessPage from './pages/OrderSuccessPage'
+import OrderSummaryPage from './pages/OrderSummaryPage'
 import OrderTrackingPage from './pages/OrderTrackingPage'
 import Debug from './pages/Debug'
 import AdminLogin from './pages/admin/Login'
 import AdminDashboard from './pages/admin/Dashboard'
 import AdminProducts from './pages/admin/Products'
 import AdminOrders from './pages/admin/Orders'
+import AdminCustomers from './pages/admin/Customer'
 
 import AdminLayout from './layouts/AdminLayout'
 import MainLayout from './layouts/MainLayout'
@@ -56,6 +58,7 @@ function App() {
               <Route path="/cart" element={<CartPage />} />
               <Route path="/checkout" element={<CheckoutPage />} />
               <Route path="/order-success/:id" element={<OrderSuccessPage />} />
+              <Route path="/order-summary/:id" element={<OrderSummaryPage />} />
               <Route path="/track-order" element={<OrderTrackingPage />} />
             <Route path="/debug" element={<Debug />} />
             </Route>
@@ -65,6 +68,7 @@ function App() {
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/admin/products" element={<AdminProducts />} />
               <Route path="/admin/orders" element={<AdminOrders />} />
+              <Route path="/admin/customers" element={<AdminCustomers />} />
 
             </Route>
           </Routes>

@@ -36,8 +36,15 @@ export default function Orders() {
     try {
       setLoading(true);
       const res = await api.get("/orders");
-      setOrders(res.data || []);
-      setFilteredOrders(res.data || []);
+      const list =
+        (Array.isArray(res.data) && res.data) ||
+        (res.data && (
+          (Array.isArray(res.data.data) && res.data.data) ||
+          (Array.isArray(res.data.orders) && res.data.orders)
+        )) ||
+        [];
+      setOrders(list);
+      setFilteredOrders(list);
     } catch (err) {
       console.log(err);
     } finally {

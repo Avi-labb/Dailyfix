@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import crypto from "crypto";
 import Order from "../models/Order.js";
 import Product from "../models/Product.js";
@@ -6,6 +7,12 @@ import customerOrderTemplate from "../templates/customerOrderTemplate.js";
 import adminOrderTemplate from "../templates/adminOrderTemplate.js";
 import delhiveryService from "../utils/delhivery.js";
 import razorpay from "../utils/razorpay.js";
+
+const isValidObjectId = (id) => {
+  if (!id) return false;
+  return mongoose.Types.ObjectId.isValid(id) && /^[a-fA-F0-9]{24}$/.test(String(id));
+};
+
 const generateOrderId = () => {
   return (
     "DFX" +
@@ -20,6 +27,7 @@ const calculateWeight = async (items) => {
 
   for (const item of items) {
     const productRef = item.product || item.productId;
+    if (!isValidObjectId(productRef)) continue;
     const product = await Product.findById(productRef);
 
     if (!product) continue;
@@ -37,6 +45,7 @@ const calculateDimensions = async (items) => {
 
   for (const item of items) {
     const productRef = item.product || item.productId;
+    if (!isValidObjectId(productRef)) continue;
     const product = await Product.findById(productRef);
 
     if (!product) continue;
@@ -129,6 +138,12 @@ export const createOrder = async (req, res) => {
 
     for (const item of items) {
       const productRef = item.product || item.productId;
+      if (!isValidObjectId(productRef)) {
+        return res.status(400).json({
+          success: false,
+          message: `Invalid product ID in cart`,
+        });
+      }
       const product = await Product.findById(productRef);
 
       if (!product) {
@@ -227,9 +242,11 @@ export const createOrder = async (req, res) => {
     console.log("Updating Product Stock...");
     for (const item of items) {
       const productRef = item.product || item.productId;
-      await Product.findByIdAndUpdate(productRef, {
-        $inc: { stock: -Number(item.quantity) },
-      });
+      if (isValidObjectId(productRef)) {
+        await Product.findByIdAndUpdate(productRef, {
+          $inc: { stock: -Number(item.quantity) },
+        });
+      }
     }
     console.log("✅ Product Stock Updated");
 
@@ -446,6 +463,7 @@ export const getOrderById = async (req, res) => {
     return res.json({
       success: true,
       order,
+      data: order,
     });
 
   } catch (error) {
@@ -476,6 +494,7 @@ export const getAllOrders = async (req, res) => {
       success: true,
       total: orders.length,
       orders,
+      data: orders,
     });
 
   } catch (error) {
@@ -737,18 +756,76 @@ GET SHIPPING RATE
 
 export const getShippingRate = async ( req,res) => {
   try {
-    const { destinationPin, weight } = req.query;
-    const response =
-      await delhiveryService.calculateShipping({
-        pickupPin:
-          process.env.DELHIVERY_PICKUP_PIN,
-        deliveryPin: destinationPin,
-        weight,
+    const { destinationPin, pincode, weight } = req.query;
+    const deliveryPin = destinationPin || pincode;
+
+    if (!deliveryPin || !/^[1-9][0-9]{5}$/.test(deliveryPin)) {
+      return res.status(400).json({
+        success: false,
+        message: "Valid pincode is required (6 digits)",
       });
+    }
+
+    let rate = null;
+    let estimated_delivery = null;
+    let is_cod_available = true;
+    let provider = "Standard";
+
+    try {
+      const response =
+        await delhiveryService.calculateShipping({
+          pickupPin:
+            process.env.DELHIVERY_PICKUP_PIN,
+          deliveryPin,
+          weight: weight || 500,
+        });
+
+      if (response && response.success !== false) {
+        const courierData = response?.data?.shipment_data?.courier || response?.courier || response?.data;
+        if (courierData && Array.isArray(courierData)) {
+          const prepaid = courierData.find(c => c.payment_mode && c.payment_mode.toLowerCase().includes("pre")) || courierData[0];
+          if (prepaid) {
+            rate = Number(prepaid.rate || prepaid.total_amount || prepaid.customer_amount || 0);
+            estimated_delivery = prepaid.etd || prepaid.expected_delivery || null;
+            is_cod_available = courierData.some(c => c.payment_mode && c.payment_mode.toLowerCase().includes("cod"));
+            provider = "Delhivery";
+          }
+        } else if (response.rate !== undefined) {
+          rate = Number(response.rate);
+          estimated_delivery = response.etd || null;
+          provider = "Delhivery";
+        }
+      }
+    } catch (delhiveryErr) {
+      console.warn("Delhivery API failed, using fallback rate:", delhiveryErr.message);
+    }
+
+    if (rate === null || isNaN(rate) || rate <= 0) {
+      const w = Number(weight) || 500;
+      if (w <= 500) rate = 49;
+      else if (w <= 1000) rate = 69;
+      else if (w <= 2000) rate = 99;
+      else rate = 149;
+
+      const pinPrefix = String(deliveryPin).slice(0, 2);
+      const localPins = ["40", "41", "42", "43"];
+      if (localPins.includes(pinPrefix)) {
+        rate = Math.max(29, rate - 20);
+      }
+      estimated_delivery = localPins.includes(pinPrefix) ? "2-3 days" : "4-7 days";
+      is_cod_available = true;
+      provider = "Standard";
+    }
 
     return res.json({
       success: true,
-      response,
+      rate,
+      currency: "INR",
+      estimated_delivery,
+      is_cod_available,
+      provider,
+      weight: Number(weight) || 500,
+      pincode: deliveryPin,
     });
   } catch (error) {
     console.error(error);

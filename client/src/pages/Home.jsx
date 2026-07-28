@@ -9,7 +9,7 @@ import poster from '../assets/images/poster.png';
 import banners from '../assets/images/2.jpg.jpeg';
 import beardVideo from '../assets/Untitled design (3).mp4';
 import api from '../services/api';
-import { getListingImage } from '../utils/productImages';
+import { normalizeProduct } from '../utils/productImages';
 import toast from 'react-hot-toast';
 
 const Home = () => {
@@ -29,17 +29,7 @@ const Home = () => {
           return;
         }
 
-        const mappedProducts = list.map((product) => ({
-          id: product._id || product.id,
-          name: product.name,
-          desc: 'Ammonia-Free Formula',
-          price: product.price,
-          image: getListingImage(product.slug),
-          slug: product.slug,
-          sku: product.sku,
-          brand: product.brand,
-          stock: product.stock
-        }));
+        const mappedProducts = list.map((product) => normalizeProduct(product));
         setProducts(mappedProducts);
       } catch (error) {
         console.error('Failed to fetch products:', error);

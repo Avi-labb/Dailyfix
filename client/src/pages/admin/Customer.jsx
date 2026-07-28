@@ -32,9 +32,9 @@ export default function Customers() {
 
       setLoading(true);
 
-      const res = await api.get("/users");
+      const res = await api.get("/admin/users");
 
-      const list = res.data || [];
+      const list = res.data?.data || [];
 
       setCustomers(list);
 

@@ -247,6 +247,60 @@ export const logout = (req, res) => {
   });
 };
 
+export const getAllCustomers = async (req, res) => {
+  try {
+    const customers = await Order.aggregate([
+      {
+        $group: {
+          _id: '$customer.email',
+          name: { $first: { $concat: ['$customer.firstName', ' ', '$customer.lastName'] } },
+          firstName: { $first: '$customer.firstName' },
+          lastName: { $first: '$customer.lastName' },
+          email: { $first: '$customer.email' },
+          phone: { $first: '$customer.phone' },
+          address: { $first: '$shippingAddress.address' },
+          city: { $first: '$shippingAddress.city' },
+          state: { $first: '$shippingAddress.state' },
+          pincode: { $first: '$shippingAddress.pincode' },
+          totalOrders: { $sum: 1 },
+          totalSpent: { $sum: '$total' },
+          _id_obj: { $first: '$_id' },
+          lastOrderDate: { $max: '$createdAt' }
+        }
+      },
+      {
+        $project: {
+          _id: '$_id_obj',
+          name: 1,
+          firstName: 1,
+          lastName: 1,
+          email: 1,
+          phone: 1,
+          address: 1,
+          city: 1,
+          state: 1,
+          pincode: 1,
+          totalOrders: 1,
+          totalSpent: 1,
+          lastOrderDate: 1
+        }
+      },
+      { $sort: { lastOrderDate: -1 } }
+    ]);
+
+    res.json({
+      success: true,
+      data: customers
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
+    });
+  }
+};
+
 export const getDashboardStats = async (req, res) => {
   try {
     const totalOrders = await Order.countDocuments();

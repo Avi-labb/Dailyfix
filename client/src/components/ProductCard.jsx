@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingCart } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { getProductImageSrc } from '../utils/productImages';
 
 const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
@@ -12,14 +13,23 @@ const ProductCard = ({ product }) => {
     addToCart(product, 1);
   };
 
+  const handleImageError = (e) => {
+    if (e.target && !e.target.dataset.fallbackApplied) {
+      e.target.dataset.fallbackApplied = '1';
+      e.target.src = getProductImageSrc(product);
+    }
+  };
+
   return (
     <Link to={`/product/${product.slug || product.id}`} className="group block">
       <div className="bg-white rounded-3xl shadow-soft overflow-hidden hover:shadow-hard transition-all duration-500 border border-stone-100 hover:border-emerald-100">
         {/* Image container */}
         <div className="p-8 bg-gradient-to-br from-emerald-50 via-white to-stone-50 border-b border-stone-100 overflow-hidden">
           <img
-            src={product.image}
+            src={getProductImageSrc(product)}
             alt={product.name}
+            onError={handleImageError}
+            loading="lazy"
             className="w-full h-72 object-contain group-hover:scale-110 transition-transform duration-700"
           />
         </div>

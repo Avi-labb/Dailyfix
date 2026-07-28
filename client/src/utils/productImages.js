@@ -1,119 +1,168 @@
-import product1 from '../assets/images/001 Natural black1.png';
-import product2 from '../assets/images/002 Brown black2.png';
-import product3 from '../assets/images/003 Drak brown3.png';
-
-import nb1 from '../assets/images/NATURAL BLACK/01.png';
-import nb2 from '../assets/images/NATURAL BLACK/02.png';
-import nb3 from '../assets/images/NATURAL BLACK/03.png';
-import nb4 from '../assets/images/NATURAL BLACK/04.png';
-import nb5 from '../assets/images/NATURAL BLACK/05.webp';
-import nb6 from '../assets/Untitled design (3).mp4';
-
-import bb1 from '../assets/images/02 BLACK BROWN/01.png';
-import bb2 from '../assets/images/02 BLACK BROWN/02.png';
-import bb3 from '../assets/images/02 BLACK BROWN/03.png';
-import bb4 from '../assets/images/02 BLACK BROWN/04.png';
-import bb5 from '../assets/images/02 BLACK BROWN/05.webp';
-import bb6 from '../assets/Untitled design (3).mp4';
-
-import db1 from '../assets/images/DARK BROWN/01.png';
-import db2 from '../assets/images/DARK BROWN/02.png';
-import db3 from '../assets/images/DARK BROWN/03.png';
-import db4 from '../assets/images/DARK BROWN/04.png';
-import db5 from '../assets/images/DARK BROWN/05.webp';
-import db6 from '../assets/Untitled design (3).mp4';
+import nb003 from '../assets/images/NATURAL BLACK/003.jpeg';
+import nb004 from '../assets/images/NATURAL BLACK/004.jpeg';
+import nb01 from '../assets/images/NATURAL BLACK/01.png';
+import nb02 from '../assets/images/NATURAL BLACK/02.png';
+import nb04 from '../assets/images/NATURAL BLACK/04.png';
+import nb05 from '../assets/images/NATURAL BLACK/05.webp';
+import dbl03 from '../assets/images/DARK BROWN/03.jpeg';
+import dbl04j from '../assets/images/DARK BROWN/04.jpeg';
+import dbl01 from '../assets/images/DARK BROWN/01.png';
+import dbl02 from '../assets/images/DARK BROWN/02.png';
+import dbl04 from '../assets/images/DARK BROWN/04.png';
+import dbl05 from '../assets/images/DARK BROWN/05.webp';
+import bb003 from '../assets/images/02 BLACK BROWN/003.jpeg';
+import bb004 from '../assets/images/02 BLACK BROWN/004.jpeg';
+import bb01 from '../assets/images/02 BLACK BROWN/01.png';
+import bb02 from '../assets/images/02 BLACK BROWN/02.png';
+import bb04 from '../assets/images/02 BLACK BROWN/04.png';
+import bb05 from '../assets/images/02 BLACK BROWN/05.webp';
+import genericListing001 from '../assets/images/001 Natural black1.png';
+import genericListing002 from '../assets/images/002 Brown black2.png';
+import genericListing003 from '../assets/images/003 Drak brown3.png';
+import genericProduct from '../assets/images/Dailyfix Beard Colour Product Only.png';
+import productVideo from '../assets/Untitled design (3).mp4';
 
 export const listingImageMap = {
-  'natural-black': product1,
-  'black-brown': product2,
-  'dark-brown': product3,
+  'natural-black': nb01,
+  'dark-brown': dbl01,
+  'black-brown': bb01,
+  'beard-colour-natural-black': nb01,
+  'beard-colour-dark-brown': dbl01,
+  'beard-colour-black-brown': bb01,
 };
+
+const galleryMapNB = [
+  { type: 'image', src: nb01 },
+  { type: 'image', src: nb02 },
+  { type: 'image', src: nb003 },
+  { type: 'image', src: nb004 },
+  { type: 'image', src: nb04 },
+  { type: 'image', src: nb05 },
+  { type: 'video', src: productVideo },
+];
+const galleryMapDBL = [
+  { type: 'image', src: dbl01 },
+  { type: 'image', src: dbl02 },
+  { type: 'image', src: dbl03 },
+  { type: 'image', src: dbl04j },
+  { type: 'image', src: dbl04 },
+  { type: 'image', src: dbl05 },
+  { type: 'video', src: productVideo },
+];
+const galleryMapBB = [
+  { type: 'image', src: bb01 },
+  { type: 'image', src: bb02 },
+  { type: 'image', src: bb003 },
+  { type: 'image', src: bb004 },
+  { type: 'image', src: bb04 },
+  { type: 'image', src: bb05 },
+  { type: 'video', src: productVideo },
+];
 
 export const galleryImageMap = {
-  'natural-black': [
-    { type: 'image', src: nb1 },
-    { type: 'image', src: nb2 },
-    { type: 'image', src: nb3 },
-    { type: 'image', src: nb4 },
-    { type: 'image', src: nb5 },
-    { type: 'video', src: nb6 },
-  ],
-  'black-brown': [
-    { type: 'image', src: bb1 },
-    { type: 'image', src: bb2 },
-    { type: 'image', src: bb3 },
-    { type: 'image', src: bb4 },
-    { type: 'image', src: bb5 },
-    { type: 'video', src: bb6 },
-  ],
-  'dark-brown': [
-    { type: 'image', src: db1 },
-    { type: 'image', src: db2 },
-    { type: 'image', src: db3 },
-    { type: 'image', src: db4 },
-    { type: 'image', src: db5 },
-    { type: 'video', src: db6 },
-  ],
+  'natural-black': galleryMapNB,
+  'dark-brown': galleryMapDBL,
+  'black-brown': galleryMapBB,
+  'beard-colour-natural-black': galleryMapNB,
+  'beard-colour-dark-brown': galleryMapDBL,
+  'beard-colour-black-brown': galleryMapBB,
 };
 
-const defaultListingImage = product1;
-const defaultGallery = galleryImageMap['natural-black'];
+const FALLBACK_LISTING = genericListing001;
+const FALLBACK_GALLERY = [
+  { type: 'image', src: genericListing001 },
+  { type: 'image', src: genericListing002 },
+  { type: 'image', src: genericListing003 },
+  { type: 'image', src: genericProduct },
+  { type: 'video', src: productVideo },
+];
+
+const pickGenericBySlug = (slug = '') => {
+  const s = String(slug || '').toLowerCase();
+  if (s.includes('dark') && s.includes('brown')) return genericListing003;
+  if (s.includes('black') && s.includes('brown')) return genericListing002;
+  if (s.includes('natural') || s.includes('black')) return genericListing001;
+  return FALLBACK_LISTING;
+};
 
 export function getProductGallery(slug) {
-  return galleryImageMap[slug] || defaultGallery;
+  if (slug && galleryImageMap[slug]) return galleryImageMap[slug];
+  return FALLBACK_GALLERY;
 }
 
 export function getListingImage(slug) {
-  return listingImageMap[slug] || defaultListingImage;
+  if (slug && listingImageMap[slug]) return listingImageMap[slug];
+  if (slug) return pickGenericBySlug(slug);
+  return FALLBACK_LISTING;
 }
 
-function looksLikeAssetUrl(value) {
-  if (!value || typeof value !== 'string') return false;
-  return (
-    value.startsWith('/') ||
-    value.startsWith('./') ||
-    value.startsWith('../') ||
-    value.startsWith('http') ||
-    value.startsWith('data:') ||
-    value.startsWith('blob:') ||
-    /\.[a-z0-9]{2,5}(?:\?|#|$)/i.test(value)
-  );
+export function getRawListingBySlug(slug) {
+  return getListingImage(slug);
+}
+
+export function resolveImage(input) {
+  if (!input) return FALLBACK_LISTING;
+  if (typeof input === 'string') return input;
+  if (typeof input === 'object' && typeof input.src === 'string') return input.src;
+  if (typeof input === 'object' && typeof input.url === 'string') return input.url;
+  if (Array.isArray(input) && input.length) return resolveImage(input[0]);
+  return FALLBACK_LISTING;
 }
 
 export function getProductImageSrc(product) {
-  if (!product) return defaultListingImage;
-
-  if (product.image && typeof product.image === 'string') {
-    if (looksLikeAssetUrl(product.image)) {
-      return product.image;
-    }
-    if (listingImageMap[product.image]) {
-      return listingImageMap[product.image];
-    }
-  }
-
-  if (product.images?.length) {
-    const first = product.images[0];
-    if (typeof first === 'string') return first;
-    if (typeof first === 'object') {
-      const firstImage = product.images.find((media) => media?.type === 'image');
-      return firstImage?.src || first?.src || defaultListingImage;
-    }
-  }
-
-  if (product.slug) {
-    return getListingImage(product.slug);
-  }
-
-  return defaultListingImage;
+  if (!product) return FALLBACK_LISTING;
+  const direct = product.image || product.img || product.cover || product.thumbnail;
+  if (direct && typeof direct === 'string') return direct;
+  if (direct && typeof direct === 'object') return resolveImage(direct);
+  const imgs = product.images || product.gallery || product.media;
+  if (Array.isArray(imgs) && imgs.length) return resolveImage(imgs[0]);
+  if (product.slug) return getListingImage(product.slug);
+  return FALLBACK_LISTING;
 }
 
-export function normalizeProduct(product) {
-  if (!product) return product;
+export function getProductGalleryImages(product) {
+  if (!product) return FALLBACK_GALLERY;
+  if (Array.isArray(product.images) && product.images.length) {
+    const normalized = product.images
+      .map((m) => {
+        if (typeof m === 'string') return { type: 'image', src: m };
+        if (m && typeof m === 'object') {
+          if (m.type === 'video') return { type: 'video', src: m.src || m.url };
+          return { type: m.type || 'image', src: m.src || m.url };
+        }
+        return null;
+      })
+      .filter(Boolean);
+    if (normalized.length) return normalized;
+  }
+  if (product.slug) return getProductGallery(product.slug);
+  return FALLBACK_GALLERY;
+}
 
+export function normalizeProduct(apiProduct) {
+  if (!apiProduct) return null;
+  const id = apiProduct._id || apiProduct.id;
+  const slug = apiProduct.slug || `product-${id}`;
+  const image =
+    (typeof apiProduct.image === 'string' && apiProduct.image) ||
+    getListingImage(slug);
+  const images = getProductGalleryImages(apiProduct);
   return {
-    ...product,
-    image: getProductImageSrc(product),
-    images: product.images || getProductGallery(product.slug),
+    ...apiProduct,
+    id,
+    slug,
+    image,
+    images,
+    name: apiProduct.name || 'Dailyfix Beard Colour',
+    price: Number(apiProduct.price || 0),
+    desc: apiProduct.desc || apiProduct.tagline || 'Ammonia-Free Formula',
+    sku: apiProduct.sku || `DFX-${String(id).slice(-6).toUpperCase()}`,
+    stock: Number(apiProduct.stock || 50),
+    description: apiProduct.description || '',
+    category: apiProduct.category || 'Beard Colour',
+    brand: apiProduct.brand || 'Dailyfix',
   };
 }
+
+export const FALLBACK_PRODUCT_IMAGE = FALLBACK_LISTING;
+export { genericProduct as genericFallback, genericListing001, genericListing002, genericListing003, productVideo };

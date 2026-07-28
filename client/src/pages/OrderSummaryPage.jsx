@@ -67,17 +67,25 @@ function OrderSummaryPage() {
           phone: orderData.customer.phone
         },
         items: orderData.items.map(item => ({
+          product: item.product?.id || item.productId,
           productId: item.productId,
+          name: item.product?.name,
+          sku: item.product?.sku,
+          price: item.product?.price,
           quantity: item.quantity
         })),
         shippingAddress: orderData.shippingAddress,
         billingAddress: orderData.billingAddress,
-        paymentMethod: orderData.paymentMethod
+        paymentMethod: orderData.paymentMethod,
+        total: orderData.grandTotal,
+        shipping: orderData.shipping || 0,
+        tax: orderData.tax || 0,
       })
 
       clearCart()
       sessionStorage.removeItem('pendingOrder')
-      navigate(`/order-success/${res.data.orderId}`)
+      const orderId = res.data?.order?.orderId || res.data?.orderId || (res.data?.data && (res.data.data.orderId || res.data.data.order?.orderId))
+      navigate(`/order-success/${orderId}`)
     } catch (error) {
       toast.error('Failed to place order')
     } finally {
