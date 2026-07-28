@@ -87,11 +87,30 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/contact', contactRoutes);
 
 // ===============================
-// FRONTEND
+// FRONTEND (dist folder serving)
+//   Supports 3 paths, checked in this order:
+//   1. FRONTEND_DIST_PATH from .env (absolute or relative — for deployed servers)
+//   2. ../client/dist               (local dev, default XAMPP structure)
+//   3. ./dist                       (server-folder-only deployments e.g. upload dist/ into server/)
 // ===============================
-const frontendPath = path.join(__dirname, '..', 'server', 'dist');
+const projectRoot = path.join(__dirname, '..');
+const envPath = process.env.FRONTEND_DIST_PATH;
 
-const frontendExists = fs.existsSync(frontendPath);
+let frontendPath;
+if (envPath && envPath.trim()) {
+  frontendPath = path.isAbsolute(envPath)
+    ? envPath
+    : path.resolve(projectRoot, envPath);
+} else {
+  const adjacentClientDist = path.join(__dirname, '..', 'client', 'dist');
+  const serverInternalDist = path.join(__dirname, 'dist');
+  frontendPath = fs.existsSync(adjacentClientDist)
+    ? adjacentClientDist
+    : serverInternalDist;
+}
+
+const frontendExists = fs.existsSync(frontendPath) &&
+  fs.existsSync(path.join(frontendPath, 'index.html'));
 
 if (frontendExists) {
   app.use(express.static(frontendPath));
@@ -105,13 +124,24 @@ if (frontendExists) {
   console.log('✅ Frontend dist folder found at:', frontendPath);
 } else {
   console.log(
-    '⚠️ Frontend dist folder not found at:', frontendPath
+    '⚠️  Frontend dist folder not found at:', frontendPath
+  );
+  if (envPath) {
+    console.log(
+      '⚠️  FRONTEND_DIST_PATH is set to:', envPath
+    );
+  }
+  console.log(
+    '⚠️  Option 1 (local):  cd client && npm run build   (creates client/dist)'
   );
   console.log(
-    '⚠️ Run: cd client && npm run build'
+    '⚠️  Option 2 (deploy): copy client/dist/* into   server/dist/'
   );
   console.log(
-    '⚠️ Only API routes are available.'
+    '⚠️  Option 3 (deploy): set FRONTEND_DIST_PATH in .env to the absolute folder path'
+  );
+  console.log(
+    '⚠️  Only API routes will work until dist exists.'
   );
 }
 
