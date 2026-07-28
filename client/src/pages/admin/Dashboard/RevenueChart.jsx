@@ -9,7 +9,11 @@ import {
 } from "recharts";
 import { motion } from "framer-motion";
 
-export default function RevenueChart({ data = [] }) {
+export default function RevenueChart({
+  data = [],
+  title = "Revenue Overview",
+  subtitle = "Monthly Sales Report",
+}) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -19,11 +23,11 @@ export default function RevenueChart({ data = [] }) {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-lg font-semibold text-slate-900">
-            Revenue Overview
+            {title}
           </h2>
 
           <p className="text-sm text-slate-500">
-            Monthly Sales Report
+            {subtitle}
           </p>
         </div>
 

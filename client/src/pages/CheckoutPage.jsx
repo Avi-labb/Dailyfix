@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import api from '../services/api';
+import api, { orderAPI } from '../services/api';
 import { getProductImageSrc } from '../utils/productImages';
 import toast from 'react-hot-toast';
 import { useForm } from 'react-hook-form';
@@ -488,20 +488,37 @@ function CheckoutPage() {
         return;
       }
 
-      const { data: gatewayData } = await api.post('/create-razorpay-order', {
-        amount: getTotal(),
-        currency: 'INR'
-      });
+      const totalAmount = getTotal();
+
+      const gatewayRes = await orderAPI.createRazorpayOrder(totalAmount);
+
+      if (!gatewayRes.ok || !gatewayRes.data?.success) {
+        throw new Error(gatewayRes.data?.message || 'Failed to initialize payment');
+      }
+
+      const gatewayData = gatewayRes.data;
 
       const options = {
         key: gatewayData.keyId,
         amount: gatewayData.amount,
         currency: gatewayData.currency,
-        name: 'Your Store Name',
-        description: 'Purchase Payment',
+        name: 'Dailyfix Care',
+        description: 'Order Payment',
         order_id: gatewayData.razorpayOrderId,
         handler: async function (response) {
           try {
+            // Step 1: Verify payment signature first
+            const verifyRes = await orderAPI.verifyPayment({
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature,
+            });
+
+            if (!verifyRes.ok || !verifyRes.data?.verified) {
+              throw new Error('Payment verification failed');
+            }
+
+            // Step 2: Payment verified, now create the order in DB
             const res = await api.post('/orders', {
               customer: {
                 firstName: data.firstName,
@@ -521,9 +538,10 @@ function CheckoutPage() {
               },
               paymentMethod: 'online',
               paymentDetails: {
-                razorpayPaymentId: response.razorpay_payment_id,
                 razorpayOrderId: response.razorpay_order_id,
-                razorpaySignature: response.razorpay_signature
+                razorpayPaymentId: response.razorpay_payment_id,
+                razorpaySignature: response.razorpay_signature,
+                verified: true,
               }
             });
 
@@ -532,13 +550,18 @@ function CheckoutPage() {
             toast.success('Payment successful!');
             navigate(`/order-success/${res.data.order.orderId}`);
           } catch (err) {
-            toast.error('Payment verification failed. Please contact support if debited.');
+            console.error('Order creation after payment failed:', err);
+            toast.error('Payment verified but order saving failed. Please contact support with Payment ID: ' + response.razorpay_payment_id);
           }
         },
         prefill: {
           name: `${data.firstName} ${data.lastName}`,
           email: data.email,
           contact: data.phone
+        },
+        notes: {
+          customer_email: data.email,
+          customer_phone: data.phone,
         },
         theme: {
           color: '#059669'
@@ -552,7 +575,8 @@ function CheckoutPage() {
       razorpayInstance.open();
 
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to initialize payment');
+      console.error('Razorpay init error:', error);
+      toast.error(error.response?.data?.message || error.message || 'Failed to initialize payment');
     } finally {
       setLoading(false);
     }

@@ -132,7 +132,7 @@ export default function RecentOrders({
 
                       <img
                         src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
-                          order.shippingAddress?.name ||
+                          order.customerName ||
                           "Customer"
                         )}&background=10b981&color=fff`}
                         alt=""
@@ -143,13 +143,13 @@ export default function RecentOrders({
 
                         <div className="font-semibold">
 
-                          {order.shippingAddress?.name}
+                          {order.customerName || "—"}
 
                         </div>
 
                         <div className="text-xs text-slate-500">
 
-                          {order.shippingAddress?.phone}
+                          {order.customerPhone || order.customerEmail || "—"}
 
                         </div>
 

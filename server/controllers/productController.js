@@ -3,11 +3,12 @@ import mongoose from 'mongoose';
 
 const getAllProducts = async (req, res) => {
   try {
-    const { search, minPrice, maxPrice, brand, sort, page = 1, limit = 20 } = req.query;
+    const { search, minPrice, maxPrice, brand, sort, page = 1, limit = 20, includeInactive } = req.query;
     const skip = (page - 1) * limit;
     
     const filter = {};
 
+    if (!includeInactive) filter.isActive = true;
     if (search) filter.$or = [{ name: { $regex: search, $options: 'i' } }, { description: { $regex: search, $options: 'i' } }];
     if (minPrice) filter.price = { ...filter.price, $gte: parseFloat(minPrice) };
     if (maxPrice) filter.price = { ...filter.price, $lte: parseFloat(maxPrice) };
@@ -26,13 +27,14 @@ const getAllProducts = async (req, res) => {
     const total = await Product.countDocuments(filter);
 
     res.json({
+      success: true,
       products,
       total,
       page: parseInt(page),
       totalPages: Math.ceil(total / limit)
     });
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
   }
 };
 
