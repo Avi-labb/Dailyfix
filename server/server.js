@@ -89,7 +89,7 @@ app.use('/api/contact', contactRoutes);
 // ===============================
 // FRONTEND
 // ===============================
-const frontendPath = path.join(__dirname, '..', 'client', 'dist');
+const frontendPath = path.join(__dirname, '..', 'server', 'dist');
 
 const frontendExists = fs.existsSync(frontendPath);
 
