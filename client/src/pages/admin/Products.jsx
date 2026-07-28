@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import api from "../../services/api";
+import toast from "react-hot-toast";
 
 export default function Products() {
   const [products, setProducts] = useState([]);
@@ -37,12 +38,31 @@ export default function Products() {
 
       const res = await api.get("/products");
 
-      const list = res.data.products || res.data || [];
+      const list =
+        (res.data && res.data.products) ||
+        (Array.isArray(res.data) ? res.data : []) ||
+        [];
 
       setProducts(list);
       setFilteredProducts(list);
+
+      if (list.length === 0) {
+        toast("No products found in catalog.", {
+          icon: "📦",
+          duration: 4000,
+        });
+      }
     } catch (err) {
       console.log(err);
+      const status = err?.response?.status;
+      if (status === 401) {
+        toast.error("Login session expired. Please sign in again to manage products.");
+      } else {
+        toast.error(
+          "Unable to load products. Verify Dailyfix API server is running on port 5001.",
+          { duration: 5000 }
+        );
+      }
     } finally {
       setLoading(false);
     }

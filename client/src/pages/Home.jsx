@@ -10,6 +10,7 @@ import banners from '../assets/images/2.jpg.jpeg';
 import beardVideo from '../assets/Untitled design (3).mp4';
 import api from '../services/api';
 import { getListingImage } from '../utils/productImages';
+import toast from 'react-hot-toast';
 
 const Home = () => {
   const [products, setProducts] = useState([]);
@@ -19,8 +20,17 @@ const Home = () => {
     const fetchProducts = async () => {
       try {
         const res = await api.get('/products');
-        const mappedProducts = res.data.products.map((product) => ({
-          id: product._id,
+        const list =
+          (res.data && res.data.products) ||
+          (Array.isArray(res.data) ? res.data : []);
+
+        if (!Array.isArray(list) || list.length === 0) {
+          setProducts([]);
+          return;
+        }
+
+        const mappedProducts = list.map((product) => ({
+          id: product._id || product.id,
           name: product.name,
           desc: 'Ammonia-Free Formula',
           price: product.price,
@@ -33,6 +43,7 @@ const Home = () => {
         setProducts(mappedProducts);
       } catch (error) {
         console.error('Failed to fetch products:', error);
+        toast.error('Unable to load products. Verify API server is running on port 5001.', { duration: 5000 });
       } finally {
         setLoading(false);
       }

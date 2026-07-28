@@ -4,6 +4,7 @@ import { Leaf, ShieldCheck, Truck } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 import api from '../services/api';
 import { getListingImage } from '../utils/productImages';
+import toast from 'react-hot-toast';
 
 const TRUST_POINTS = [
   { icon: Leaf, label: 'Ammonia-Free Formula' },
@@ -19,8 +20,18 @@ const Shop = () => {
     const fetchProducts = async () => {
       try {
         const res = await api.get('/products');
-        const mappedProducts = res.data.products.map((product) => ({
-          id: product._id,
+        const list =
+          (res.data && res.data.products) ||
+          (Array.isArray(res.data) ? res.data : []);
+
+        if (!Array.isArray(list) || list.length === 0) {
+          toast.error('No products are available right now');
+          setProducts([]);
+          return;
+        }
+
+        const mappedProducts = list.map((product) => ({
+          id: product._id || product.id,
           name: product.name,
           desc: 'Ammonia-Free Formula',
           price: product.price,
@@ -33,6 +44,14 @@ const Shop = () => {
         setProducts(mappedProducts);
       } catch (error) {
         console.error('Failed to fetch products:', error);
+        const status = error?.response?.status;
+        const msg =
+          status === 404
+            ? 'Products endpoint not found — check API server is running on port 5001'
+            : status && status >= 500
+              ? 'Server error while loading products — please refresh in a moment'
+              : 'Unable to load products. Verify that the Dailyfix API server is running on port 5001';
+        toast.error(msg, { duration: 6000 });
       } finally {
         setLoading(false);
       }

@@ -67,11 +67,29 @@ export function getListingImage(slug) {
   return listingImageMap[slug] || defaultListingImage;
 }
 
+function looksLikeAssetUrl(value) {
+  if (!value || typeof value !== 'string') return false;
+  return (
+    value.startsWith('/') ||
+    value.startsWith('./') ||
+    value.startsWith('../') ||
+    value.startsWith('http') ||
+    value.startsWith('data:') ||
+    value.startsWith('blob:') ||
+    /\.[a-z0-9]{2,5}(?:\?|#|$)/i.test(value)
+  );
+}
+
 export function getProductImageSrc(product) {
   if (!product) return defaultListingImage;
 
   if (product.image && typeof product.image === 'string') {
-    return product.image;
+    if (looksLikeAssetUrl(product.image)) {
+      return product.image;
+    }
+    if (listingImageMap[product.image]) {
+      return listingImageMap[product.image];
+    }
   }
 
   if (product.images?.length) {
