@@ -23,7 +23,8 @@ const seed = async () => {
         stock: 100,
         sku: 'DF-NB-001',
         brand: 'Dailyfix',
-        image: 'natural-black'
+        image: 'natural-black',
+        isActive: true
       },
       {
         name: 'Mens Beard Colour Black Brown',
@@ -33,7 +34,8 @@ const seed = async () => {
         stock: 100,
         sku: 'DF-BB-002',
         brand: 'Dailyfix',
-        image: 'black-brown'
+        image: 'black-brown',
+        isActive: true
       },
       {
         name: 'Mens Beard Colour Dark Brown',
@@ -43,7 +45,8 @@ const seed = async () => {
         stock: 100,
         sku: 'DF-DB-003',
         brand: 'Dailyfix',
-        image: 'dark-brown'
+        image: 'dark-brown',
+        isActive: true
       },
     ];
 

@@ -8,8 +8,13 @@ const getAllProducts = async (req, res) => {
     
     const filter = {};
 
-    if (!includeInactive) filter.isActive = true;
-    if (search) filter.$or = [{ name: { $regex: search, $options: 'i' } }, { description: { $regex: search, $options: 'i' } }];
+    if (!includeInactive) {
+      filter.$or = [
+        { isActive: { $exists: false } },
+        { isActive: true }
+      ];
+    }
+    if (search) filter.$and = (filter.$and || []).concat([{ $or: [{ name: { $regex: search, $options: 'i' } }, { description: { $regex: search, $options: 'i' } }] }]);
     if (minPrice) filter.price = { ...filter.price, $gte: parseFloat(minPrice) };
     if (maxPrice) filter.price = { ...filter.price, $lte: parseFloat(maxPrice) };
     if (brand) filter.brand = brand;
