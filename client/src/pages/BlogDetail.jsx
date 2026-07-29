@@ -82,9 +82,8 @@ const BlogDetail = () => {
   return (
     <div className="min-h-screen bg-stone-50 pb-20">
       {/* Hero Section */}
-      <div className="relative w-full h-[420px] md:h-[600px] overflow-hidden">
+      <div className="relative w-full h-[220px] md:h-[300px] overflow-hidden">
         <img
-          src={post.image}
           alt={post.title}
           className="w-full h-full object-cover"
         />
