@@ -5,6 +5,7 @@ import {
   Star,
   ShoppingBag,
 } from "lucide-react";
+import { getProductImageSrc } from "../../../utils/productImages";
 
 export default function TopProducts({
   products = [],
@@ -79,11 +80,7 @@ export default function TopProducts({
               <div className="flex items-center gap-4">
 
                 <img
-                  src={
-                    product.images?.[0] ||
-                    product.image ||
-                    "https://placehold.co/70x70?text=Product"
-                  }
+                  src={getProductImageSrc(product)}
                   alt={product.name}
                   className="w-16 h-16 rounded-xl object-cover border"
                 />

@@ -77,13 +77,46 @@ const FALLBACK_GALLERY = [
   { type: 'video', src: productVideo },
 ];
 
-const pickGenericBySlug = (slug = '') => {
+const VALID_URL_PREFIXES = ['http://', 'https://', '//', 'data:image/', 'blob:'];
+const VITE_ASSET_EXT_RE = /\.(png|jpe?g|webp|gif|svg|mp4|webm)(\?.*)?$/i;
+
+function isLikelyAssetUrl(value) {
+  if (!value || typeof value !== 'string') return false;
+  const v = value.trim();
+  if (!v) return false;
+  if (VALID_URL_PREFIXES.some((p) => v.toLowerCase().startsWith(p))) return true;
+  if (v.startsWith('/') || v.startsWith('./') || v.startsWith('../')) return true;
+  if (VITE_ASSET_EXT_RE.test(v)) return true;
+  return false;
+}
+
+function pickGenericBySlug(slug = '') {
   const s = String(slug || '').toLowerCase();
   if (s.includes('dark') && s.includes('brown')) return genericListing003;
   if (s.includes('black') && s.includes('brown')) return genericListing002;
   if (s.includes('natural') || s.includes('black')) return genericListing001;
   return FALLBACK_LISTING;
-};
+}
+
+function resolveListingOrUrl(value, fallbackSlug) {
+  if (!value) {
+    if (fallbackSlug && listingImageMap[fallbackSlug]) return listingImageMap[fallbackSlug];
+    if (fallbackSlug) return pickGenericBySlug(fallbackSlug);
+    return FALLBACK_LISTING;
+  }
+  if (typeof value !== 'string') {
+    if (fallbackSlug && listingImageMap[fallbackSlug]) return listingImageMap[fallbackSlug];
+    if (fallbackSlug) return pickGenericBySlug(fallbackSlug);
+    return FALLBACK_LISTING;
+  }
+  if (isLikelyAssetUrl(value)) return value;
+  if (listingImageMap[value]) return listingImageMap[value];
+  if (fallbackSlug && listingImageMap[fallbackSlug]) return listingImageMap[fallbackSlug];
+  const generic = pickGenericBySlug(value);
+  if (generic !== FALLBACK_LISTING) return generic;
+  if (fallbackSlug) return pickGenericBySlug(fallbackSlug);
+  return FALLBACK_LISTING;
+}
 
 export function getProductGallery(slug) {
   if (slug && galleryImageMap[slug]) return galleryImageMap[slug];
@@ -102,21 +135,27 @@ export function getRawListingBySlug(slug) {
 
 export function resolveImage(input) {
   if (!input) return FALLBACK_LISTING;
-  if (typeof input === 'string') return input;
-  if (typeof input === 'object' && typeof input.src === 'string') return input.src;
-  if (typeof input === 'object' && typeof input.url === 'string') return input.url;
+  if (typeof input === 'string') return resolveListingOrUrl(input);
+  if (typeof input === 'object' && typeof input.src === 'string') return resolveListingOrUrl(input.src);
+  if (typeof input === 'object' && typeof input.url === 'string') return resolveListingOrUrl(input.url);
   if (Array.isArray(input) && input.length) return resolveImage(input[0]);
   return FALLBACK_LISTING;
 }
 
 export function getProductImageSrc(product) {
   if (!product) return FALLBACK_LISTING;
+  const slug = product.slug;
   const direct = product.image || product.img || product.cover || product.thumbnail;
-  if (direct && typeof direct === 'string') return direct;
-  if (direct && typeof direct === 'object') return resolveImage(direct);
+  if (direct) {
+    const resolved =
+      typeof direct === 'object'
+        ? resolveImage(direct)
+        : resolveListingOrUrl(direct, slug);
+    if (resolved) return resolved;
+  }
   const imgs = product.images || product.gallery || product.media;
   if (Array.isArray(imgs) && imgs.length) return resolveImage(imgs[0]);
-  if (product.slug) return getListingImage(product.slug);
+  if (slug) return getListingImage(slug);
   return FALLBACK_LISTING;
 }
 

@@ -1,5 +1,7 @@
 import jwt from 'jsonwebtoken';
 
+const JWT_SECRET = 'your-super-secret-jwt-key-change-this-in-production';
+
 const authMiddleware = (req, res, next) => {
   try {
     let token = req.cookies.adminToken;
@@ -10,7 +12,7 @@ const authMiddleware = (req, res, next) => {
     if (!token) {
       return res.status(401).json({ message: 'Access denied' });
     }
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET);
     req.admin = decoded;
     next();
   } catch (error) {

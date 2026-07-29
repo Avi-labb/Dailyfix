@@ -24,6 +24,7 @@ import {
 import { motion } from "framer-motion";
 
 import api from "../../services/api";
+import { getProductImageSrc } from "../../utils/productImages";
 
 import StatsCard from "./Dashboard/StatsCard";
 import RevenueChart from "./Dashboard/RevenueChart";
@@ -369,7 +370,7 @@ export default function Dashboard() {
       </div>
 
       {/* Revenue Chart + Status Cards */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      <div className="gap-6 space-y-3">
         <div className="xl:col-span-2">
           <RevenueChart data={monthlyRevenue} title="Monthly Revenue (Last 6 months)" />
         </div>
@@ -387,7 +388,7 @@ export default function Dashboard() {
       </div>
 
       {/* Recent Orders + Quick Actions */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      <div className="space-y-3 gap-6">
         <div className="xl:col-span-2">
           <RecentOrders
             loading={loading}
@@ -445,16 +446,23 @@ export default function Dashboard() {
                     animate={{ opacity: 1, x: 0 }}
                     className="flex items-center justify-between gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3"
                   >
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <XCircle size={15} className="text-red-500 flex-shrink-0" />
-                        <p className="font-semibold text-slate-800 truncate">
-                          {p.name}
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <img
+                        src={getProductImageSrc(p)}
+                        alt={p.name}
+                        className="w-12 h-12 rounded-lg object-cover border border-red-200 bg-white flex-shrink-0"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <XCircle size={15} className="text-red-500 flex-shrink-0" />
+                          <p className="font-semibold text-slate-800 truncate">
+                            {p.name}
+                          </p>
+                        </div>
+                        <p className="text-xs text-red-700 mt-0.5">
+                          Out of stock · SKU: {p.sku || "—"}
                         </p>
                       </div>
-                      <p className="text-xs text-red-700 mt-0.5">
-                        Out of stock · SKU: {p.sku || "—"}
-                      </p>
                     </div>
                     <span className="flex-shrink-0 text-xs font-bold text-red-700 bg-red-100 rounded-lg px-2 py-1">
                       0 left
@@ -468,16 +476,23 @@ export default function Dashboard() {
                     animate={{ opacity: 1, x: 0 }}
                     className="flex items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3"
                   >
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <AlertTriangle size={15} className="text-amber-500 flex-shrink-0" />
-                        <p className="font-semibold text-slate-800 truncate">
-                          {p.name}
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <img
+                        src={getProductImageSrc(p)}
+                        alt={p.name}
+                        className="w-12 h-12 rounded-lg object-cover border border-amber-200 bg-white flex-shrink-0"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <AlertTriangle size={15} className="text-amber-500 flex-shrink-0" />
+                          <p className="font-semibold text-slate-800 truncate">
+                            {p.name}
+                          </p>
+                        </div>
+                        <p className="text-xs text-amber-700 mt-0.5">
+                          Running low · SKU: {p.sku || "—"}
                         </p>
                       </div>
-                      <p className="text-xs text-amber-700 mt-0.5">
-                        Running low · SKU: {p.sku || "—"}
-                      </p>
                     </div>
                     <span className="flex-shrink-0 text-xs font-bold text-amber-700 bg-amber-100 rounded-lg px-2 py-1">
                       {p.stock} left
@@ -496,7 +511,7 @@ export default function Dashboard() {
           <h3 className="font-bold text-slate-900">Order Pipeline</h3>
           <span className="text-xs text-slate-500">Status breakdown</span>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-0.5 p-2">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-row-8 gap-1 p-2">
           {Object.entries(data.orderStatusCounts).map(([status, count]) => {
             const Icon = {
               Pending: Clock,

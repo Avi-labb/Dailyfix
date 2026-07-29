@@ -11,6 +11,7 @@ import {
 import { motion } from "framer-motion";
 import api from "../../services/api";
 import toast from "react-hot-toast";
+import { getProductImageSrc } from "../../utils/productImages";
 
 export default function Products() {
   const [products, setProducts] = useState([]);
@@ -403,11 +404,7 @@ export default function Products() {
                       <div className="flex items-center gap-4">
 
                         <img
-                          src={
-                            product.images?.[0] ||
-                            product.image ||
-                            "https://placehold.co/70x70?text=Product"
-                          }
+                          src={getProductImageSrc(product)}
                           alt={product.name}
                           className="w-14 h-14 rounded-xl object-cover border"
                         />

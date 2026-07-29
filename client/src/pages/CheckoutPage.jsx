@@ -5,6 +5,7 @@ import api, { orderAPI } from '../services/api';
 import { getProductImageSrc } from '../utils/productImages';
 import toast from 'react-hot-toast';
 import { useForm } from 'react-hook-form';
+import axios from 'axios';
 import {
   ArrowLeft,
   CreditCard,
@@ -52,7 +53,7 @@ const loadRazorpayScript = () => {
   });
 };
 
-function Step1AddressSummary({ register, errors, touchedFields, watchedPhone, watchedPincode, selectedPayment, setSelectedPayment }) {
+function Step1AddressSummary({ register, errors, touchedFields, watchedPhone, watchedPincode, selectedPayment, setSelectedPayment, pincodeLoading }) {
   return (
     <div className="space-y-8">
       <motion.div
@@ -267,11 +268,16 @@ function Step1AddressSummary({ register, errors, touchedFields, watchedPhone, wa
                   maxLength={6}
                   onInput={(e) => (e.target.value = e.target.value.replace(/[^\d]/g, ''))}
                 />
-                {touchedFields.pincode && (
-                  <div className="absolute right-5 top-1/2 -translate-y-1/2">
-                    {!errors.pincode && watchedPincode?.length === 6 && <CheckCircle size={20} className="text-emerald-500" />}
-                  </div>
-                )}
+                <div className="absolute right-5 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                  {pincodeLoading && (
+                    <div className="w-5 h-5 border-2 border-stone-300 border-t-emerald-500 rounded-full animate-spin" />
+                  )}
+                  {touchedFields.pincode && !pincodeLoading && (
+                    <>
+                      {!errors.pincode && watchedPincode?.length === 6 && <CheckCircle size={20} className="text-emerald-500" />}
+                    </>
+                  )}
+                </div>
               </div>
               {errors.pincode && touchedFields.pincode && (
                 <span className="text-red-500 text-sm flex items-center gap-1">
@@ -409,6 +415,7 @@ function CheckoutPage() {
   const { cart, getTotal, clearCart } = useCart();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [pincodeLoading, setPincodeLoading] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -426,7 +433,8 @@ function CheckoutPage() {
     handleSubmit,
     formState: { errors, touchedFields },
     watch,
-    reset
+    reset,
+    setValue
   } = useForm({
     mode: 'onTouched',
     reValidateMode: 'onChange',
@@ -455,6 +463,36 @@ function CheckoutPage() {
       reset(initialVals);
     }
   }, [reset]);
+
+  useEffect(() => {
+    const lookupPincode = async () => {
+      if (!watchedPincode || watchedPincode.length !== 6 || !/^[1-9][0-9]{5}$/.test(watchedPincode)) {
+        return;
+      }
+      setPincodeLoading(true);
+      try {
+        const res = await axios.get(`https://api.postalpincode.in/pincode/${watchedPincode}`);
+        if (res.data && res.data[0] && res.data[0].Status === 'Success') {
+          const postOffice = res.data[0].PostOffice?.[0];
+          if (postOffice) {
+            const district = postOffice.District || postOffice.County || '';
+            const state = postOffice.State || '';
+            if (district) {
+              setValue('city', district, { shouldValidate: true, shouldDirty: true, shouldTouch: true });
+            }
+            if (state) {
+              setValue('state', state, { shouldValidate: true, shouldDirty: true, shouldTouch: true });
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Pincode lookup failed:', err.message);
+      } finally {
+        setPincodeLoading(false);
+      }
+    };
+    lookupPincode();
+  }, [watchedPincode, setValue]);
 
   if (cart.length === 0) {
     navigate('/cart');
@@ -640,6 +678,7 @@ function CheckoutPage() {
                 watchedPincode={watchedPincode}
                 selectedPayment={selectedPayment}
                 setSelectedPayment={setSelectedPayment}
+                pincodeLoading={pincodeLoading}
               />
 
               {/* Desktop Place Order Button (hidden on mobile) */}

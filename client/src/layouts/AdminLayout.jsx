@@ -27,11 +27,11 @@ function AdminLayout() {
     try {
       await api.post('/admin/logout')
       logout()
-      navigate('/admin/login')
+      navigate('/', { replace: true })
       toast.success('Logged out successfully')
     } catch {
       logout()
-      navigate('/admin/login')
+      navigate('/', { replace: true })
       toast.error('Logout failed')
     }
   }
@@ -45,12 +45,12 @@ function AdminLayout() {
   }
 
   return (
-    <div className="min-h-screen flex">
-      <aside className="w-64 bg-gray-900 text-white">
-        <div className="p-4 border-b border-gray-800">
+    <div className="min-h-screen flex bg-gray-50">
+      <aside className="fixed top-0 left-0 z-30 flex flex-col w-64 h-screen bg-gray-900 text-white">
+        <div className="p-4 border-b border-gray-800 flex-shrink-0">
           <h1 className="text-xl font-bold text-primary">DailyFixCare Admin</h1>
         </div>
-        <nav className="p-4">
+        <nav className="p-4 flex-1 overflow-y-auto">
           <ul className="space-y-2">
             <li>
               <Link to="/admin" className="flex items-center gap-3 p-3 rounded hover:bg-gray-800">
@@ -79,7 +79,7 @@ function AdminLayout() {
 
           </ul>
         </nav>
-        <div className="absolute bottom-4 left-4 w-56">
+        <div className="p-4 border-t border-gray-800 flex-shrink-0">
           <button
             onClick={handleLogout}
             className="flex items-center gap-3 p-3 rounded hover:bg-gray-800 w-full"
@@ -89,8 +89,10 @@ function AdminLayout() {
           </button>
         </div>
       </aside>
-      <main className="flex-1 p-8 bg-gray-50">
-        <Outlet />
+      <main className="flex-1 ml-64 min-h-screen">
+        <div className="p-8 min-h-screen">
+          <Outlet />
+        </div>
       </main>
     </div>
   )

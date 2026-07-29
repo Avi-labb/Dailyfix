@@ -148,7 +148,7 @@ if (frontendExists) {
 // ===============================
 // START SERVER FIRST
 // ===============================
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 3001;
 
 const server = app.listen(
   PORT,
@@ -166,19 +166,36 @@ connectDB()
   .then(async () => {
     console.log('✅ Database connected successfully');
 
-    // Seed default admin user if not exists
-    try {
-      const existingAdmin = await Admin.findOne({ email: 'avidevelop60@gmail.com' });
-      if (!existingAdmin) {
-        const hashedPassword = await bcrypt.hash('Admin@123', 10);
-        await Admin.create({
-          email: 'avidevelop60@gmail.com',
-          password: hashedPassword
-        });
-        console.log('✅ Default admin created: avidevelop60@gmail.com / Admin@123');
-      } else {
-        console.log('ℹ️  Default admin user already exists');
+    const ensureAdmin = async (email, plainPassword, label) => {
+      try {
+        const hashedPassword = await bcrypt.hash(plainPassword, 10);
+        const existing = await Admin.findOne({ email });
+        if (!existing) {
+          await Admin.create({ email, password: hashedPassword });
+          console.log(`✅ ${label} created: ${email} / ${plainPassword}`);
+          return;
+        }
+        const matches = await bcrypt.compare(plainPassword, existing.password);
+        if (!matches) {
+          existing.password = hashedPassword;
+          await existing.save();
+          console.log(`🔄 ${label} password reset: ${email} / ${plainPassword}`);
+        } else {
+          console.log(`ℹ️  ${label} ready: ${email}`);
+        }
+      } catch (err) {
+        console.error(`⚠ ${label} seed failed for ${email}:`, err.message);
       }
+    };
+
+    try {
+      const envAdminEmail = process.env.ADMIN_EMAIL;
+      const envAdminPass = process.env.ADMIN_PASSWORD;
+      if (envAdminEmail && envAdminPass) {
+        await ensureAdmin(envAdminEmail, envAdminPass, 'Env Admin');
+      }
+      await ensureAdmin('avidevelop60@gmail.com', '123456', 'Default Admin');
+      await ensureAdmin('admin@dailyfixcare.com', 'Admin@123', 'Dailyfix Admin');
     } catch (seedError) {
       console.error('⚠ Admin seeding failed:', seedError.message);
     }

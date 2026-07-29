@@ -6,7 +6,7 @@ import sendEmail from "../utils/sendEmail.js";
 import customerOrderTemplate from "../templates/customerOrderTemplate.js";
 import adminOrderTemplate from "../templates/adminOrderTemplate.js";
 import delhiveryService from "../utils/delhivery.js";
-import razorpay from "../utils/razorpay.js";
+import razorpay, { isRazorpayConfigured } from "../utils/razorpay.js";
 
 const isValidObjectId = (id) => {
   if (!id) return false;
@@ -1082,6 +1082,14 @@ CREATE RAZORPAY ORDER
 
 export const createRazorpayOrder = async (req, res) => {
   try {
+    if (!isRazorpayConfigured()) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Online payment is not available. Please select Cash on Delivery (COD).",
+      });
+    }
+
     const { amount, currency = "INR", receipt } = req.body;
 
     if (!amount || amount <= 0) {
@@ -1116,6 +1124,13 @@ export const createRazorpayOrder = async (req, res) => {
       order: razorpayOrder,
     });
   } catch (error) {
+    if (error.code === "RAZORPAY_NOT_CONFIGURED") {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Online payment is not available. Please select Cash on Delivery (COD).",
+      });
+    }
     console.error("❌ RAZORPAY ORDER ERROR:", error);
 
     return res.status(500).json({
@@ -1136,6 +1151,15 @@ VERIFY RAZORPAY PAYMENT SIGNATURE
 
 export const verifyRazorpayPayment = async (req, res) => {
   try {
+    if (!isRazorpayConfigured()) {
+      return res.status(400).json({
+        success: false,
+        verified: false,
+        message:
+          "Online payment is not available. Please select Cash on Delivery (COD).",
+      });
+    }
+
     const {
       razorpay_order_id,
       razorpay_payment_id,
@@ -1182,6 +1206,14 @@ export const verifyRazorpayPayment = async (req, res) => {
       message: "Payment verified successfully",
     });
   } catch (error) {
+    if (error.code === "RAZORPAY_NOT_CONFIGURED") {
+      return res.status(400).json({
+        success: false,
+        verified: false,
+        message:
+          "Online payment is not available. Please select Cash on Delivery (COD).",
+      });
+    }
     console.error("❌ PAYMENT VERIFICATION ERROR:", error);
 
     return res.status(500).json({

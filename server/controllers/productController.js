@@ -1,6 +1,16 @@
 import Product from '../models/Product.js';
 import mongoose from 'mongoose';
 
+const addIdField = (doc) => {
+  if (!doc) return doc;
+  const obj = doc.toObject ? doc.toObject() : doc;
+  return { ...obj, id: obj._id };
+};
+
+const addIdFieldToArray = (docs) => {
+  return docs.map((doc) => addIdField(doc));
+};
+
 const getAllProducts = async (req, res) => {
   try {
     const { search, minPrice, maxPrice, brand, sort, page = 1, limit = 20, includeInactive } = req.query;
@@ -33,7 +43,7 @@ const getAllProducts = async (req, res) => {
 
     res.json({
       success: true,
-      products,
+      products: addIdFieldToArray(products),
       total,
       page: parseInt(page),
       totalPages: Math.ceil(total / limit)
@@ -55,7 +65,7 @@ const getProductById = async (req, res) => {
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
     }
-    res.json(product);
+    res.json(addIdField(product));
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
