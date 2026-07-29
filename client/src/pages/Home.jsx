@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { ShoppingCart, ArrowRight, Play, Clock, Droplets, Shield, Sparkles, CheckCircle2, Box } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 import banner from '../assets/images/webbanner3.png';
-import mobileBanner from '../assets/images/Dailyfix with Updated Box Design1.png';
+import mobileBanners from '../assets/images/Dailyfix with Updated Box Design1.png';
 import poster from '../assets/images/poster.png';
 import banners from '../assets/images/2.jpg.jpeg';
 import beardVideo from '../assets/Untitled design (3).mp4';
@@ -68,11 +68,11 @@ const Home = () => {
         <div className="absolute inset-0 z-0">
           {/* Mobile Banner */}
           <img
-            src={mobileBanner}
+            src={mobileBanners}
             alt="Dailyfix Banner"
-            className="w-full h-full object-cover object-center sm:hidden"
+            className="w-full h-full object-contain object-center sm:hidden"
           />
-          {/* Desktop Banner */}
+
           <img
             src={banner}
             alt="Dailyfix Banner"
