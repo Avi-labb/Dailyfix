@@ -65,12 +65,12 @@ const Home = () => {
       {/* Hero Section with Banner */}
       <section className="min-h-screen -mt-20 -sm:mt-10 pt-10 relative overflow-hidden">
         {/* Background Banner Image */}
-        <div className="absolute inset-0 z-0">
+        <div className="absolute - inset-0 z-0">
           {/* Mobile Banner */}
           <img
             src={mobileBanners}
             alt="Dailyfix Banner"
-            className="w-full h-full object-contain object-center sm:hidden"
+            className="w-full h-full -mt-20 object-contain object-center sm:hidden"
           />
 
           <img
@@ -301,8 +301,8 @@ const Home = () => {
             </div>
 
             <div className="my-6 lg:my-0 flex justify-center">
-              <div className="w-full max-w-md lg:max-w-none bg-gradient-to-br from-gray-200 to-gray-300 rounded-3xl overflow-hidden shadow-2xl">
-                <img src={banners} alt="Dailyfix Product" className="w-full h-[400px] sm:h-[400px] lg:h-[500px] object-cover" />
+              <div className="w-full  lg:max-w-none bg-gradient-to-br from-gray-200 to-gray-300 rounded-3xl overflow-hidden shadow-2xl">
+                <img src={banners} alt="Dailyfix Product" className="w-full h-[450px] sm:h-[450px] lg:h-[500px] object-cover" />
               </div>
             </div>
 
