@@ -4,12 +4,13 @@ import { motion } from 'framer-motion';
 import { ShoppingCart, ArrowRight, Play, Clock, Droplets, Shield, Sparkles, CheckCircle2, Box } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 import banner from '../assets/images/webbanner3.png';
-import mobileBanners from '../assets/images/dailyfixbannerforwebside.png';
+import mobileBanners from '../assets/images/mobile banner.png';
 import poster from '../assets/images/poster.png';
 import banners from '../assets/images/2.jpg.jpeg';
 import beardVideo from '../assets/Untitled design (3).mp4';
 import api from '../services/api';
 import { getListingImage } from '../utils/productImages';
+import { blogPosts } from '../data/blogData.js';
 import toast from 'react-hot-toast';
 
 const Home = () => {
@@ -257,6 +258,84 @@ const Home = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
               </svg>
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Blog Infinite Scroll Carousel */}
+      <section className="py-12 sm:py-16 lg:py-20 px-0 overflow-hidden bg-stone-50">
+        <div className="max-w-9xl mx-auto px-4 sm:px-8 md:px-16 mb-8 sm:mb-12">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+            <div>
+              <p className="text-emerald-600 font-bold text-xs tracking-widest uppercase mb-3 flex items-center gap-2">
+                <span className="w-2 h-2 bg-emerald-500 rounded-full"></span>
+                FROM OUR BLOG
+              </p>
+              <h2 className="text-3xl md:text-4xl font-bold text-slate-900 leading-tight">
+                Latest Grooming Tips & Guides
+              </h2>
+            </div>
+            <Link
+              to="/blog"
+              className="inline-flex items-center gap-2 text-emerald-600 font-semibold hover:text-emerald-700 transition-colors"
+            >
+              View All Articles
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+          </div>
+        </div>
+
+        {/* CSS keyframes for continuous right-to-left scroll */}
+        <style>{`
+          @keyframes marquee-home-blog {
+            0%   { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+          }
+          .home-blog-marquee-track {
+            display: flex;
+            width: max-content;
+            animation: marquee-home-blog 40s linear infinite;
+          }
+          .home-blog-marquee-wrap:hover .home-blog-marquee-track {
+            animation-play-state: paused;
+          }
+          @media (prefers-reduced-motion: reduce) {
+            .home-blog-marquee-track { animation: none; }
+          }
+        `}</style>
+
+        <div className="home-blog-marquee-wrap w-full overflow-hidden" aria-label="Blog articles carousel">
+          <div className="home-blog-marquee-track gap-4 sm:gap-6 pl-4 sm:pl-8">
+            {/* Duplicate posts twice for seamless loop */}
+            {[...blogPosts, ...blogPosts].map((post, i) => (
+              <Link
+                key={`${post.id}-${i}`}
+                to={`/blog/${post.id}`}
+                className="flex-shrink-0 w-[280px] sm:w-[340px] md:w-[380px] bg-white rounded-3xl overflow-hidden shadow-lg border border-stone-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 group"
+              >
+                <div className="relative overflow-hidden bg-stone-100">
+                  <img
+                    src={post.image}
+                    alt={post.title}
+                    loading="lazy"
+                    className="w-full h-44 sm:h-52 md:h-56 object-cover group-hover:scale-105 transition-transform duration-700"
+                  />
+                </div>
+                <div className="p-5 sm:p-6">
+                  <div className="flex items-center gap-3 text-[11px] sm:text-xs text-slate-500 mb-2 sm:mb-3">
+                    <span>{post.date}</span>
+                    <span>·</span>
+                    <span>{post.readTime}</span>
+                  </div>
+                  <h3 className="text-base sm:text-lg font-bold text-slate-900 mb-2 leading-snug line-clamp-2 group-hover:text-emerald-600 transition-colors">
+                    {post.title}
+                  </h3>
+                  <p className="text-sm text-slate-600 line-clamp-2 leading-relaxed">
+                    {post.excerpt}
+                  </p>
+                </div>
+              </Link>
+            ))}
           </div>
         </div>
       </section>

@@ -12,7 +12,7 @@ import {
   Users
 } from 'lucide-react';
 import banner from '../assets/images/dailyfixbannerforwebside.png';
-import productBox from '../assets/images/Dailyfix with Updated Box Design1.png';
+import productBox from '../assets/images/mobile banner.png';
 import naturalBlack from '../assets/images/NATURAL BLACK/01.png';
 import blackBrown from '../assets/images/02 BLACK BROWN/01.png';
 import darkBrown from '../assets/images/DARK BROWN/01.png';
@@ -89,6 +89,7 @@ const About = () => {
           <img
             src={banner}
             alt="Dailyfix Banner"
+            loading="eager"
             className="w-full h-full object-cover"
           />
         </div>
@@ -132,11 +133,12 @@ const About = () => {
 
               <div className="relative group">
                 <div className="absolute inset-0 bg-emerald-900/10 rounded-3xl blur-2xl transform translate-x-6 translate-y-6 transition-transform duration-500 group-hover:translate-x-4 group-hover:translate-y-4" />
-                <div className="relative w-80 sm:w-96 md:w-[500px] h-[550px] bg-gradient-to-br from-stone-100 to-white rounded-3xl shadow-hard overflow-hidden transition-transform duration-500 group-hover:scale-[1.02] z-10">
+                <div className="relative w-72 sm:w-80 md:w-[450px] h-[380px] sm:h-[480px] md:h-[520px] bg-gradient-to-br from-stone-100 to-white rounded-3xl shadow-hard overflow-hidden transition-transform duration-500 group-hover:scale-[1.02] z-10">
                   <img
                     src={productBox}
                     alt="Dailyfix Product"
-                    className="w-full h-full object-cover"
+                    loading="lazy"
+                    className="w-full h-full object-contain sm:object-cover p-3 sm:p-0"
                   />
                 </div>
                 <div className="absolute -bottom-16 -right-8 md:right-[-40px] bg-white p-8 rounded-2xl shadow-hard border border-stone-100 max-w-[260px] z-20">
@@ -280,6 +282,7 @@ const About = () => {
                     <img
                       src={item.image}
                       alt={item.title}
+                      loading="lazy"
                       className="w-full h-full object-contain p-4 group-hover:scale-110 transition-transform duration-700"
                     />
                   </div>
