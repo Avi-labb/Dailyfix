@@ -88,25 +88,25 @@ const Home = () => {
 
         {/* Content Overlay - positioned lower on mobile so product in banner is visible */}
         <div className="absolute inset-0 z-10">
-          <div className="max-w-9xl mx-auto h-full px-5 sm:px-10 lg:px-12 flex items-end sm:items-center justify-start pb-8 sm:pb-0">
+          <div className="max-w-9xl -mt-60 sm:mt-0 mx-auto h-full px-5 sm:px-10 lg:px-12 flex items-end sm:items-center justify-start pb-8 sm:pb-0">
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.7 }}
               className="w-full max-w-lg text-left"
             >
-              <div className="inline-flex items-center gap-2 mb-3 sm:mb-5 bg-white/10 border border-white/20 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full backdrop-blur-md">
+              <div className="inline-flex items-center  gap-2  bg-white/10 border border-white/20 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full backdrop-blur-md">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 <p className="text-white font-bold text-[10px] sm:text-xs tracking-widest uppercase">Dailyfix Grooming</p>
               </div>
-              <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight leading-[1.15] mb-3 sm:mb-6">
-                Premium Men's{" "}
-                <span className="text-emerald-400">Beard Colour</span>{" "}
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl mb-6 font-semibold text-white tracking-tight leading-[1.1]">
+                Premium Men's <br />
+                <span className="text-emerald-500">Beard Colour</span> <br />
                 for a Perfect Look
               </h1>
               <Link
                 to="/shop"
-                className="group mt-1 sm:mt-4 bg-emerald-500 text-white font-bold py-3 px-7 sm:py-4 sm:px-10 rounded-full hover:bg-emerald-400 transition-all duration-300 shadow-xl hover:shadow-2xl hover:-translate-y-0.5 inline-flex items-center gap-2 text-sm sm:text-base"
+                className=" absolute mt-40 sm:mt-4 bg-emerald-500 text-white font-bold py-3 px-7 sm:py-4 sm:px-10 rounded-full hover:bg-emerald-400 transition-all duration-300 shadow-xl hover:shadow-2xl hover:-translate-y-0.5 inline-flex items-center gap-2 text-sm sm:text-base"
               >
                 Shop Now
                 <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
@@ -303,7 +303,7 @@ const Home = () => {
 
             <div className="my-6 lg:my-0 flex justify-center">
               <div className="w-full max-w-md lg:max-w-none bg-gradient-to-br from-gray-200 to-gray-300 rounded-3xl overflow-hidden shadow-2xl">
-                <img src={banners} alt="Dailyfix Product" loading="lazy" className="w-full h-[320px] sm:h-[420px] lg:h-[500px] object-cover" />
+                <img src={banners} alt="Dailyfix Product" loading="lazy" className="w-full h-[500px] object-cover" />
               </div>
             </div>
 
