@@ -63,14 +63,14 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section with Banner */}
-      <section className="min-h-screen relative overflow-hidden">
+      <section className="min-h-screen -mt-20 -sm:mt-10 pt-10 relative overflow-hidden">
         {/* Background Banner Image */}
-        <div className="absolute  inset-0 z-0">
+        <div className="absolute - inset-0 z-0">
           {/* Mobile Banner */}
           <img
             src={mobileBanners}
             alt="Dailyfix Banner"
-            className="w-full h-full  object-contain object-center sm:hidden"
+            className="w-full h-full -mt-10 object-contain object-center sm:hidden"
           />
 
           <img
@@ -89,7 +89,7 @@ const Home = () => {
             className="space-y-8 text-left max-w-xl"
           >
             {/* Brand Badge */}
-            <div className='px-5 sm:px-20 mb-4 sm:mb-0'>
+            <div className='px-5 sm:px-20 mb-40 sm:mb-0'>
               <div className="inline-flex items-center gap-2 mb-5 bg-white/10 border border-white/20 px-4 py-1.5 rounded-full backdrop-blur-md">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 <p className="text-white font-bold text-xs tracking-widest uppercase">Dailyfix Grooming</p>
@@ -301,8 +301,8 @@ const Home = () => {
             </div>
 
             <div className="my-6 lg:my-0 flex justify-center">
-              <div className="w-full  lg:max-w-none bg-gradient-to-br from-gray-200 to-gray-300 rounded-3xl overflow-hidden shadow-2xl">
-                <img src={banners} alt="Dailyfix Product" className="w-full h-[500px] sm:h-[500px] lg:h-[600px] object-cover" />
+              <div className="w-full max-w-md lg:max-w-none bg-gradient-to-br from-gray-200 to-gray-300 rounded-3xl overflow-hidden shadow-2xl">
+                <img src={banners} alt="Dailyfix Product" className="w-full h-[500px] sm:h-[500px] lg:h-[500px] object-cover" />
               </div>
             </div>
 
