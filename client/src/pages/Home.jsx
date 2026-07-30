@@ -63,55 +63,56 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section with Banner */}
-      <section className="min-h-screen -mt-20 -sm:mt-10 pt-10 relative overflow-hidden">
+      <section className="relative overflow-hidden -mt-[76px] sm:-mt-[84px]">
         {/* Background Banner Image */}
-        <div className="absolute - inset-0 z-0">
+        <div className="relative w-full">
           {/* Mobile Banner */}
           <img
             src={mobileBanners}
             alt="Dailyfix Banner"
-            className="w-full h-full -mt-10 object-contain object-center sm:hidden"
+            loading="eager"
+            fetchPriority="high"
+            className="w-full h-auto object-contain object-center sm:hidden block"
           />
-
+          {/* Desktop Banner */}
           <img
             src={banner}
             alt="Dailyfix Banner"
-            className="w-full h-full object-cover object-center hidden sm:block"
+            loading="eager"
+            fetchPriority="high"
+            className="w-full h-auto object-cover object-center hidden sm:block"
           />
+          {/* Gradient overlay for readability */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/60 sm:bg-gradient-to-r sm:from-black/60 sm:via-black/30 sm:to-transparent" />
         </div>
 
-        {/* Content Overlay */}
-        <div className="relative z-10 max-w-9xl mx-auto px-6 sm:px-12 lg:px-10 h-[calc(100vh-5rem)] flex items-center justify-start">
-          <motion.div 
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
-            className="space-y-8 text-left max-w-xl"
-          >
-            {/* Brand Badge */}
-            <div className='px-5 sm:px-20 mb-40 sm:mb-0'>
-              <div className="inline-flex items-center gap-2 mb-5 bg-white/10 border border-white/20 px-4 py-1.5 rounded-full backdrop-blur-md">
+        {/* Content Overlay - positioned lower on mobile so product in banner is visible */}
+        <div className="absolute inset-0 z-10">
+          <div className="max-w-9xl mx-auto h-full px-5 sm:px-10 lg:px-12 flex items-end sm:items-center justify-start pb-8 sm:pb-0">
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7 }}
+              className="w-full max-w-lg text-left"
+            >
+              <div className="inline-flex items-center gap-2 mb-3 sm:mb-5 bg-white/10 border border-white/20 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full backdrop-blur-md">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <p className="text-white font-bold text-xs tracking-widest uppercase">Dailyfix Grooming</p>
+                <p className="text-white font-bold text-[10px] sm:text-xs tracking-widest uppercase">Dailyfix Grooming</p>
               </div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl mb-6 font-semibold text-white tracking-tight leading-[1.1]">
-                Premium Men's <br />
-                <span className="text-emerald-500">Beard Colour</span> <br />
+              <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight leading-[1.15] mb-3 sm:mb-6">
+                Premium Men's{" "}
+                <span className="text-emerald-400">Beard Colour</span>{" "}
                 for a Perfect Look
               </h1>
-            </div>
-
-            {/* Call To Actions */}
-            <div className="flex flex-wrap gap-4 px-10 sm:px-20 ">
               <Link
                 to="/shop"
-                className="group -mb-20 mt-20 bg-emerald-500 text-white font-bold py-4 px-10 rounded-full hover:bg-emerald-400 transition-all duration-300 shadow-xl hover:shadow-2xl hover:-translate-y-0.5 inline-flex items-center gap-2"
+                className="group mt-1 sm:mt-4 bg-emerald-500 text-white font-bold py-3 px-7 sm:py-4 sm:px-10 rounded-full hover:bg-emerald-400 transition-all duration-300 shadow-xl hover:shadow-2xl hover:-translate-y-0.5 inline-flex items-center gap-2 text-sm sm:text-base"
               >
                 Shop Now
                 <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
               </Link>
-            </div>
-          </motion.div>
+            </motion.div>
+          </div>
         </div>
       </section>
 
@@ -126,8 +127,8 @@ const Home = () => {
 
               <div className="relative group">
                 <div className="absolute inset-0 bg-stone-900/10 rounded-2xl blur-xl transform translate-x-4 translate-y-4 transition-transform duration-500 group-hover:translate-x-2 group-hover:translate-y-2"></div>
-                <div className="relative w-72 sm:w-80 md:w-[400px] h-[450px] bg-gradient-to-tr from-stone-200 to-stone-100 rounded-2xl shadow-2xl ring-1 ring-black/5 overflow-hidden transition-transform duration-500 group-hover:scale-[1.02] z-10">
-                  <img src={poster} alt="Dailyfix Poster" className="w-full h-full" />
+                <div className="relative w-72 sm:w-80 md:w-[400px] h-[380px] sm:h-[450px] bg-gradient-to-tr from-stone-200 to-stone-100 rounded-2xl shadow-2xl ring-1 ring-black/5 overflow-hidden transition-transform duration-500 group-hover:scale-[1.02] z-10">
+                  <img src={poster} alt="Dailyfix Poster" loading="lazy" className="w-full h-full object-cover" />
                 </div>
                 <div className="absolute -bottom-12 -right-6 md:right-[-20px] bg-white p-6 rounded-xl shadow-xl border border-stone-100 max-w-[200px] z-20">
                   <p className="text-3xl font-black text-emerald-500">100%</p>
@@ -234,7 +235,7 @@ const Home = () => {
               muted
               loop
               playsInline
-              controls
+              preload="metadata"
               poster={poster}
             >
               Your browser does not support the video tag.
@@ -302,7 +303,7 @@ const Home = () => {
 
             <div className="my-6 lg:my-0 flex justify-center">
               <div className="w-full max-w-md lg:max-w-none bg-gradient-to-br from-gray-200 to-gray-300 rounded-3xl overflow-hidden shadow-2xl">
-                <img src={banners} alt="Dailyfix Product" className="w-full h-[500px] sm:h-[500px] lg:h-[500px] object-cover" />
+                <img src={banners} alt="Dailyfix Product" loading="lazy" className="w-full h-[320px] sm:h-[420px] lg:h-[500px] object-cover" />
               </div>
             </div>
 

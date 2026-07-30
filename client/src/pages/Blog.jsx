@@ -29,10 +29,11 @@ const Blog = () => {
           <div className="flex flex-col lg:flex-row gap-12 items-center">
             <div className="lg:w-1/2">
               <div className="relative rounded-3xl overflow-hidden shadow-lg">
-                <img 
-                  src={featuredPost.image} 
-                  alt={featuredPost.title} 
-                  className="w-full h-[450px] object-cover"
+                <img
+                  src={featuredPost.image}
+                  alt={featuredPost.title}
+                  loading="lazy"
+                  className="w-full h-64 sm:h-80 lg:h-96 object-cover"
                 />
                 <div className="absolute bottom-6 left-6 right-6">
                   <span className="inline-block bg-emerald-500 text-white text-xs font-semibold px-4 py-1.5 rounded-full mb-4">
@@ -83,10 +84,11 @@ const Blog = () => {
                 className="bg-white rounded-3xl overflow-hidden shadow-lg border border-stone-100"
               >
                 <div className="relative overflow-hidden">
-                  <img 
-                    src={post.image} 
-                    alt={post.title} 
-                    className="w-full h-[380px] object-cover"
+                  <img
+                    src={post.image}
+                    alt={post.title}
+                    loading="lazy"
+                    className="w-full h-64 sm:h-72 md:h-80 object-cover"
                   />
                 </div>
 
