@@ -82,11 +82,8 @@ const BlogDetail = () => {
   return (
     <div className="min-h-screen bg-stone-50 pb-20">
       {/* Hero Section */}
-      <div className="relative w-full h-[220px] md:h-[300px] overflow-hidden">
-        <img
-          alt={post.title}
-          className="w-full h-full object-cover"
-        />
+      <div className="relative w-full h-[220px] md:h-[300px] overflow-hidden bg-black/70">
+        
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/60 to-slate-900/20" />
         <div className="absolute inset-0 flex items-end">
           <div className="max-w-9xl mx-auto w-full px-6 sm:px-8 lg:px-12 pb-12">

@@ -1,6 +1,9 @@
 import img1 from '../assets/images/1.jpg.jpeg';
 import poster from '../assets/images/poster.png';
 import naturalBlack from '../assets/images/NATURAL BLACK/01.png';
+import howToUse from '../assets/images/How to use1.jpg.jpeg';
+import youngerLooking from '../assets/images/d.jpg.jpeg';
+import blackBrown from '../assets/images/02 BLACK BROWN/003.jpeg';
 
 export const blogPosts = [
   {
@@ -9,7 +12,6 @@ export const blogPosts = [
     title: 'How to Choose the Right Beard Colour Shade for Your Skin Tone',
     excerpt: 'Discover the perfect beard colour shade that complements your skin tone and natural hair colour for a seamless, natural look.',
     date: 'May 30, 2026',
-    category: 'Grooming Tips',
     image: img1,
     readTime: '5 min read',
     author: 'Dailyfix Grooming Team',
@@ -70,7 +72,6 @@ export const blogPosts = [
     title: '10 Beard Grooming Mistakes to Avoid in 2026',
     excerpt: 'Learn from the most common beard grooming mistakes and how to fix them for a perfectly groomed beard that stands out.',
     date: 'May 28, 2026',
-    category: 'Tips & Tricks',
     image: poster,
     readTime: '8 min read',
     author: 'Dailyfix Grooming Team',
@@ -167,200 +168,82 @@ export const blogPosts = [
   },
   {
     id: 3,
-    slug: 'natural-vs-synthetic-beard-colour',
-    title: 'Natural vs. Synthetic Beard Colour: Which is Better?',
-    excerpt: 'Compare natural and synthetic beard colour formulas to make an informed decision about what\'s best for your beard and skin.',
-    date: 'May 25, 2026',
-    category: 'Product Guide',
-    image: naturalBlack,
-    readTime: '6 min read',
+    slug: 'grey-beard-not-anymore-black-brown',
+    title: 'Grey Beard? Not Anymore. Complete Grey Coverage with Black Brown',
+    excerpt: 'Say goodbye to grey hairs with Dailyfix 002 Black Brown. Covers greys completely in just 15 minutes for a natural, confident look.',
+    date: 'July 15, 2026',
+    image: blackBrown,
+    readTime: '5 min read',
     author: 'Dailyfix Grooming Team',
     content: [
       {
         type: 'paragraph',
-        text: 'With so many beard colour products on the market, it can be hard to decide which is right for you. The biggest choice comes down to natural vs. synthetic formulas. Let\'s break down the pros and cons so you can choose with confidence.'
+        text: 'Grey hairs creeping into your beard? Don\'t worry—you don\'t have to live with them. Our 002 Black Brown beard colour delivers complete grey coverage for beards, mustaches, and sideburns in a single 15-minute application. No salon, no mess, just a natural-looking result that makes you look and feel like the best version of yourself.'
       },
       {
         type: 'heading',
-        text: 'What are Synthetic Beard Colours?'
+        text: 'The Before & After Difference'
       },
       {
         type: 'paragraph',
-        text: 'Traditional synthetic beard colours use harsh chemicals like ammonia, PPD, and resorcinol to open the hair cuticle and deposit permanent pigment. While they work, they come with significant trade-offs.'
-      },
-      {
-        type: 'list',
-        items: [
-          'Ammonia opens the hair cuticle aggressively—this causes dryness, irritation, and a strong odour.',
-          'PPD (p-Phenylenediamine) can cause severe allergic reactions in up to 5% of users.',
-          'Results are often flat or one-dimensional, lacking the depth of natural hair.'
-        ]
-      },
-      {
-        type: 'heading',
-        text: 'The Case for Ammonia-Free Natural Formulas'
-      },
-      {
-        type: 'paragraph',
-        text: 'Modern ammonia-free formulas like Dailyfix use gentle, plant-derived ingredients that deliver professional results without the downsides. Here\'s what sets them apart:'
-      },
-      {
-        type: 'list',
-        items: [
-          'No harsh ammonia smell—pleasant application experience.',
-          'Dermatologically tested and safe for sensitive skin.',
-          'Multi-dimensional pigments mimic natural hair colour variations.',
-          'Enriched with conditioning agents that leave hair soft and healthy.'
-        ]
+        text: 'One side grey, one side confident—that\'s the transformation our customers see every single day. Our Black Brown shade (002) is specifically formulated for Indian skin tones and hair textures, delivering a rich, warm brown-black result that blends seamlessly with your natural colour. It doesn\'t look fake, flat, or "dyed"—it looks like you were born with it.'
       },
       {
         type: 'quote',
-        text: 'Healthy skin and healthy hair are always in style—don\'t compromise them for colour.'
+        text: 'Natural Black formula penetrates deep and covers grey completely for a confident you.'
       },
       {
         type: 'heading',
-        text: 'Longevity Comparison'
+        text: 'One Product, Complete Coverage'
       },
       {
         type: 'paragraph',
-        text: 'Synthetic permanent colours last until the hair grows out, but fade into brassy tones over time. Ammonia-free semi-permanent formulas fade gradually and naturally over 4-6 weeks, meaning you\'ll never have an awkward line of regrowth—you simply touch up as needed.'
-      },
-      {
-        type: 'heading',
-        text: 'Which Should You Choose?'
-      },
-      {
-        type: 'paragraph',
-        text: 'For 95% of men, an ammonia-free natural formula is the better choice. It\'s safer for your skin, gentler on your beard hair, and gives more natural results. The only scenario where a permanent synthetic colour might be preferred is for extremely resistant white hair that doesn\'t take semi-permanent dye well—but even then, always do a patch test first!'
-      }
-    ]
-  },
-  {
-    id: 4,
-    slug: 'how-often-colour-your-beard',
-    title: 'How Often Should You Colour Your Beard?',
-    excerpt: 'Find out the ideal frequency for beard colour touch-ups to maintain a fresh, natural look without over-processing.',
-    date: 'May 22, 2026',
-    category: 'Grooming Tips',
-    image: img1,
-    readTime: '4 min read',
-    author: 'Dailyfix Grooming Team',
-    content: [
-      {
-        type: 'paragraph',
-        text: 'One of the most common questions we get is: "How often should I colour my beard?" The answer depends on several factors. Let\'s break it down so you know exactly when to refresh your colour.'
-      },
-      {
-        type: 'heading',
-        text: 'The Standard Timeline: Every 3-4 Weeks'
-      },
-      {
-        type: 'paragraph',
-        text: 'For most men using an ammonia-free semi-permanent formula, touching up every 3-4 weeks is the sweet spot. This gives enough time for the colour to fade naturally while keeping greys at bay.'
-      },
-      {
-        type: 'heading',
-        text: 'When to Do It Sooner'
+        text: 'Unlike other brands that force you to buy separate products for your beard, mustache, and sideburns, Dailyfix 002 Black Brown does it all. A single kit gives you everything you need to cover greys across your entire facial hair zone—no need to mix and match, no need to buy three different products.'
       },
       {
         type: 'list',
         items: [
-          'You have over 50% grey hair—greys tend to show through faster.',
-          'You have a big event (wedding, job interview, date) coming up.',
-          'You swim regularly—chlorine and saltwater strip colour faster.',
-          'You shampoo your beard daily with clarifying shampoo.'
+          'Works on beard, mustaches & sideburns—one formula, total coverage.',
+          'Ammonia Free: No harsh fumes, no burning, no irritation to delicate facial skin.',
+          'Long Lasting: Stays vibrant for 4–6 weeks, fading naturally and gradually without brassiness.',
+          'Natural Looking: Multi-dimensional pigments create depth and warmth, not a flat paint-job finish.'
         ]
       },
       {
         type: 'heading',
-        text: 'When to Wait Longer'
+        text: 'Covers Grey in 15 Minutes'
       },
       {
-        type: 'list',
-        items: [
-          'You only have scattered greys (20% or less).',
-          'Your natural colour is very close to your chosen shade.',
-          'Your skin feels sensitive or you had a reaction last time.',
-          'You\'re going for a more salt-and-pepper look.'
-        ]
+        type: 'paragraph',
+        text: 'We know you\'re busy. That\'s why our formula is engineered to work fast. Here\'s the breakdown: 3 minutes to prep and mix, 4 minutes to apply, 8 minutes to develop, and you\'re done. That\'s it. In the time it takes to watch one episode of your favourite show, you can erase years from your appearance and walk out with a beard you\'re proud to show off.'
       },
       {
         type: 'quote',
-        text: 'Colour your beard to enhance your look—not on a strict schedule. Let your mirror be the judge.'
+        text: '15 minutes is all it takes. Grey beard? Not anymore.'
       },
       {
         type: 'heading',
-        text: 'Signs It\'s Definitely Time'
+        text: 'Why 002 Black Brown is Our Bestseller'
       },
       {
         type: 'paragraph',
-        text: 'If you notice greys popping through at the root line, the colour has faded noticeably lighter than your head hair, or people are commenting that you\'re looking older—it\'s time for a refresh. And remember: with ammonia-free formulas, there\'s no such thing as "too soon" if your skin tolerates it well.'
-      }
-    ]
-  },
-  {
-    id: 5,
-    slug: 'beard-care-after-colouring',
-    title: 'The Ultimate Guide to Beard Care After Colouring',
-    excerpt: 'Essential tips for maintaining healthy, vibrant beard colour while keeping your skin and beard nourished.',
-    date: 'May 20, 2026',
-    category: 'Care Guide',
-    image: poster,
-    readTime: '7 min read',
-    author: 'Dailyfix Grooming Team',
-    content: [
-      {
-        type: 'paragraph',
-        text: 'The application is done, the colour looks perfect—now what? How you care for your beard in the hours, days, and weeks after colouring determines how long that perfect shade will last, and how healthy your beard stays.'
+        text: 'Black Brown is our most popular shade—and for good reason. It\'s the perfect middle ground: darker than pure brown but softer and warmer than jet black. It complements men with dark brown to black head hair, works beautifully on warm and neutral skin undertones, and gives you that "polished but not trying too hard" look that never goes out of style. If you\'re unsure which shade to start with, 002 Black Brown is almost always the right call.'
       },
       {
         type: 'heading',
-        text: 'First 24 Hours: Be Gentle'
+        text: 'Your Beard Deserves Better Than Harsh Chemicals'
       },
       {
         type: 'paragraph',
-        text: 'The first day after colouring is critical for pigment lock-in. Avoid washing, avoid hot water, and skip the beard oil until tomorrow. Let the colour fully oxidise and set in the hair shaft.'
+        text: 'The skin on your face is 2–3 times thinner than the skin on your scalp. That\'s why every Dailyfix formula is 100% ammonia-free, dermatologically tested, and enriched with Olive Oil Extracts to condition and nourish your beard and the skin underneath. You get full grey coverage without sacrificing the health of your beard or the comfort of your skin.'
       },
       {
         type: 'heading',
-        text: 'Day 2 Onwards: Moisturise, Moisturise, Moisturise'
+        text: 'Ready for the Change? Order Black Brown Today'
       },
       {
         type: 'paragraph',
-        text: 'Beard colour, even ammonia-free, can be slightly drying. Now is the time to double down on moisture. Apply beard oil twice daily—morning and night—and consider a beard balm for extra conditioning and hold.'
-      },
-      {
-        type: 'heading',
-        text: 'Wash Smarter, Not More'
-      },
-      {
-        type: 'list',
-        items: [
-          'Limit beard washing to 2-3 times per week.',
-          'Use lukewarm water, never hot.',
-          'Choose sulfate-free, colour-safe beard wash.',
-          'Always follow with conditioner or beard oil immediately after.'
-        ]
-      },
-      {
-        type: 'quote',
-        text: 'A great beard colour starts with a healthy beard. Invest in the foundation, and the colour will thank you.'
-      },
-      {
-        type: 'heading',
-        text: 'Watch Out For Colour Fading Culprits'
-      },
-      {
-        type: 'paragraph',
-        text: 'Sun, chlorine, salt water, and clarifying shampoos are the four biggest enemies of vibrant beard colour. Wear a hat in strong sun, rinse immediately after swimming, and save your clarifying shampoo for the day before a touch-up.'
-      },
-      {
-        type: 'heading',
-        text: 'Trim Regularly'
-      },
-      {
-        type: 'paragraph',
-        text: 'Damaged ends are porous and fade unevenly. Trim 2-3mm off your beard length every 2-3 weeks to keep hair healthy and colour looking fresh from root to tip.'
+        text: 'Stop letting grey hairs define how old you look. Pick up a box of Dailyfix 002 Black Brown and experience the 15-minute confidence boost for yourself. Each kit comes with the Colour Cream, Developer Liquid, mixing tray, application brush, and gloves—everything you need, right out of the box. Order today and see why thousands of men are making the switch to Dailyfix.'
       }
     ]
   },
@@ -370,7 +253,6 @@ export const blogPosts = [
     title: 'Ammonia-Free Beard Colour: The Benefits Explained',
     excerpt: 'Learn why ammonia-free beard colour is the safest choice for sensitive skin and long-term beard health.',
     date: 'May 18, 2026',
-    category: 'Product Guide',
     image: naturalBlack,
     readTime: '5 min read',
     author: 'Dailyfix Grooming Team',
@@ -422,6 +304,188 @@ export const blogPosts = [
       {
         type: 'paragraph',
         text: 'While most studies focus on hair dye safety on women, the skin on your face is thinner and more permeable than your scalp. Using ammonia-free formulas reduces your long-term exposure to harsh chemicals—a smart choice for anyone planning to colour their beard for years to come.'
+      }
+    ]
+  },
+  {
+    id: 7,
+    slug: 'how-to-apply-dailyfix-beard-colour',
+    title: 'How to Apply Dailyfix Beard Colour: 3 Simple Steps for Perfect Results',
+    excerpt: 'Get a natural-looking, even beard colour with our easy 3-step application process. Achieve professional results at home in just minutes.',
+    date: 'July 25, 2026',
+    image: howToUse,
+    readTime: '6 min read',
+    author: 'Dailyfix Grooming Team',
+    content: [
+      {
+        type: 'paragraph',
+        text: 'Applying beard colour shouldn\'t be complicated. With Dailyfix, we\'ve designed a simple 3-step process that gives you professional, natural-looking results from the comfort of your home. Whether you\'re a first-timer or a seasoned pro, this guide will ensure you get the perfect beard colour every time.'
+      },
+      {
+        type: 'heading',
+        text: 'Why Choose Dailyfix Beard Colour?'
+      },
+      {
+        type: 'paragraph',
+        text: 'Before we dive into the steps, let\'s quickly cover what makes Dailyfix stand out from other beard colour brands on the market:'
+      },
+      {
+        type: 'list',
+        items: [
+          'Natural Look: Multi-dimensional pigments blend seamlessly with your existing beard hair for a finish that looks completely authentic.',
+          'Long Lasting: Our advanced formula stays vibrant for up to 4-6 weeks, fading gradually and naturally without brassy tones.',
+          'Safe & Effective: Ammonia-free and dermatologically tested, our formula is gentle on sensitive skin while delivering exceptional grey coverage.',
+          'Easy Application: Everything you need is in the box—no salon visit, no complicated tools, no mess.'
+        ]
+      },
+      {
+        type: 'heading',
+        text: 'Prep Before You Start'
+      },
+      {
+        type: 'paragraph',
+        text: 'Proper preparation is the key to flawless results. Start by doing a patch test 24 hours before your full application—apply a small amount of mixed colour behind your ear and check for any irritation. On application day, wash your beard with a gentle, sulfate-free cleanser and pat completely dry. Comb through any tangles and apply a thin layer of petroleum jelly along your hairline, cheeks, and neck to protect your skin from staining.'
+      },
+      {
+        type: 'quote',
+        text: 'Great beard colour is 50% preparation and 50% application. Don\'t skip the prep steps!'
+      },
+      {
+        type: 'heading',
+        text: 'Step 1: Mix the Colour Cream and Developer'
+      },
+      {
+        type: 'paragraph',
+        text: 'Squeeze the entire contents of the Colour Cream tube (Tube 1) into the mixing tray provided. Then pour the Developer Liquid (Bottle 2) into the same tray. Use the included brush to mix thoroughly until you achieve a smooth, creamy consistency with no streaks or lumps. The colour will begin to activate immediately, so don\'t delay moving to Step 2.'
+      },
+      {
+        type: 'heading',
+        text: 'Step 2: Apply Evenly to Your Beard'
+      },
+      {
+        type: 'paragraph',
+        text: 'Using the brush, start applying the mixture to the areas with the most grey hair first—typically the mustache, chin, and jawline. Work from the roots outwards, making sure every hair is coated. Use the fine end of the brush to work through thicker sections and ensure no strands are missed. Pay special attention to the mustache area and any patchy spots. Once fully coated, use a beard comb to distribute the colour evenly and catch any stray hairs you might have missed.'
+      },
+      {
+        type: 'heading',
+        text: 'Step 3: Wait, Rinse, and Reveal'
+      },
+      {
+        type: 'paragraph',
+        text: 'Set a timer and let the colour process for 10–15 minutes. If you have resistant grey hair or want deeper colour, you can leave it on for up to 20 minutes—but we recommend starting with 10 minutes for your first application. When time is up, rinse your beard thoroughly with lukewarm water until the water runs clear. Follow with our Dailyfix Beard Conditioner (or your favourite hydrating conditioner), leave on for 2 minutes, and rinse again. Pat dry gently with a dark towel and style as usual.'
+      },
+      {
+        type: 'quote',
+        text: 'The perfect beard colour doesn\'t come from rushing. Set the timer and trust the process.'
+      },
+      {
+        type: 'heading',
+        text: 'Pro Tips for Next-Level Results'
+      },
+      {
+        type: 'list',
+        items: [
+          'For first-time users: Leave the colour on for only 10 minutes. You can always go darker with your next application.',
+          'For stubborn greys: Apply a second thin layer over grey-prone areas 5 minutes into processing.',
+          'To prevent forehead stains: Keep wet wipes handy and immediately wipe any colour that touches your skin.',
+          'For even longer-lasting results: Avoid washing your beard for 24 hours after application and use sulfate-free beard wash going forward.',
+          'Touch up roots and greys every 3–4 weeks for a consistently fresh look.'
+        ]
+      }
+    ]
+  },
+  {
+    id: 8,
+    slug: '15-minute-hack-younger-looking-beard',
+    title: 'The 15-Minute Hack for a Younger-Looking Beard',
+    excerpt: 'Discover the quick and easy grooming hack that takes years off your appearance with instant grey coverage and a natural finish that lasts.',
+    date: 'July 28, 2026',
+    image: youngerLooking,
+    readTime: '5 min read',
+    author: 'Dailyfix Grooming Team',
+    content: [
+      {
+        type: 'paragraph',
+        text: 'What if we told you that in just 15 minutes, you could look 5–10 years younger without surgery, without expensive skincare, and without anyone knowing you did anything? It\'s not a gimmick—it\'s the power of a well-executed beard colour touch-up. Grey hairs in your beard add years to your face, and covering them is the fastest, most impactful anti-aging grooming move you can make.'
+      },
+      {
+        type: 'heading',
+        text: 'Why Your Beard Makes You Look Older Than You Are'
+      },
+      {
+        type: 'paragraph',
+        text: 'Most men don\'t realise it, but beard greys age your appearance faster than wrinkles or a receding hairline. Why? Because facial hair is front and center—it\'s the first thing people notice when they look at you. A peppering of greys might read "distinguished" in your 40s, but in your 20s and 30s it reads "stressed," "rundown," or simply "older than you are." The good news? Fixing it is fast, easy, and affordable.'
+      },
+      {
+        type: 'list',
+        items: [
+          'Natural Finish: Looks like your real beard colour, not a dye job—no one will know unless you tell them.',
+          'Long Lasting: Vibrant colour that stays put for weeks, fading gradually and naturally.',
+          'Instant Grey Coverage: Erases years of ageing in a single 15-minute application.',
+          'Easy Application: Foolproof process with everything included in the box.'
+        ]
+      },
+      {
+        type: 'heading',
+        text: 'The 15-Minute Game Plan'
+      },
+      {
+        type: 'paragraph',
+        text: 'Grab your Dailyfix beard colour kit and let\'s transform your look. Here\'s the exact minute-by-minute breakdown:'
+      },
+      {
+        type: 'quote',
+        text: '15 minutes. That\'s less time than your morning coffee. Less time than a commute. And it rewinds years from your appearance.'
+      },
+      {
+        type: 'heading',
+        text: 'Minutes 0–3: Prep and Mix'
+      },
+      {
+        type: 'paragraph',
+        text: 'Wash and completely dry your beard. Petroleum jelly along your hairline (optional but recommended). Empty Tube 1 and Bottle 2 into the mixing tray and stir vigorously with the brush until the mixture is perfectly smooth and creamy—no clumps, no streaks. The formula activates immediately, so get ready to apply right away.'
+      },
+      {
+        type: 'heading',
+        text: 'Minutes 3–7: Brush It On'
+      },
+      {
+        type: 'paragraph',
+        text: 'This is the step that makes all the difference. Start with the greyest areas first: your mustache, soul patch, and any grey-heavy patches along the jawline. Use the tip of the brush for precision work, then go in with the flat side to coat larger sections. Every single hair needs to be saturated—don\'t be shy about using plenty of product. Use a comb to rake through at the end to ensure even distribution.'
+      },
+      {
+        type: 'heading',
+        text: 'Minutes 7–14: Let It Develop'
+      },
+      {
+        type: 'paragraph',
+        text: 'Set your timer for 10 minutes total (counting from when you started applying). If you have extremely resistant greys, you can extend to 15—but 10 is the sweet spot for a natural, undetectable result. Resist the urge to scratch, touch, or check constantly. Use this time to answer a few emails, scroll your feed, or just relax and let the formula work.'
+      },
+      {
+        type: 'heading',
+        text: 'Minute 15: Rinse and Reveal'
+      },
+      {
+        type: 'paragraph',
+        text: 'Rinse with lukewarm (not hot) water until the water runs completely clear—this usually takes about 60 seconds. Condition your beard with a hydrating conditioner, leave it on for 60 seconds more, then rinse one last time. Pat dry gently with a dark towel and comb into your usual style. Step in front of the mirror and say hello to the younger, more polished version of yourself.'
+      },
+      {
+        type: 'quote',
+        text: 'The difference? Night and day. The reaction? "Did you get a haircut? You look refreshed!" No one guesses beard colour—and that\'s exactly the point.'
+      },
+      {
+        type: 'heading',
+        text: 'Make It Last (Because Who Wants to Do This Every Week?)'
+      },
+      {
+        type: 'list',
+        items: [
+          'Skip the daily wash. Shampoo your beard 2–3 times per week maximum with sulfate-free wash.',
+          'Beard oil daily. It keeps hair healthy, colour locked in, and prevents dryness.',
+          'Hat in the sun. UV rays fade colour faster—cover up if you\'ll be outdoors all day.',
+          'Rinse after swimming. Chlorine and saltwater strip colour, so hit the shower immediately after getting out of the pool or ocean.',
+          'Touch up every 3–4 weeks. A quick 10-minute refresh is all you need to keep greys at bay permanently.'
+        ]
       }
     ]
   }

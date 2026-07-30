@@ -9,7 +9,7 @@ const Blog = () => {
   return (
     <div className="min-h-screen">
       {/* Page Header */}
-      <section className="bg-gray-900 pt-40 pb-20 px-8 md:px-16">
+      <section className="bg-gray-900 pt-10 pb-20 px-8 md:px-16">
         <div className="max-w-9xl mx-auto text-center">
           <p className="text-emerald-500 font-semibold text-sm tracking-widest uppercase mb-6">
             Our Blog
@@ -32,9 +32,8 @@ const Blog = () => {
                 <img 
                   src={featuredPost.image} 
                   alt={featuredPost.title} 
-                  className="w-full h-96 object-cover"
+                  className="w-full h-[450px] object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
                 <div className="absolute bottom-6 left-6 right-6">
                   <span className="inline-block bg-emerald-500 text-white text-xs font-semibold px-4 py-1.5 rounded-full mb-4">
                     Featured
@@ -47,9 +46,6 @@ const Blog = () => {
             </div>
 
             <div className="lg:w-1/2">
-              <span className="inline-block bg-emerald-50 text-emerald-600 text-xs font-semibold px-4 py-1.5 rounded-full mb-4">
-                {featuredPost.category}
-              </span>
               <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4 leading-tight">
                 {featuredPost.title}
               </h2>
@@ -77,11 +73,6 @@ const Blog = () => {
             <h2 className="text-3xl font-bold text-slate-900">
               Latest Articles
             </h2>
-            <div className="flex gap-3">
-              <button className="px-5 py-2 bg-emerald-500 text-white rounded-full text-sm font-semibold">All</button>
-              <button className="px-5 py-2 bg-white text-slate-600 rounded-full text-sm font-semibold border border-stone-200">Grooming Tips</button>
-              <button className="px-5 py-2 bg-white text-slate-600 rounded-full text-sm font-semibold border border-stone-200 hidden md:block">Product Guide</button>
-            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -95,11 +86,8 @@ const Blog = () => {
                   <img 
                     src={post.image} 
                     alt={post.title} 
-                    className="w-full h-80 object-cover"
+                    className="w-full h-[380px] object-cover"
                   />
-                  <span className="absolute top-4 left-4 bg-white text-slate-800 text-xs font-semibold px-3 py-1.5 rounded-full shadow">
-                    {post.category}
-                  </span>
                 </div>
 
                 <div className="p-6">
