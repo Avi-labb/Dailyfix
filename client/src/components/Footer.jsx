@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { MapPin, Mail, Youtube, Facebook, Instagram, Search } from 'lucide-react';
-import logo from '../assets/images/dailyfix new logo.png';
+import { MapPin, Mail, Youtube, Facebook, Instagram, Linkedin, Search } from 'lucide-react';
+import logo from '../assets/images/favicon logo.jpeg';
 
 const Footer = () => {
   const [orderId, setOrderId] = useState('');
@@ -49,14 +49,23 @@ const Footer = () => {
               >
                 <Facebook size={20} />
               </motion.a>
-              <motion.a 
+              <motion.a
                 whileHover={{ y: -3 }}
-                href="https://www.instagram.com/dailyfix_care/" 
-                target="_blank" 
+                href="https://www.instagram.com/dailyfix_care/"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center hover:bg-emerald-600 transition-all duration-300"
               >
                 <Instagram size={20} />
+              </motion.a>
+              <motion.a
+                whileHover={{ y: -3 }}
+                href="https://www.linkedin.com/company/daily-fix-care/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center hover:bg-emerald-600 transition-all duration-300"
+              >
+                <Linkedin size={20} />
               </motion.a>
             </div>
           </div>

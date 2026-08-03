@@ -84,7 +84,7 @@ const Contact = () => {
     {
       icon: Mail,
       title: 'Email Address',
-      content: 'orders@dailyfixcare.com',
+      content: 'marketing@dailyfixcare.com',
       color: 'emerald'
     },
     {

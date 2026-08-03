@@ -11,7 +11,15 @@ const BlogDetail = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [id]);
+    if (post) {
+      document.title = `${post.title} | Dailyfix Blog`;
+    } else {
+      document.title = 'Article Not Found | Dailyfix Blog';
+    }
+    return () => {
+      document.title = 'Beard Colour for Men | Natural, Ammonia-Free Shades';
+    };
+  }, [id, post]);
 
   if (!post) {
     return (
@@ -83,13 +91,7 @@ const BlogDetail = () => {
     <div className="min-h-screen bg-stone-50 pb-20">
       {/* Hero Section */}
       <div className="relative w-full h-[220px] md:h-[300px] overflow-hidden bg-black/70">
-        <img
-          src={post.image}
-          alt={post.title}
-          loading="eager"
-          fetchPriority="high"
-          className="absolute inset-0 w-full h-full object-cover"
-        />
+        
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/60 to-slate-900/20" />
         <div className="absolute inset-0 flex items-end">
           <div className="max-w-9xl mx-auto w-full px-6 sm:px-8 lg:px-12 pb-12">

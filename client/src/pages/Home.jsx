@@ -232,11 +232,11 @@ const Home = () => {
             <video
               className="w-full h-auto aspect-video lg:aspect-auto lg:h-full object-contain bg-black"
               src={beardVideo}
+              controls
               autoPlay
               muted
               loop
               playsInline
-              preload="metadata"
               poster={poster}
             >
               Your browser does not support the video tag.

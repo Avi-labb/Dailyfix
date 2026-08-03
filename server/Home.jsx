@@ -81,7 +81,7 @@ const Home = () => {
         </div>
 
         {/* Content Overlay */}
-        <div className="relative z-10 max-w-9xl mx-auto px-6 sm:px-12 lg:px-10 h-[calc(100vh-5rem)] flex items-center justify-start">
+        <div className="relative bg-white z-10 max-w-9xl mx-auto px-6 sm:px-12 lg:px-10 h-[calc(100vh-5rem)] flex items-center justify-start">
           <motion.div 
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
