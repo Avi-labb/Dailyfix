@@ -297,7 +297,7 @@ const ProductPage = () => {
                   </>
                 )}
               </div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-stone-900 leading-tight">
+              <h1 className="text-2xl  lg:text-4xl font-extrabold text-stone-900 leading-tight">
                 {product.name}
               </h1>
               {detail.shortTagline && (
@@ -311,7 +311,7 @@ const ProductPage = () => {
 
             {/* Price & availability */}
             <div className="flex flex-wrap items-baseline gap-4">
-              <span className="text-5xl sm:text-6xl font-extrabold text-emerald-600">
+              <span className="text-4xl sm:text-5xl font-extrabold text-emerald-600">
                 ₹{product.price}
               </span>
               {product.stock > 0 ? (
@@ -392,7 +392,7 @@ const ProductPage = () => {
               <button
                 onClick={handleAddToCart}
                 disabled={product.stock === 0}
-                className="flex-1 flex items-center justify-center gap-3 rounded-2xl font-bold py-5 px-6 border-2 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-base sm:text-lg"
+                className="flex-1 flex items-center justify-center gap-3 rounded-2xl font-bold py-4 px-5 border-2 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-base sm:text-lg"
                 style={{
                   borderColor: '#10b981',
                   color: '#065f46',
@@ -411,7 +411,7 @@ const ProductPage = () => {
                   navigate('/checkout');
                 }}
                 disabled={product.stock === 0}
-                className="flex-1 flex items-center justify-center gap-3 rounded-2xl font-bold py-5 px-6 transition-all duration-300 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed shadow-soft hover:shadow-medium text-base sm:text-lg"
+                className="flex-1 flex items-center justify-center gap-3 rounded-2xl font-bold py-4 px-5 transition-all duration-300 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed shadow-soft hover:shadow-medium text-base sm:text-lg"
                 style={{ backgroundColor: '#10b981', color: 'white' }}
               >
                 <Zap size={20} fill="currentColor" />
