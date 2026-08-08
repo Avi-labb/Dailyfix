@@ -11,6 +11,8 @@ import {
   updateOrderStatus,
 
   trackDelhiveryOrder,
+  createManualShipment,
+  updateOrderWaybill,
   cancelDelhiveryShipment,
   downloadShippingLabel,
   syncOrderTracking,
@@ -69,6 +71,10 @@ DELHIVERY ROUTES
 =================================================
 */
 router.get("/:orderId/track", trackDelhiveryOrder);
+
+router.post("/:orderId/create-shipment", authMiddleware, createManualShipment);
+
+router.put("/:orderId/waybill", authMiddleware, updateOrderWaybill);
 
 router.get("/:orderId/label", authMiddleware, downloadShippingLabel);
 

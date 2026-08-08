@@ -16,9 +16,9 @@ const seed = async () => {
     // Create products
     const products = [
       {
-        name: 'Mens Beard Colour Natural Black',
+        name: "Dailyfix Men's Beard Colour – Natural Black",
         slug: 'natural-black',
-        description: 'Our Natural Black Beard Colour gives a perfect natural black shade. Formulated without ammonia, gentle on skin and beard.',
+        description: 'Get a bold, youthful and well-groomed appearance with Dailyfix Natural Black Beard Colour. Premium beard colour designed to provide rich, natural-looking black coverage. Grey beard coverage with smooth, even colour and a clean, polished appearance.',
         price: 450,
         stock: 100,
         sku: 'DF-NB-001',
@@ -27,9 +27,9 @@ const seed = async () => {
         isActive: true
       },
       {
-        name: 'Mens Beard Colour Black Brown',
+        name: "Dailyfix Men's Beard Colour – Black Brown",
         slug: 'black-brown',
-        description: 'Our Black Brown Beard Colour provides a rich warm brownish-black hue. Perfect for a natural distinguished look.',
+        description: 'Get a naturally groomed look with Dailyfix Black Brown Beard Colour for Men. It helps cover grey beard hair while providing rich, even and natural-looking colour. The easy-to-use formula is ideal for regular grooming and gives your beard a smooth, polished finish.',
         price: 450,
         stock: 100,
         sku: 'DF-BB-002',
@@ -38,9 +38,9 @@ const seed = async () => {
         isActive: true
       },
       {
-        name: 'Mens Beard Colour Dark Brown',
+        name: "Dailyfix Men's Beard Colour – Dark Brown",
         slug: 'dark-brown',
-        description: 'Our Dark Brown Beard Colour offers a classic deep brown shade. Blends seamlessly for a natural well-groomed appearance.',
+        description: 'Get a naturally groomed look with Dailyfix Dark Brown Beard Colour for Men. It helps cover grey beard hair while providing rich, even and natural-looking colour. The easy-to-use formula is ideal for regular grooming and gives your beard a smooth, polished finish.',
         price: 450,
         stock: 100,
         sku: 'DF-DB-003',

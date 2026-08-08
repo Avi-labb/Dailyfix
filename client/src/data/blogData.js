@@ -170,6 +170,7 @@ export const blogPosts = [
   {
     id: 3,
     slug: 'grey-beard-not-anymore-black-brown',
+    category: 'Product Review',
     title: 'Grey Beard? Not Anymore. Complete Grey Coverage with Black Brown',
     excerpt: 'Say goodbye to grey hairs with Dailyfix 002 Black Brown. Covers greys completely in just 15 minutes for a natural, confident look.',
     date: 'July 15, 2026',
@@ -251,6 +252,7 @@ export const blogPosts = [
   {
     id: 6,
     slug: 'ammonia-free-beard-colour-benefits',
+    category: 'Grooming Tips',
     title: 'Ammonia-Free Beard Colour: The Benefits Explained',
     excerpt: 'Learn why ammonia-free beard colour is the safest choice for sensitive skin and long-term beard health.',
     date: 'May 18, 2026',
@@ -311,6 +313,7 @@ export const blogPosts = [
   {
     id: 7,
     slug: 'how-to-apply-dailyfix-beard-colour',
+    category: 'How-To Guide',
     title: 'How to Apply Dailyfix Beard Colour: 3 Simple Steps for Perfect Results',
     excerpt: 'Get a natural-looking, even beard colour with our easy 3-step application process. Achieve professional results at home in just minutes.',
     date: 'July 25, 2026',
@@ -398,6 +401,7 @@ export const blogPosts = [
   {
     id: 8,
     slug: '15-minute-hack-younger-looking-beard',
+    category: 'Grooming Tips',
     title: 'The 15-Minute Hack for a Younger-Looking Beard',
     excerpt: 'Discover the quick and easy grooming hack that takes years off your appearance with instant grey coverage and a natural finish that lasts.',
     date: 'July 28, 2026',
@@ -493,6 +497,7 @@ export const blogPosts = [
   {
     id: 9,
     slug: 'the-perfect-beard-color-dark-brown',
+    category: 'Product Review',
     title: 'The Perfect Beard Color: Natural-Looking Results in Just 15 Minutes with Dark Brown',
     excerpt: 'Discover why Dailyfix Dark Brown is the perfect beard color—ammonia-free, stain-free, and works beautifully on both beard and mustache for a confident, polished look.',
     date: 'July 30, 2026',
@@ -581,11 +586,12 @@ export const blogPosts = [
   }
 ];
 
-export const getPostById = (id) => {
-  const parsed = parseInt(id, 10);
-  return blogPosts.find(p => p.id === parsed) || null;
+export const getPostBySlug = (slug) => {
+  return blogPosts.find(p => p.slug === slug) || null;
 };
 
-export const getRelatedPosts = (currentId, limit = 3) => {
-  return blogPosts.filter(p => p.id !== parseInt(currentId, 10)).slice(0, limit);
+export const getRelatedPosts = (currentSlug, limit = 3) => {
+  return blogPosts
+    .filter(p => p.slug !== currentSlug)
+    .slice(0, limit);
 };

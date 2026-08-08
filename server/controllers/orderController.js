@@ -480,6 +480,141 @@ export const getOrderById = async (req, res) => {
 
 /*
 ==========================================
+CREATE SHIPMENT MANUALLY (Admin)
+==========================================
+*/
+
+export const createManualShipment = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+
+    const order = await Order.findOne({
+      $or: [
+        { orderId },
+        { _id: isValidObjectId(orderId) ? orderId : null }
+      ]
+    });
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    if (order.delhivery?.waybill) {
+      return res.status(400).json({
+        success: false,
+        message: "Shipment already created. Waybill: " + order.delhivery.waybill,
+      });
+    }
+
+    const shipmentPayload = delhiveryService.buildShipmentPayload(order);
+    const shipmentResponse = await delhiveryService.createShipment(shipmentPayload);
+
+    const waybill = delhiveryService.extractWaybill(shipmentResponse);
+
+    if (!waybill) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to generate waybill. Please check Delhivery configuration.",
+        raw: shipmentResponse,
+      });
+    }
+
+    order.delhivery = {
+      waybill,
+      shipmentId: delhiveryService.getShipmentId(shipmentResponse),
+      pickupRequestId: delhiveryService.getPickupRequestId(shipmentResponse),
+      currentStatus: "Manifested",
+      labelUrl: delhiveryService.getLabelURL(shipmentResponse),
+      invoiceUrl: delhiveryService.getInvoiceURL(shipmentResponse),
+      expectedDelivery: delhiveryService.getEstimatedDelivery(shipmentResponse),
+      shipmentResponse,
+      trackingHistory: [],
+      lastSynced: new Date(),
+    };
+    await order.save();
+
+    try {
+      const label = await delhiveryService.generateShippingLabel(waybill);
+      order.delhivery.label = label;
+      await order.save();
+    } catch (labelErr) {
+      console.log("Label generation skipped:", labelErr.message);
+    }
+
+    return res.json({
+      success: true,
+      message: "Shipment created successfully",
+      waybill,
+      order,
+    });
+  } catch (error) {
+    console.error("CREATE SHIPMENT ERROR:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Shipment creation failed",
+    });
+  }
+};
+
+/*
+==========================================
+UPDATE AWB/WAYBILL MANUALLY (Admin)
+==========================================
+*/
+
+export const updateOrderWaybill = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { waybill } = req.body;
+
+    if (!waybill || !waybill.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Waybill number is required",
+      });
+    }
+
+    const order = await Order.findOne({
+      $or: [
+        { orderId },
+        { _id: isValidObjectId(orderId) ? orderId : null }
+      ]
+    });
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    if (!order.delhivery) {
+      order.delhivery = {};
+    }
+
+    order.delhivery.waybill = waybill.trim();
+    order.delhivery.lastSynced = new Date();
+    await order.save();
+
+    return res.json({
+      success: true,
+      message: "AWB/Waybill updated successfully",
+      order,
+    });
+  } catch (error) {
+    console.error("UPDATE WAYBILL ERROR:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Failed to update waybill",
+    });
+  }
+};
+
+/*
+==========================================
 GET ALL ORDERS
 ==========================================
 */
@@ -564,47 +699,106 @@ export const trackDelhiveryOrder = async (req, res) => {
   try {
     const { orderId } = req.params;
 
-    const order = await Order.findOne({ orderId });
+    const trimmedId = orderId.trim();
+
+    const order = await Order.findOne({
+      $or: [
+        { orderId: trimmedId },
+        { "delhivery.waybill": trimmedId }
+      ]
+    }).populate("items.product");
 
     if (!order) {
       return res.status(404).json({
         success: false,
-        message: "Order not found",
+        message: "Order not found with the provided Order ID or AWB number.",
       });
     }
 
-    if (!order.delhivery?.waybill) {
-      return res.status(400).json({
-        success: false,
-        message: "Shipment not created yet.",
-      });
+    const waybill = order.delhivery?.waybill;
+
+    let tracking = null;
+    let trackingData = null;
+
+    if (waybill) {
+      try {
+        tracking = await delhiveryService.trackShipment(waybill);
+
+        order.delhivery.currentStatus =
+          tracking?.ShipmentData?.[0]?.Shipment?.Status?.Status ||
+          order.delhivery.currentStatus;
+
+        order.delhivery.lastSynced = new Date();
+
+        const scans =
+          tracking?.ShipmentData?.[0]?.Shipment?.Scans ||
+          tracking?.ShipmentData?.[0]?.Shipment?.Scan ||
+          [];
+
+        order.delhivery.trackingHistory = scans.map((scan) => ({
+          status: scan?.ScanDetail?.Scan || scan?.status || "",
+          location: scan?.ScanDetail?.ScannedLocation || scan?.location || "",
+          remarks: scan?.ScanDetail?.Instructions || scan?.remarks || "",
+          date: scan?.ScanDetail?.ScanDateTime || scan?.date || null,
+        }));
+
+        await order.save();
+
+        const rawScans =
+          tracking?.ShipmentData?.[0]?.Shipment?.Scans ||
+          tracking?.ShipmentData?.[0]?.Shipment?.Scan ||
+          [];
+
+        trackingData = {
+          ...tracking,
+          ShipmentData: tracking?.ShipmentData?.map((sd) => ({
+            ...sd,
+            Shipment: {
+              ...sd?.Shipment,
+              Scan: rawScans.map((scan) => ({
+                status: scan?.ScanDetail?.Scan || "",
+                location: scan?.ScanDetail?.ScannedLocation || "",
+                date: scan?.ScanDetail?.ScanDateTime || null,
+                remarks: scan?.ScanDetail?.Instructions || "",
+              })),
+              Scans: rawScans,
+            },
+          })),
+        };
+      } catch (trackingErr) {
+        console.warn("Delhivery tracking fetch failed, using saved history:", trackingErr.message);
+        trackingData = {
+          ShipmentData: [{
+            Shipment: {
+              Scan: order.delhivery.trackingHistory.map((h) => ({
+                status: h.status,
+                location: h.location,
+                date: h.date,
+                remarks: h.remarks,
+              })),
+            },
+          }],
+        };
+      }
+    } else {
+      trackingData = {
+        ShipmentData: [{
+          Shipment: {
+            Scan: order.delhivery?.trackingHistory?.map((h) => ({
+              status: h.status,
+              location: h.location,
+              date: h.date,
+              remarks: h.remarks,
+            })) || [],
+          },
+        }],
+      };
     }
-
-    const tracking = await delhiveryService.trackShipment(
-      order.delhivery.waybill
-    );
-
-    order.delhivery.currentStatus =
-      tracking?.ShipmentData?.[0]?.Shipment?.Status?.Status ||
-      order.delhivery.currentStatus;
-
-    order.delhivery.lastSynced = new Date();
-
-    const scans =
-      tracking?.ShipmentData?.[0]?.Shipment?.Scans || [];
-
-    order.delhivery.trackingHistory = scans.map((scan) => ({
-      status: scan.ScanDetail.Scan,
-      location: scan.ScanDetail.ScannedLocation,
-      remarks: scan.ScanDetail.Instructions,
-      date: scan.ScanDetail.ScanDateTime,
-    }));
-
-    await order.save();
 
     return res.json({
       success: true,
       tracking,
+      trackingData,
       order,
     });
   } catch (error) {

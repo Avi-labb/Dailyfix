@@ -48,7 +48,7 @@ function App() {
               <Route path="/about" element={<About />} />
               <Route path="/shop" element={<Shop />} />
               <Route path="/blog" element={<Blog />} />
-              <Route path="/blog/:id" element={<BlogDetail />} />
+              <Route path="/blog/:slug" element={<BlogDetail />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/store-locator" element={<StoreLocator />} />
               <Route path="/beard-oil" element={<BeardOil />} />

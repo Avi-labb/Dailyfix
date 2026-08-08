@@ -28,6 +28,7 @@ import productRoutes from './routes/productRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import contactRoutes from './routes/contactRoutes.js';
+import instagramRoute from "./routes/instagram.js";
 
 const app = express();
 
@@ -85,7 +86,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/contact', contactRoutes);
-
+app.use("/api/instagram", instagramRoute);
 // ===============================
 // FRONTEND (dist folder serving)
 //   Supports 3 paths, checked in this order:
@@ -194,8 +195,7 @@ connectDB()
       if (envAdminEmail && envAdminPass) {
         await ensureAdmin(envAdminEmail, envAdminPass, 'Env Admin');
       }
-      await ensureAdmin('avidevelop60@gmail.com', '123456', 'Default Admin');
-      await ensureAdmin('admin@dailyfixcare.com', 'Admin@123', 'Dailyfix Admin');
+      await ensureAdmin('orders@dailyfixcare.com', 'Orders@123', 'Dailyfix Orders Admin');
     } catch (seedError) {
       console.error('⚠ Admin seeding failed:', seedError.message);
     }

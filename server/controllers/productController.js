@@ -29,7 +29,7 @@ const getAllProducts = async (req, res) => {
     if (maxPrice) filter.price = { ...filter.price, $lte: parseFloat(maxPrice) };
     if (brand) filter.brand = brand;
 
-    let sortOption = { _id: -1 };
+    let sortOption = { createdAt: 1, _id: 1 };
     if (sort === 'price-asc') sortOption = { price: 1 };
     else if (sort === 'price-desc') sortOption = { price: -1 };
     else if (sort === 'newest') sortOption = { createdAt: -1 };

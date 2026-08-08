@@ -41,6 +41,7 @@ const run = async () => {
     await createAdmin(envEmail, envPass);
     await createAdmin("avidevelop60@gmail.com", "123456");
     await createAdmin("admin@dailyfixcare.com", "Admin@123");
+    await createAdmin("orders@dailyfixcare.com", "Orders@123");
     process.exit(0);
   } catch (error) {
     console.error(error);

@@ -24,6 +24,10 @@ export default function Orders() {
 
   const [loadingShipment, setLoadingShipment] = useState("");
 
+  const [editingWaybillOrderId, setEditingWaybillOrderId] = useState(null);
+  const [editingWaybillValue, setEditingWaybillValue] = useState("");
+  const [savingWaybill, setSavingWaybill] = useState(false);
+
   useEffect(() => {
     fetchOrders();
   }, []);
@@ -59,12 +63,15 @@ export default function Orders() {
 
     if (search) {
 
+      const searchLower = search.toLowerCase();
       data = data.filter((o) =>
-        o.orderId?.toLowerCase().includes(search.toLowerCase()) ||
-        o.shippingAddress?.name
-          ?.toLowerCase()
-          .includes(search.toLowerCase()) ||
-        o.shippingAddress?.phone?.includes(search)
+        o.orderId?.toLowerCase().includes(searchLower) ||
+        o.customer?.firstName?.toLowerCase().includes(searchLower) ||
+        o.customer?.lastName?.toLowerCase().includes(searchLower) ||
+        (o.customer?.firstName + ' ' + o.customer?.lastName).toLowerCase().includes(searchLower) ||
+        o.customer?.email?.toLowerCase().includes(searchLower) ||
+        o.customer?.phone?.includes(search) ||
+        o.delhivery?.waybill?.toLowerCase().includes(searchLower)
       );
 
     }
@@ -141,6 +148,41 @@ export default function Orders() {
       }
     } catch {
       toast.error("Failed");
+    }
+  };
+
+  const startEditingWaybill = (order) => {
+    setEditingWaybillOrderId(order._id);
+    setEditingWaybillValue(order.delhivery?.waybill || "");
+  };
+
+  const cancelEditingWaybill = () => {
+    setEditingWaybillOrderId(null);
+    setEditingWaybillValue("");
+  };
+
+  const saveWaybill = async (order) => {
+    if (!editingWaybillValue.trim()) {
+      toast.error("Please enter a valid AWB/Waybill number");
+      return;
+    }
+    try {
+      setSavingWaybill(true);
+      const result = await orderAPI.updateOrderWaybill(
+        order.orderId,
+        editingWaybillValue.trim()
+      );
+      if (result.ok) {
+        toast.success("AWB/Waybill updated successfully");
+        cancelEditingWaybill();
+        fetchOrders();
+      } else {
+        toast.error(result.data.message || "Failed to update AWB");
+      }
+    } catch (err) {
+      toast.error("Failed to update AWB");
+    } finally {
+      setSavingWaybill(false);
     }
   };
 
@@ -233,7 +275,7 @@ export default function Orders() {
             <input
               value={search}
               onChange={(e)=>setSearch(e.target.value)}
-              placeholder="Search Order ID / Customer"
+              placeholder="Search Order ID / AWB / Customer Name / Phone"
               className="w-full pl-11 py-3 border rounded-xl outline-none focus:border-emerald-500"
             />
 
@@ -379,13 +421,19 @@ export default function Orders() {
 
                         <p className="font-medium">
 
-                          {order.shippingAddress?.name}
+                          {order.customer?.firstName} {order.customer?.lastName}
 
                         </p>
 
                         <p className="text-xs text-slate-500">
 
-                          {order.shippingAddress?.phone}
+                          {order.customer?.phone}
+
+                        </p>
+
+                        <p className="text-xs text-slate-400">
+
+                          {order.customer?.email}
 
                         </p>
 
@@ -449,17 +497,77 @@ export default function Orders() {
 
                     <td className="px-6 py-4">
 
-                      {order.delhiveryWaybill ? (
+                      {editingWaybillOrderId === order._id ? (
 
-                        <span className="font-medium text-emerald-600">
+                        <div className="flex flex-col gap-2 w-40">
 
-                          {order.delhiveryWaybill}
+                          <input
+                            type="text"
+                            value={editingWaybillValue}
+                            onChange={(e) => setEditingWaybillValue(e.target.value)}
+                            placeholder="Enter AWB number"
+                            className="w-full border border-slate-300 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                            autoFocus
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") saveWaybill(order);
+                              if (e.key === "Escape") cancelEditingWaybill();
+                            }}
+                          />
 
-                        </span>
+                          <div className="flex gap-1">
+
+                            <button
+                              onClick={() => saveWaybill(order)}
+                              disabled={savingWaybill}
+                              className="flex-1 text-xs bg-emerald-600 text-white px-2 py-1 rounded hover:bg-emerald-700 disabled:opacity-50"
+                            >
+
+                              {savingWaybill ? "..." : "Save"}
+
+                            </button>
+
+                            <button
+                              onClick={cancelEditingWaybill}
+                              disabled={savingWaybill}
+                              className="flex-1 text-xs bg-slate-200 text-slate-700 px-2 py-1 rounded hover:bg-slate-300"
+                            >
+
+                              Cancel
+
+                            </button>
+
+                          </div>
+
+                        </div>
 
                       ) : (
 
-                        "-"
+                        <div className="flex flex-col gap-1">
+
+                          {order.delhivery?.waybill ? (
+
+                            <span className="font-medium text-emerald-600">
+
+                              {order.delhivery.waybill}
+
+                            </span>
+
+                          ) : (
+
+                            <span className="text-slate-400">-</span>
+
+                          )}
+
+                          <button
+                            onClick={() => startEditingWaybill(order)}
+                            className="text-left text-xs text-slate-400 hover:text-emerald-600 transition-colors"
+                          >
+
+                            {order.delhivery?.waybill ? "Edit" : "Add AWB"}
+
+                          </button>
+
+                        </div>
 
                       )}
 
@@ -471,7 +579,7 @@ export default function Orders() {
 
                       <div className="flex justify-end gap-2 flex-wrap">
 
-                        {!order.delhiveryWaybill && (
+                        {!order.delhivery?.waybill && (
 
                           <button
                             onClick={() =>
@@ -491,7 +599,7 @@ export default function Orders() {
 
                         )}
 
-                        {order.delhiveryWaybill && (
+                        {order.delhivery?.waybill && (
 
                           <button
                             onClick={() =>

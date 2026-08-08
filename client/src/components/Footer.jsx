@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { MapPin, Mail, Youtube, Facebook, Instagram, Linkedin, Search } from 'lucide-react';
-import logo from '../assets/images/favicon logo.jpeg';
+import logo from '../assets/images/dailyfix new logo.png';
 
 const Footer = () => {
   const [orderId, setOrderId] = useState('');

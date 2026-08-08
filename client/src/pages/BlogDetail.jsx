@@ -1,25 +1,29 @@
-import React, { useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import React, { useEffect, useMemo } from 'react';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Calendar, Clock, User, ChevronRight } from 'lucide-react';
-import { getPostById, getRelatedPosts } from '../data/blogData.js';
+import { getPostBySlug, getRelatedPosts } from '../data/blogData.js';
 
 const BlogDetail = () => {
-  const { id } = useParams();
+  const { pathname } = useLocation();
   const navigate = useNavigate();
-  const post = getPostById(id);
-  const relatedPosts = post ? getRelatedPosts(id, 3) : [];
+  const slug = useMemo(() => {
+    const match = pathname.match(/^\/blog\/([^/]+)/);
+    return match ? decodeURIComponent(match[1]) : null;
+  }, [pathname]);
+  const post = slug ? getPostBySlug(slug) : null;
+  const relatedPosts = post ? getRelatedPosts(slug, 3) : [];
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    if (post) {
-      document.title = `${post.title} | Dailyfix Blog`;
-    } else {
-      document.title = 'Article Not Found | Dailyfix Blog';
-    }
+  }, [slug]);
+
+  useEffect(() => {
+    const originalTitle = document.title;
+    document.title = post ? `${post.title} | Dailyfix` : 'Article Not Found | Dailyfix';
     return () => {
-      document.title = 'Beard Colour for Men | Natural, Ammonia-Free Shades';
+      document.title = originalTitle;
     };
-  }, [id, post]);
+  }, [post]);
 
   if (!post) {
     return (
@@ -102,11 +106,13 @@ const BlogDetail = () => {
               <ArrowLeft size={18} />
               Back to All Articles
             </button>
-            <div className="flex items-center gap-3 mb-5">
-              <span className="inline-block bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-full">
-                {post.category}
-              </span>
-            </div>
+            {post.category && (
+              <div className="flex items-center gap-3 mb-5">
+                <span className="inline-block bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-full">
+                  {post.category}
+                </span>
+              </div>
+            )}
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white leading-tight mb-6 max-w-4xl">
               {post.title}
             </h1>
@@ -183,7 +189,7 @@ const BlogDetail = () => {
               {relatedPosts.map((rp) => (
                 <Link
                   key={rp.id}
-                  to={`/blog/${rp.id}`}
+                  to={`/blog/${rp.slug}`}
                   className="bg-white rounded-3xl overflow-hidden shadow-lg border border-stone-100 flex flex-col justify-between"
                 >
                   <div>
@@ -194,9 +200,11 @@ const BlogDetail = () => {
                         loading="lazy"
                         className="w-full h-56 sm:h-60 md:h-56 object-cover"
                       />
-                      <span className="absolute top-4 left-4 bg-white text-slate-800 text-xs font-semibold px-3 py-1.5 rounded-full shadow">
-                        {rp.category}
-                      </span>
+                      {rp.category && (
+                        <span className="absolute top-4 left-4 bg-white text-slate-800 text-xs font-semibold px-3 py-1.5 rounded-full shadow">
+                          {rp.category}
+                        </span>
+                      )}
                     </div>
                     <div className="p-6">
                       <div className="flex items-center gap-3 text-xs text-slate-500 mb-3">

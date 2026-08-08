@@ -1,4 +1,4 @@
-﻿
+
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 import path from "path";
@@ -37,8 +37,10 @@ transporter.verify((error, success) => {
 
 const sendEmail = async ({ to, subject, html, text }) => {
   try {
+    const fromName = process.env.SMTP_FROM_NAME || 'DailyFixCare';
+    const fromEmail = process.env.SMTP_FROM_EMAIL || 'noreply@dailyfixcare.com';
     const mailOptions = {
-      from: process.env.SMTP_FROM || '"DailyFixCare" <noreply@dailyfixcare.com>',
+      from: `"${fromName}" <${fromEmail}>`,
       to,
       subject,
       html,

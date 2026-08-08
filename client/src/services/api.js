@@ -100,6 +100,15 @@ export const orderAPI = {
       return { ok: false, data: err.response?.data || { message: 'Failed to create shipment' } }
     }
   },
+
+  updateOrderWaybill: async (orderId, waybill) => {
+    try {
+      const res = await api.put(`/orders/${orderId}/waybill`, { waybill })
+      return { ok: true, data: res.data }
+    } catch (err) {
+      return { ok: false, data: err.response?.data || { message: 'Failed to update waybill' } }
+    }
+  },
   
   trackOrder: async (orderId) => {
     try {

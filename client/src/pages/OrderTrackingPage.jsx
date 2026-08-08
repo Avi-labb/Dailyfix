@@ -11,15 +11,15 @@ function OrderTrackingPage() {
 
   const trackOrder = async () => {
     if (!orderId) {
-      toast.error('Please enter order ID')
+      toast.error('Please enter Order ID or AWB number')
       return
     }
     setLoading(true)
     try {
-      const result = await orderAPI.trackOrder(orderId)
+      const result = await orderAPI.trackOrder(orderId.trim())
       if (result.ok) {
         setOrder(result.data.order)
-        setTrackingData(result.data.trackingData)
+        setTrackingData(result.data.trackingData || result.data.tracking)
       } else {
         toast.error(result.data.message || 'Order not found')
       }
@@ -49,7 +49,7 @@ function OrderTrackingPage() {
       <div className="flex gap-2 mb-8">
         <input
           type="text"
-          placeholder="Enter your order ID (e.g., DFC12345)"
+          placeholder="Enter your Order ID (e.g., DFX2024...) or AWB Number"
           value={orderId}
           onChange={(e) => setOrderId(e.target.value)}
           className="flex-1 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500"
@@ -73,9 +73,9 @@ function OrderTrackingPage() {
               <p className="text-gray-600">
                 Placed on {new Date(order.createdAt).toLocaleDateString('en-IN')}
               </p>
-              {order.delhiveryWaybill && (
+              {order.delhivery?.waybill && (
                 <p className="text-sm text-emerald-600 mt-1">
-                  Waybill: {order.delhiveryWaybill}
+                  AWB / Waybill: {order.delhivery.waybill}
                 </p>
               )}
             </div>

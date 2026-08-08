@@ -10,8 +10,10 @@ import banners from '../assets/images/2.jpg.jpeg';
 import beardVideo from '../assets/Untitled design (3).mp4';
 import api from '../services/api';
 import { getListingImage } from '../utils/productImages';
+import { getShadeSortRank } from '../data/productDetailData';
 import { blogPosts } from '../data/blogData.js';
 import toast from 'react-hot-toast';
+import InstagramFeed from '../components/Instagramfeed.jsx';
 
 const Home = () => {
   const [products, setProducts] = useState([]);
@@ -41,6 +43,7 @@ const Home = () => {
           brand: product.brand,
           stock: product.stock
         }));
+        mappedProducts.sort((a, b) => getShadeSortRank(a.slug) - getShadeSortRank(b.slug));
         setProducts(mappedProducts);
       } catch (error) {
         console.error('Failed to fetch products:', error);
@@ -128,8 +131,8 @@ const Home = () => {
 
               <div className="relative group">
                 <div className="absolute inset-0 bg-stone-900/10 rounded-2xl blur-xl transform translate-x-4 translate-y-4 transition-transform duration-500 group-hover:translate-x-2 group-hover:translate-y-2"></div>
-                <div className="relative w-72 sm:w-80 md:w-[400px] h-[380px] sm:h-[450px] bg-gradient-to-tr from-stone-200 to-stone-100 rounded-2xl shadow-2xl ring-1 ring-black/5 overflow-hidden transition-transform duration-500 group-hover:scale-[1.02] z-10">
-                  <img src={poster} alt="Dailyfix Poster" loading="lazy" className="w-full h-full object-cover" />
+                <div className="relative w-72 sm:w-80 md:w-[400px] h-[380px] sm:h-[500px] bg-gradient-to-tr from-stone-200 to-stone-100 rounded-2xl shadow-2xl ring-1 ring-black/5 overflow-hidden transition-transform duration-500 group-hover:scale-[1.02] z-10">
+                  <img src={poster} alt="Dailyfix Poster" loading="lazy" className="w-full h-full object-conatin" />
                 </div>
                 <div className="absolute -bottom-12 -right-6 md:right-[-20px] bg-white p-6 rounded-xl shadow-xl border border-stone-100 max-w-[200px] z-20">
                   <p className="text-3xl font-black text-emerald-500">100%</p>
@@ -224,7 +227,7 @@ const Home = () => {
           )}
         </div>
       </section>
-
+          <InstagramFeed />
       {/* Video & Highlight Section (Third Last) */}
       <section className="min-h-fit lg:h-[550px] max-h-none lg:max-h-[600px] flex flex-col lg:flex-row bg-black">
         <div className="w-full lg:w-1/2 bg-black flex items-center justify-center">
@@ -310,7 +313,7 @@ const Home = () => {
             {[...blogPosts, ...blogPosts].map((post, i) => (
               <Link
                 key={`${post.id}-${i}`}
-                to={`/blog/${post.id}`}
+                to={`/blog/${post.slug}`}
                 className="flex-shrink-0 w-[280px] sm:w-[340px] md:w-[380px] bg-white rounded-3xl overflow-hidden shadow-lg border border-stone-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 group"
               >
                 <div className="relative overflow-hidden bg-stone-100">
@@ -382,7 +385,7 @@ const Home = () => {
 
             <div className="my-6 lg:my-0 flex justify-center">
               <div className="w-full max-w-md lg:max-w-none bg-gradient-to-br from-gray-200 to-gray-300 rounded-3xl overflow-hidden shadow-2xl">
-                <img src={banners} alt="Dailyfix Product" loading="lazy" className="w-full h-[500px] object-cover" />
+                <img src={banners} alt="Dailyfix Product" loading="lazy" className="w-full h-[520px] object-cover" />
               </div>
             </div>
 

@@ -4,6 +4,7 @@ import { Leaf, ShieldCheck, Truck } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 import api from '../services/api';
 import { getListingImage } from '../utils/productImages';
+import { getShadeSortRank } from '../data/productDetailData';
 import toast from 'react-hot-toast';
 
 const TRUST_POINTS = [
@@ -41,6 +42,7 @@ const Shop = () => {
           brand: product.brand,
           stock: product.stock
         }));
+        mappedProducts.sort((a, b) => getShadeSortRank(a.slug) - getShadeSortRank(b.slug));
         setProducts(mappedProducts);
       } catch (error) {
         console.error('Failed to fetch products:', error);
